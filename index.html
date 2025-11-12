@@ -714,7 +714,7 @@
           apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
           authDomain: "emoji-royale-8fb68.firebaseapp.com",
           projectId: "emoji-royale-8fb68",
-          storageBucket: "emoji-royale-8fb68.firebasestorage.app",
+          storageBucket: "emoji-royale-8fb68.appspot.com",
           messagingSenderId: "1021589049311",
           appId: "1:1021589049311:web:61ce6353950831e298be6a",
           measurementId: "G-FDQ9L0MQGM"
@@ -923,11 +923,6 @@
                     userId = null;
                     userDocRef = null;
                     isDataSaved = false;
-                    // --- FIX: Don't auto-login, just stay on login screen ---
-                    if (isInitialAuthCheck) {
-                        showScreen('login'); // Stay on login screen
-                        return; // Don't proceed to load
-                    }
                     showScreen('login');
                 }
             }
@@ -1917,6 +1912,7 @@
                 spawnBarbarians() {
                     if (this.spawnedBarbs) return; // Only spawn once
                     this.spawnedBarbs = true;
+                    // --- BATTLE RAM FIX: Push to gameObjects, not a temp array ---
                     gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, this.barbLevel));
                     gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, this.barbLevel));
                 }
@@ -2173,7 +2169,7 @@
                 }
                 if (canSpawn && card.unitClass) {
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', level);
-                    if (!card.type.includes('Swarm')) { // Spawner class handles buildings and swarms
+                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) { // Spawner class handles buildings and swarms
                         gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
@@ -2325,16 +2321,17 @@
                     runAI();
                     aiThinkTimer = 30 + Math.random() * 30; // Think every 0.5-1s
                 }
-                gameObjects.forEach(obj => obj.update());
                 
                 // --- BATTLE RAM FIX ---
-                let unitsToSpawn = [];
+                // We must loop over a *copy* of the array if we modify it
+                const currentObjects = [...gameObjects];
+                for (const obj of currentObjects) {
+                    obj.update();
+                }
+                
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
-                    // If Battle Ram died, add its spawns to a temp list
-                    if (obj instanceof BattleRam && !obj.spawnedBarbs) {
-                        obj.spawnBarbarians(); // This will add new Barbarians to gameObjects
-                    }
+                    // If Battle Ram died, it should have already spawned its barbs
                     if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { return false; }
                     if (obj instanceof Tower || obj instanceof Building) {
                         if (obj.isKing) { checkGameOver(); return true; }
@@ -2431,7 +2428,7 @@
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
                 } else {
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
+                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) { // Spawner class handles buildings and swarms
                         gameObjects.push(newUnit);
                     }
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
@@ -2456,8 +2453,15 @@
             // --- Init App ---
             initCardSystem(); // Define all cards
             onAuthStateChanged(auth, (user) => {
-                handleAuth(user);
-                isInitialAuthCheck = false; // After first check, allow normal logic
+                // --- FIX: This block prevents auto-login on page load ---
+                if (isInitialAuthCheck) {
+                    isInitialAuthCheck = false; // Set flag to false and do nothing
+                    return; 
+                }
+                // --- End of Fix ---
+
+                // This will now only run *after* the user clicks a login button
+                handleAuth(user); 
             }); // Wait for user login
         };
 
