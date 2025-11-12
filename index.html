@@ -7,27 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Import Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Import Firebase -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    
+    <!-- 
+      REMOVED the first script block. 
+      All Firebase code is now combined into the single script
+      block at the bottom of the <body>.
+    -->
 
-        // Your web app's Firebase configuration
-        // IMPORTANT: Use the __firebase_config global variable
-        const firebaseConfig = JSON.parse(__firebase_config);
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        // setLogLevel('debug'); // Uncomment for debugging Firestore
-
-        // Make auth and db globally accessible for other parts of the script
-        window.firebase = { auth, db, provider, signInAnonymously, signInWithPopup, onAuthStateChanged, doc, getDoc, setDoc, signOut };
-    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -185,6 +171,7 @@
             padding: 0 4px;
             border-radius: 4px;
             z-index: 2;
+            text-align: center; /* Ensure name is centered */
         }
         .card-ui-emoji {
             font-size: 2.5rem;
@@ -717,9 +704,29 @@
     </div>
 
 
+    <!-- 
+    ========================================================
+    MAIN SCRIPT BLOCK (COMBINED)
+    ========================================================
+    -->
     <script type="module">
-        // --- Firebase Globals (from window) ---
-        const { auth, db, provider, signInAnonymously, signInWithPopup, onAuthStateChanged, doc, getDoc, setDoc } = window.firebase;
+        // --- Firebase Imports & Init ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        // IMPORTANT: Use the __firebase_config global variable
+        const firebaseConfig = JSON.parse(__firebase_config);
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        // setLogLevel('debug'); // Uncomment for debugging Firestore
+
+        // --- Firebase Globals (now in scope) ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Use __app_id
         let userDocRef; // Reference to the user's document in Firestore
         let userId; // The user's unique ID
@@ -736,13 +743,12 @@
         let hand = [];
         let nextCard = null;
         let discardPile = [];
-        let aiDeck = [];
+        let aiDeck = []; // AI's 8-card deck for the match
         let aiHand = [];
         let aiNextCard = null;
         let aiDiscardPile = [];
         let towerLevel = 1;
         let towerCardCount = 0;
-        // --- NEW: Level Cap at 15 ---
         const towerUpgradeCosts = {
             1: { cards: 2, gold: 50 }, 2: { cards: 4, gold: 150 }, 3: { cards: 10, gold: 400 },
             4: { cards: 20, gold: 1000 }, 5: { cards: 50, gold: 2000 }, 6: { cards: 100, gold: 4000 },
@@ -777,7 +783,6 @@
         let currentArenaFloor = 0;
         let currentArenaTheme = 'arena-1'; // For canvas styling
 
-        // --- NEW: Level Cap at 15 ---
         const upgradeCosts = {
             1: { cards: 2, gold: 50 }, 2: { cards: 4, gold: 150 }, 3: { cards: 10, gold: 400 },
             4: { cards: 20, gold: 1000 }, 5: { cards: 50, gold: 2000 }, 6: { cards: 100, gold: 4000 },
@@ -1160,7 +1165,8 @@
                     }
                 }
                 saveUserData();
-                alert('All cards unlocked!');
+                // Use a custom modal later, for now, just log
+                console.log('All cards unlocked!');
             });
             debugUpgradeAll.addEventListener('click', () => {
                 for (const cardId in cardCollection) {
@@ -1171,29 +1177,30 @@
                 }
                 if (towerLevel < 15) towerLevel++;
                 saveUserData();
-                alert('All owned cards and tower upgraded +1 level!');
+                console.log('All owned cards and tower upgraded +1 level!');
             });
             debugGetChest.addEventListener('click', () => {
                 if (trophyChests.length < 4) {
                     trophyChests.push({ id: 'wood', openTime: 0 });
                     renderChests();
                     saveUserData();
-                    alert('Got a chest!');
+                    console.log('Got a chest!');
                 } else {
-                    alert('Chest slots are full!');
+                    console.log('Chest slots are full!');
                 }
             });
             debugAddGold.addEventListener('click', () => {
                 gold += 1000;
                 goldDisplay.textContent = `💰 ${gold}`;
                 saveUserData();
-                alert('+1000 Gold!');
+                console.log('+1000 Gold!');
             });
             debugReset.addEventListener('click', () => {
-                if (confirm('Are you sure you want to reset all progress?')) {
+                // Replace confirm later with a modal
+                if (true) { // Auto-confirm for now
                     initNewUser(); // This saves
                     showScreen('menu');
-                    alert('Account reset!');
+                    console.log('Account reset!');
                 }
             });
 
@@ -1221,7 +1228,7 @@
                         <span class="card-ui-name">${card.name}</span>
                         <span class="card-ui-emoji">${card.emoji}</span>
                         <span class="card-ui-type">${card.type}</span>
-                        <div class="card-ui-locked-arena">Unlocks in Arena ${card.arena}</div>
+                        <div class="card-ui-locked-arena">Arena ${card.arena}</div>
                     `;
                     return cardEl;
                 }
@@ -1250,13 +1257,11 @@
                 return cardEl;
             }
 
-            function getUnlockedCards(includeTower = false, arenaLevel = 0) {
+            // AI Level Fix: This function now just returns cards up to a certain ARENA
+            function getUnlockedCards(includeTower = false, arena = 1) {
                 const unlocked = [];
-                // Use AI arena level if provided, otherwise use player's trophies
-                const arenaNum = arenaLevel > 0 ? arenaLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : 3));
-                
                 for (const cardId in allCards) {
-                    if (allCards[cardId].arena <= arenaNum) {
+                    if (allCards[cardId].arena <= arena) {
                         unlocked.push(cardId);
                     }
                 }
@@ -1359,37 +1364,37 @@
                 allCards = {
                     // Arena 1
                     'knight': { name: 'Knight', cost: 3, emoji: '⚔️', type: 'Melee', unitClass: Knight, placementRadius: 12, isFlying: false, arena: 1, targets: 'Ground',
-                                    stats: { 1: { health: 500, damage: 65, hitSpeed: 1.2 } } },
+                                stats: { 1: { health: 500, damage: 65, hitSpeed: 1.2 } } },
                     'archer': { name: 'Archer', cost: 4, emoji: '🏹', type: 'Ranged', unitClass: Archer, placementRadius: 10, isFlying: false, arena: 1, targets: 'Air & Ground',
-                                    stats: { 1: { health: 250, damage: 40, hitSpeed: 1 } } },
+                                stats: { 1: { health: 250, damage: 40, hitSpeed: 1 } } },
                     'giant': { name: 'Giant', cost: 5, emoji: '💪', type: 'Tank', unitClass: Giant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings',
-                                    stats: { 1: { health: 2000, damage: 60, hitSpeed: 1.5 } } },
+                                stats: { 1: { health: 2000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Giant Speed Nerfed
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
-                                    stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1 } } },
+                                stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1 } } },
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
-                                    stats: { 1: { count: 3, health: 50, damage: 15, hitSpeed: 1 } } },
+                                stats: { 1: { count: 3, health: 50, damage: 15, hitSpeed: 1 } } },
                     'tinyBot': { name: 'Tiny Bot', cost: 4, emoji: '🤖', type: 'Melee', unitClass: TinyBot, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
-                                    stats: { 1: { health: 700, damage: 250, hitSpeed: 1.8 } } },
+                                stats: { 1: { health: 700, damage: 250, hitSpeed: 1.8 } } },
                     'fireball': { name: 'Fireball', cost: 4, emoji: '🔥', type: 'Spell', radius: 50, placementRadius: 50, arena: 1, targets: 'Air & Ground',
-                                    stats: { 1: { damage: 250 } } },
+                                stats: { 1: { damage: 250 } } },
                     'arrows': { name: 'Arrows', cost: 3, emoji: '🎯', type: 'Spell', radius: 80, placementRadius: 80, arena: 1, targets: 'Air & Ground',
-                                    stats: { 1: { damage: 140 } } },
+                                stats: { 1: { damage: 140 } } },
                     // Arena 2
                     'hut': { name: 'Goblin House', cost: 5, emoji: '🏠', type: 'Building', unitClass: GoblinHut, placementRadius: 20, isFlying: false, arena: 2, targets: '-',
-                                    stats: { 1: { health: 800, spawn_speed: '5s', lifetime: '30s' } } },
+                                stats: { 1: { health: 800, spawn_speed: '5s', lifetime: '30s' } } },
                     'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground',
-                                    stats: { 1: { count: 15, health: 50, damage: 15, hitSpeed: 1 } } },
+                                stats: { 1: { count: 15, health: 50, damage: 15, hitSpeed: 1 } } },
                     'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground',
-                                    stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2 } } },
+                                stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2 } } },
                     // Arena 3
                     'fireDragon': { name: 'Fire Dragon', cost: 4, emoji: '🐲', type: 'Air', unitClass: FireDragon, placementRadius: 12, isFlying: true, arena: 3, targets: 'Air & Ground',
-                                    stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5 } } },
+                                stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5, splashRadius: 20 } } }, // Added splash
                     'barbarians': { name: 'Barbarians', cost: 5, emoji: '🧔', type: 'Swarm', unitClass: Barbarians, placementRadius: 10, isFlying: false, arena: 3, targets: 'Ground',
-                                    stats: { 1: { count: 5, health: 300, damage: 60, hitSpeed: 1.4 } } },
+                                stats: { 1: { count: 5, health: 300, damage: 60, hitSpeed: 1.4 } } },
                     'battleRam': { name: 'Battle Ram', cost: 4, emoji: '🌲', type: 'WinCon', unitClass: BattleRam, placementRadius: 10, isFlying: false, arena: 3, targets: 'Buildings',
-                                    stats: { 1: { health: 700, damage: 200, chargeSpeed: 2.5, barbLevel: 1 } } },
+                                stats: { 1: { health: 700, damage: 200, chargeSpeed: 2.5, barbLevel: 1 } } },
                     'barbarianHut': { name: 'Barbarian House', cost: 7, emoji: '🏘️', type: 'Building', unitClass: BarbarianHut, placementRadius: 20, isFlying: false, arena: 3, targets: '-',
-                                    stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
+                                stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
                 
@@ -1408,7 +1413,7 @@
                             if (newStats.spear_health) newStats.spear_health = Math.round(newStats.spear_health * 1.1);
                             if (newStats.spear_damage) newStats.spear_damage = Math.round(newStats.spear_damage * 1.1);
                             // Update levels for spawner cards
-                            if (cardId === 'battleRam' || cardId === 'barbarianHut' || cardId === 'barbHut') newStats.barbLevel = level;
+                            if (cardId === 'battleRam' || cardId === 'barbarianHut') newStats.barbLevel = level;
                             card.stats[level] = newStats;
                         }
                     }
@@ -1439,9 +1444,10 @@
                 // --- FIX: Only loop stats if stats is not null ---
                 if (stats) {
                     for (const [key, value] of Object.entries(stats)) { 
-                        if (key !== 'barbLevel') cardInfoStats.innerHTML += `<div>${key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}: <span>${value}</span></div>`; 
+                        if (key !== 'barbLevel' && key !== 'speed') cardInfoStats.innerHTML += `<div>${key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}: <span>${value}</span></div>`; 
                     }
                     if (card.type === 'Spell') { cardInfoStats.innerHTML += `<div>Radius: <span>${card.radius}</span></div>`; }
+                    if (stats.speed) cardInfoStats.innerHTML += `<div>Speed: <span>${stats.speed}</span></div>`;
                     if (stats.damage && stats.hitSpeed) { const dps = (stats.damage / stats.hitSpeed).toFixed(1); cardInfoStats.innerHTML += `<div>DPS: <span>${dps}</span></div>`; }
                 }
 
@@ -1541,38 +1547,24 @@
                 discardPile = [];
                 for (let i = 0; i < 4; i++) { hand.push(gameDeck.pop()); }
                 nextCard = gameDeck.pop();
-                discardPile = [...gameDeck]; // Put remaining 3 in discard
-                gameDeck = []; // Empty the game deck
                 renderHand();
                 
                 // AI
-                const aiArenaLevel = getAIArenaLevel(); // Get AI's arena
-                const aiArenaCards = getUnlockedCards(false, aiArenaLevel); // Get cards based on *arena*
+                const aiArenaNum = getAIArena(); // AI deck based on its "trophies"
+                const aiAvailableCards = getUnlockedCards(false, aiArenaNum).filter(id => id !== 'tower');
+                // AI builds its own 8-card deck
+                let tempDeck = shuffleDeck(aiAvailableCards);
+                aiDeck = tempDeck.slice(0, 8); // Take top 8
                 
-                // Build a random 8-card deck for the AI
-                let aiFullCardPool = shuffleDeck(aiArenaCards);
-                aiDeck = []; // This is the AI's 8-card deck
-                for(let i=0; i<8; i++) {
-                    if(aiFullCardPool.length === 0) aiFullCardPool = shuffleDeck(aiArenaCards); // Refill if not enough cards
-                    aiDeck.push(aiFullCardPool.pop());
-                }
-
-                // Now use aiDeck to build hand/discard
-                let aiShuffledGameDeck = shuffleDeck(aiDeck); // Use the 8-card deck
                 aiHand = [];
                 aiDiscardPile = [];
-                for (let i = 0; i < 4; i++) { if(aiShuffledGameDeck.length > 0) aiHand.push(aiShuffledGameDeck.pop()); }
-                if(aiShuffledGameDeck.length > 0) aiNextCard = aiShuffledGameDeck.pop();
-                aiDiscardPile = [...aiShuffledGameDeck]; // The rest are in the discard
+                for (let i = 0; i < 4; i++) { if(aiDeck.length > 0) aiHand.push(aiDeck.pop()); }
+                if(aiDeck.length > 0) aiNextCard = aiDeck.pop();
+                else aiNextCard = aiAvailableCards[0]; // Fallback
             }
             
             function aiPlayCard(cardId) {
-                if (!allCards[cardId]) { // Safety check
-                    // Card isn't valid, try to refresh hand from discard
-                    if(aiDeck.length === 0) { aiDeck = shuffleDeck(aiDiscardPile); aiDiscardPile = []; }
-                    aiNextCard = aiDeck.pop() || null;
-                    return;
-                }
+                if (!allCards[cardId]) return; // Safety check
                 aiElixir -= allCards[cardId].cost;
                 aiDiscardPile.push(cardId);
                 const handIndex = aiHand.indexOf(cardId);
@@ -1641,31 +1633,30 @@
             // ==============================================
             class GameObject {
                 constructor(x, y, radius, team, health) { this.x = x; this.y = y; this.radius = radius; this.team = team; this.health = health; this.maxHealth = health; this.id = Math.random(); }
-                drawHealthBar() {
-                    const barWidth = this.radius * 2;
-                    const barHeight = 5;
-                    const barY = this.y - this.radius - 10;
-                    const barX = this.x - this.radius; // --- ERROR FIX: barX was not defined ---
-
-                    // --- NEW: Draw Level ---
-                    if (this.level) { // Only if level is set
-                        ctx.font = `bold 11px Arial`;
-                        ctx.fillStyle = this.team === 'player' ? 'white' : 'white';
+                drawHealthBar(level) { 
+                    // Draw Level
+                    if(level) {
+                        ctx.font = `bold 12px Inter`;
+                        ctx.fillStyle = this.team === 'player' ? '#fff' : '#fff';
                         ctx.textAlign = 'center';
-                        ctx.textBaseline = 'bottom';
-                        ctx.fillText(`Lvl ${this.level}`, this.x, barY - 2); // Above health bar
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(`Lvl ${level}`, this.x, this.y - this.radius - 18);
                     }
-                    
+                    // Draw Health
                     if (this.health < this.maxHealth) { 
-                        ctx.fillStyle = '#dc2626'; 
-                        ctx.fillRect(barX, barY, barWidth, barHeight); 
-                        ctx.fillStyle = '#16a34a'; 
-                        ctx.fillRect(barX, barY, barWidth * (this.health / this.maxHealth), barHeight); 
-                        ctx.strokeStyle = '#000'; 
-                        ctx.strokeRect(barX, barY, barWidth, barHeight); 
+                        const barWidth = this.radius * 2; const barHeight = 5; const barX = this.x - this.radius; const barY = this.y - this.radius - 10; 
+                        ctx.fillStyle = '#dc2626'; ctx.fillRect(barX, barY, barWidth, barHeight); 
+                        ctx.fillStyle = '#16a34a'; ctx.fillRect(barX, barY, barWidth * (this.health / this.maxHealth), barHeight); 
+                        ctx.strokeStyle = '#000'; ctx.strokeRect(barX, barY, barWidth, barHeight); 
                     } 
                 }
-                draw(color, emoji) { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke(); if (emoji) { ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); } this.drawHealthBar(); }
+                draw(color, emoji, level) { 
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
+                    ctx.fillStyle = color; ctx.fill(); 
+                    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke(); 
+                    if (emoji) { ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); } 
+                    this.drawHealthBar(level); 
+                }
                 update() {}
             }
 
@@ -1674,7 +1665,6 @@
                     const s = towerStats[level] || towerStats[1];
                     super(x, y, isKing ? 25 : 20, team, isKing ? s.kingHealth : s.princessHealth);
                     this.isKing = isKing;
-                    this.level = level; // Store level
                     this.attackRange = 150;
                     this.attackDamage = s.damage;
                     this.attackCooldown = s.hitSpeed * 60;
@@ -1683,6 +1673,7 @@
                     this.isActive = false;
                     this.activationAnimation = 0;
                     this.dyingAnimationTimer = 0;
+                    this.level = level; // Store level
                 }
                 findTarget() { if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) { return; } this.target = null; let closestDist = this.attackRange; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Unit)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; this.target = obj; } } } }
                 attack() { if (this.target) { gameObjects.push(new Projectile(this.x, this.y, this.target, this.team, this.attackDamage)); this.cooldownTimer = this.attackCooldown; } }
@@ -1690,27 +1681,20 @@
                 draw() { 
                     ctx.save(); 
                     if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } 
-                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
-                    const emoji = this.isKing ? '👑' : '👸'; 
-                    ctx.fillStyle = color; 
-                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
-                    ctx.strokeStyle = 'black'; 
-                    ctx.lineWidth = 2; 
-                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
-                    
-                    // --- NEW: Draw Level ---
-                    ctx.font = `bold 14px Arial`;
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    // Draw level BEHIND
+                    ctx.font = `bold 16px Inter`;
+                    ctx.fillStyle = this.team === 'player' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.3)';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(`Lvl ${this.level}`, this.x, this.y + this.radius + 12); // Below tower
+                    ctx.fillText(`Lvl ${this.level}`, this.x, this.y + this.radius + 12);
 
-                    ctx.font = `${this.radius * 1.5}px Arial`; 
-                    ctx.textAlign = 'center'; 
-                    ctx.textBaseline = 'middle'; 
-                    ctx.fillText(emoji, this.x, this.y); 
+                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
+                    const emoji = this.isKing ? '👑' : '👸'; 
+                    ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); 
                     if (this.activationAnimation > 0) { this.activationAnimation--; ctx.fillStyle = `rgba(255, 255, 0, ${0.5 * (this.activationAnimation / 30)})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2); ctx.fill(); } 
-                    this.drawHealthBar(); 
+                    this.drawHealthBar(); // Draw health bar (without level)
                     ctx.restore(); 
                 }
             }
@@ -1719,7 +1703,6 @@
                 constructor(x, y, team, level = 1, cardId) {
                     const s = allCards[cardId].stats[level];
                     super(x, y, 20, team, s.health);
-                    this.level = level; // Store level
                     this.maxLifetime = parseFloat(s.lifetime) * 60;
                     this.lifetime = this.maxLifetime;
                     this.dyingAnimationTimer = 0;
@@ -1728,6 +1711,7 @@
                     this.spawnLevel = level;
                     this.cardId = cardId;
                     this.emoji = allCards[cardId].emoji;
+                    this.level = level;
                 }
                 update() { 
                     if (this.health <= 0) return; 
@@ -1750,21 +1734,10 @@
                     ctx.save(); 
                     if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } 
                     const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
-                    ctx.fillStyle = color; 
-                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
-                    ctx.strokeStyle = 'black'; 
-                    ctx.lineWidth = 2; 
-                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
-                    
-                    ctx.font = `${this.radius * 1.5}px Arial`; 
-                    ctx.textAlign = 'center'; 
-                    ctx.textBaseline = 'middle'; 
-                    ctx.fillText(this.emoji, this.x, this.y); 
-                    
-                    // --- NEW: Draw Level ---
-                    // (Healthbar function already draws it)
-
-                    this.drawHealthBar(); 
+                    ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.emoji, this.x, this.y); 
+                    this.drawHealthBar(this.level); // Draw health bar WITH level
                     ctx.restore(); 
                 }
             }
@@ -1773,7 +1746,7 @@
 
 
             class Unit extends GameObject {
-                constructor(x, y, radius, team, health, speed, attackRange, attackDamage, attackCooldown, emoji, isFlying = false, targetsAir = false) {
+                constructor(x, y, radius, team, health, speed, attackRange, attackDamage, attackCooldown, emoji, isFlying = false, targetsAir = false, level = 1) {
                     super(x, y, radius, team, health);
                     this.speed = speed;
                     this.attackRange = attackRange;
@@ -1784,7 +1757,7 @@
                     this.emoji = emoji;
                     this.isFlying = isFlying;
                     this.targetsAir = targetsAir;
-                    this.level = 1; // Default, will be set by child class
+                    this.level = level; // Store level
                 }
                 findTarget() {
                     let closestDist = Infinity;
@@ -1830,8 +1803,13 @@
                             this.target.health -= this.attackDamage; 
                         } else { // Ranged
                             let projectileType = Projectile;
-                            if (this.emoji === '🐲') projectileType = FireballProjectile; // Fire Dragon projectile
-                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, this.attackDamage)); 
+                            let damage = this.attackDamage;
+                            let splashRadius = 0;
+                            if (this.emoji === '🐲') {
+                                projectileType = FireballProjectile;
+                                splashRadius = allCards['fireDragon'].stats[this.level].splashRadius;
+                            }
+                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, damage, splashRadius)); 
                         } 
                         this.cooldownTimer = this.attackCooldown; 
                     } 
@@ -1849,16 +1827,15 @@
                         }
                     }
                 }
-                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji); }
+                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji, this.level); }
             }
 
-            class Knight extends Unit { constructor(x, y, team, level = 1) { const s = allCards['knight'].stats[level]; super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '⚔️', false, false); this.level = level; } }
-            class Archer extends Unit { constructor(x, y, team, level = 1) { const s = allCards['archer'].stats[level]; super(x, y, 10, team, s.health, 1.2, 120, s.damage, s.hitSpeed, '🏹', false, true); this.level = level; } }
+            class Knight extends Unit { constructor(x, y, team, level = 1) { const s = allCards['knight'].stats[level]; super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '⚔️', false, false, level); } }
+            class Archer extends Unit { constructor(x, y, team, level = 1) { const s = allCards['archer'].stats[level]; super(x, y, 10, team, s.health, 1.2, 120, s.damage, s.hitSpeed, '🏹', false, true, level); } }
             class Giant extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['giant'].stats[level];
-                    super(x, y, 18, team, s.health, 0.6, 30, s.damage, s.hitSpeed, '💪', false, false); // FIX: Slower speed
-                    this.level = level;
+                    super(x, y, 18, team, s.health, s.speed, 30, s.damage, s.hitSpeed, '💪', false, false, level);
                     this.findTarget = () => {
                         let closestDist = Infinity;
                         let newTarget = null;
@@ -1872,104 +1849,87 @@
                     };
                 }
             }
-            class Goblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblins'].stats[level]; super(x, y, 8, team, s.health, 1.5, 20, s.damage, s.hitSpeed, '👺', false, false); this.level = level; } }
-            class Skeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['skeletons'].stats[level]; super(x, y, 7, team, s.health, 1.6, 20, s.damage, s.hitSpeed, '💀', false, false); this.level = level; } }
-            class TinyBot extends Unit { constructor(x, y, team, level = 1) { const s = allCards['tinyBot'].stats[level]; super(x, y, 10, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '🤖', false, false); this.level = level; } }
+            class Goblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblins'].stats[level]; super(x, y, 8, team, s.health, 1.5, 20, s.damage, s.hitSpeed, '👺', false, false, level); } }
+            class Skeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['skeletons'].stats[level]; super(x, y, 7, team, s.health, 1.6, 20, s.damage, s.hitSpeed, '💀', false, false, level); } }
+            class TinyBot extends Unit { constructor(x, y, team, level = 1) { const s = allCards['tinyBot'].stats[level]; super(x, y, 10, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '🤖', false, false, level); } }
             class Goblins { constructor(x, y, team, level = 1) { const s = allCards['goblins'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Goblin(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
             class Skeletons { constructor(x, y, team, level = 1) { const s = allCards['skeletons'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
             
             // --- NEW CARD CLASSES ---
-            class SpearGoblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; super(x, y, 8, team, s.spear_health, 1.5, 100, s.spear_damage, s.spear_hitSpeed, '🎯', false, true); this.level = level; } }
+            class SpearGoblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; super(x, y, 8, team, s.spear_health, 1.5, 100, s.spear_damage, s.spear_hitSpeed, '🎯', false, true, level); } }
             class GoblinGang { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Goblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } for (let i = 0; i < s.spear_count; i++) { gameObjects.push(new SpearGoblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } } }
             class SkeletonArmy { constructor(x, y, team, level = 1) { const s = allCards['skeletonArmy'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
-            class Barbarian extends Unit { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; super(x, y, 11, team, s.health, 1.1, 25, s.damage, s.hitSpeed, '🧔', false, false); this.level = level; } }
+            class Barbarian extends Unit { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; super(x, y, 11, team, s.health, 1.1, 25, s.damage, s.hitSpeed, '🧔', false, false, level); } }
             class Barbarians { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Barbarian(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
-            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true); this.level = level; } }
+            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); } }
             
-            // --- BATTLE RAM (FIXED) ---
+            // --- BATTLE RAM FIX ---
             class BattleRam extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['battleRam'].stats[level];
-                    super(x, y, 15, team, s.health, 1.2, 25, s.damage, 1, '🌲', false, false);
-                    this.level = level;
+                    super(x, y, 15, team, s.health, 1.2, 25, s.damage, 1, '🌲', false, false, level);
                     this.barbLevel = s.barbLevel;
                     this.chargeTimer = 3 * 60;
                     this.isCharging = false;
-                    this.spawnedBarbs = false; // Flag
+                    this.barbsSpawned = false; // Flag to prevent double spawn
                     this.findTarget = () => { let closestDist = Infinity; let newTarget = null; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Tower || obj instanceof Building)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } } this.target = newTarget; };
                 }
-                
-                spawnBarbarians() {
-                    if (this.spawnedBarbs) return; // Only spawn once
+                spawnBarbs() {
+                    if (this.barbsSpawned) return;
+                    this.barbsSpawned = true;
                     gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, this.barbLevel));
                     gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, this.barbLevel));
-                    this.spawnedBarbs = true;
                 }
-
                 update() {
                     if (this.health <= 0) {
-                        this.spawnBarbarians(); // Spawn on death
+                        this.spawnBarbs(); // Spawn on death
                         return;
                     }
                     if (this.chargeTimer > 0) { this.chargeTimer--; if(this.chargeTimer === 0) this.isCharging = true; }
                     if (this.isCharging) this.speed = 2.4; else this.speed = 1.2;
                     super.update();
                 }
-                
                 attack() { // Ram only attacks when it hits
                     if (this.target && this.cooldownTimer <= 0) { 
                         this.target.health -= this.attackDamage;
                         this.health = 0; // Ram breaks
-                        // --- BATTLE RAM FIX: Call spawn *immediately* ---
-                        this.spawnBarbarians(); // Spawn on hit
+                        this.spawnBarbs(); // Spawn on hit
                     } 
                 }
             }
 
             class Projectile extends GameObject {
-                constructor(x, y, target, team, damage) { super(x, y, 4, team, 1); this.target = target; this.damage = damage; this.speed = 5; }
-                update() { if (!this.target || this.target.health <= 0) { this.health = 0; return; } const dist = getDistance(this, this.target); if (dist < this.speed) { this.target.health -= this.damage; this.health = 0; return; } const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x); this.x += Math.cos(angle) * this.speed; this.y += Math.sin(angle) * this.speed; }
-                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca'; ctx.fill(); }
-            }
-            
-            // --- FIRE DRAGON PROJECTILE (FIXED) ---
-            class FireballProjectile extends Projectile {
-                constructor(x, y, target, team, damage) {
-                    super(x, y, target, team, damage);
-                    this.splashRadius = 30; // Splash radius
+                constructor(x, y, target, team, damage, splashRadius = 0) { 
+                    super(x, y, 4, team, 1); 
+                    this.target = target; 
+                    this.damage = damage; 
+                    this.speed = 5; 
+                    this.splashRadius = splashRadius;
                 }
-
-                update() {
-                    if (!this.target || this.target.health <= 0) { 
-                        // Target died, but still splash
-                        if(this.health > 0) this.doSplashDamage();
-                        this.health = 0; 
-                        return; 
-                    }
-                    const dist = getDistance(this, this.target);
-                    if (dist < this.speed) {
-                        this.doSplashDamage(); // Hit target, do splash
-                        this.health = 0;
-                        return;
-                    }
-                    const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
-                    this.x += Math.cos(angle) * this.speed;
-                    this.y += Math.sin(angle) * this.speed;
-                }
-
-                doSplashDamage() {
-                    // Add an explosion animation
-                    gameObjects.push(new Spell(this.x, this.y, this.team, 0, this.splashRadius, '🔥')); // 0 damage, just visual
-                    // Deal damage
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
-                            if (getDistance(this, obj) < this.splashRadius) {
-                                obj.health -= this.damage;
+                update() { 
+                    if (!this.target || this.target.health <= 0) { this.health = 0; return; } 
+                    const dist = getDistance(this, this.target); 
+                    if (dist < this.speed) { 
+                        this.target.health -= this.damage; 
+                        // Splash Damage
+                        if (this.splashRadius > 0) {
+                            for (const obj of gameObjects) {
+                                if (obj.team !== this.team && obj.id !== this.target.id && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                    if (getDistance(this.target, obj) < this.splashRadius) {
+                                        obj.health -= this.damage;
+                                    }
+                                }
                             }
                         }
-                    }
+                        this.health = 0; 
+                        return; 
+                    } 
+                    const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x); 
+                    this.x += Math.cos(angle) * this.speed; this.y += Math.sin(angle) * this.speed; 
                 }
-
+                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca'; ctx.fill(); }
+            }
+            class FireballProjectile extends Projectile {
                 draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00'; ctx.fill(); }
             }
 
@@ -1983,7 +1943,7 @@
                     this.emoji = emoji;
                 }
                 update() {
-                    if (!this.hit && this.damage > 0) { // Only deal damage if it's a "real" spell
+                    if (!this.hit) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
                                 if (getDistance(this, obj) < this.radius) {
@@ -1991,8 +1951,8 @@
                                 }
                             }
                         }
+                        this.hit = true;
                     }
-                    this.hit = true; // Only hit once
                     this.animationTimer--;
                     if (this.animationTimer <= 0) {
                         this.health = 0;
@@ -2063,16 +2023,11 @@
                 ctx.setLineDash([]);
             }
 
-            // --- AI LEVEL FIX ---
-            function getAIStatLevel() { // The stat level (1, 3, 5)
-                if (trophies >= 500) return 5; // Arena 3
-                if (trophies >= 250) return 3; // Arena 2
-                return 1; // Arena 1
+            function getAIArena() {
+                if (trophies > 500) return 3; if (trophies > 250) return 2; return 1;
             }
-            function getAIArenaLevel() { // The arena (1, 2, 3)
-                if (trophies >= 500) return 3; // Arena 3
-                if (trophies >= 250) return 2; // Arena 2
-                return 1; // Arena 1
+            function getAILevel() {
+                if (trophies > 500) return 5; if (trophies > 250) return 3; return 1;
             }
 
             function initGame() {
@@ -2092,24 +2047,27 @@
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
 
-                const aiStatLevel = getAIStatLevel(); // Use stat level
+                const aiLevel = getAILevel(); // This is the STAT level (1, 3, or 5)
                 gameObjects.push(new Tower(LANE_LEFT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(LANE_RIGHT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(WIDTH / 2, HEIGHT - 50, 'player', true, towerLevel));
-                gameObjects.push(new Tower(LANE_LEFT_X, 100, 'ai', false, aiStatLevel));
-                gameObjects.push(new Tower(LANE_RIGHT_X, 100, 'ai', false, aiStatLevel));
-                gameObjects.push(new Tower(WIDTH / 2, 50, 'ai', true, aiStatLevel));
+                gameObjects.push(new Tower(LANE_LEFT_X, 100, 'ai', false, aiLevel));
+                gameObjects.push(new Tower(LANE_RIGHT_X, 100, 'ai', false, aiLevel));
+                gameObjects.push(new Tower(WIDTH / 2, 50, 'ai', true, aiLevel));
 
                 startGameDecks();
                 updateCardUI();
             }
 
+            // AI Brain Fix
             function runAI() {
-                const aiStatLevel = getAIStatLevel();
+                const aiLevel = getAILevel();
                 const playerUnits = gameObjects.filter(o => o.team === 'player' && o instanceof Unit && o.y < RIVER_Y + 50);
+                let bestCardId = null;
+
+                // 1. Defensive Logic
                 if (playerUnits.length > 0) {
-                    let bestCardId = null;
-                    if (playerUnits.some(u => u instanceof Goblin || u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
+                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof GoblinGang) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
                     } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
                         bestCardId = 'tinyBot';
@@ -2120,26 +2078,29 @@
                     } else if (aiHand.includes('goblins') && aiElixir >= allCards['goblins'].cost) {
                         bestCardId = 'goblins';
                     }
-                    if (bestCardId) { spawnAIUnit(bestCardId, aiStatLevel, true); return; }
+                    if (bestCardId) { spawnAIUnit(bestCardId, aiLevel, true); return; }
                 }
+
+                // 2. Offensive Logic
                 if (aiElixir > 8) {
-                    let bestCardId = null;
                     if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
-                    if (bestCardId) { spawnAIUnit(bestCardId, aiStatLevel, false); return; }
+                    if (bestCardId) { spawnAIUnit(bestCardId, aiLevel, false); return; }
                 }
+
+                // 3. Spell Logic
                 if (aiElixir === MAX_ELIXIR && aiHand.includes('fireball') && Math.random() < 0.2) {
-                    spawnAIUnit('fireball', aiStatLevel, false);
+                    spawnAIUnit('fireball', aiLevel, false);
                     return;
                 }
-                
-                // --- AI FALLBACK (FIXED) ---
-                if (aiElixir > 7) {
-                    let playableCards = aiHand.filter(id => allCards[id] && allCards[id].cost <= aiElixir);
-                    if(playableCards.length > 0) {
-                        let cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
-                        spawnAIUnit(cardToPlay, aiStatLevel, false);
+
+                // 4. FALLBACK: Play *any* card if elixir is high
+                if (aiElixir >= 7) {
+                    let affordableCards = aiHand.filter(id => allCards[id] && allCards[id].cost <= aiElixir);
+                    if (affordableCards.length > 0) {
+                        bestCardId = affordableCards[Math.floor(Math.random() * affordableCards.length)];
+                        spawnAIUnit(bestCardId, aiLevel, false);
                         return;
                     }
                 }
@@ -2172,9 +2133,11 @@
                     if (dist < spawnRadius + obj.radius) { canSpawn = false; break; }
                 }
                 if (canSpawn && card.unitClass) {
-                    // --- BUILDING SPAWN FIX ---
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', level);
-                    if (!card.type.includes('Swarm')) { // Swarms add themselves
+                    if (!card.type.includes('Swarm') && card.type !== 'Building') {
+                        gameObjects.push(newUnit);
+                    } else if (card.type === 'Building') {
+                        // FIX: Actually push the building to gameObjects
                         gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
@@ -2326,17 +2289,18 @@
                     runAI();
                     aiThinkTimer = 30 + Math.random() * 30; // Think every 0.5-1s
                 }
-                gameObjects.forEach(obj => obj.update());
                 
-                // --- GAME LOOP FILTER (FIXED) ---
+                // --- BATTLE RAM FIX: Check for dead rams BEFORE filtering ---
+                for (let i = 0; i < gameObjects.length; i++) {
+                    const obj = gameObjects[i];
+                    if (obj instanceof BattleRam && obj.health <= 0 && !obj.barbsSpawned) {
+                        obj.spawnBarbs();
+                    }
+                }
+
+                gameObjects.forEach(obj => obj.update());
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
-                    
-                    // --- BATTLE RAM FIX: Check for dead ram that hasn't spawned ---
-                    if (obj instanceof BattleRam && !obj.spawnedBarbs) {
-                        obj.spawnBarbarians(); // Force spawn
-                    }
-
                     if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { return false; }
                     if (obj instanceof Tower || obj instanceof Building) {
                         if (obj.isKing) { checkGameOver(); return true; }
@@ -2346,7 +2310,6 @@
                     }
                     return false;
                 });
-
                 updateCardUI();
                 if (gameTimer <= 0) {
                     if (isOvertime) { startTieBreaker(); }
@@ -2432,9 +2395,11 @@
                     gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
                 } else {
-                    // --- BUILDING SPAWN FIX ---
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                    if (!card.type.includes('Swarm')) { // Swarms add themselves, Buildings/Units need to be added
+                    if (!card.type.includes('Swarm') && card.type !== 'Building') {
+                        gameObjects.push(newUnit);
+                    } else if (card.type === 'Building') {
+                        // FIX: Actually push the building to gameObjects
                         gameObjects.push(newUnit);
                     }
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
