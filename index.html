@@ -924,40 +924,37 @@
                     showScreen('loading');
                     loadingScreen.querySelector('p').textContent = 'Loading Progress...';
 
-                    let hasLoaded = false;
-                    
-                    // Safety timeout: If loading takes > 8 seconds, force start.
-                    const loadingTimeout = setTimeout(async () => {
-                        if (hasLoaded) return; // If it loaded just in time, do nothing.
-                        
-                        console.warn("Loading took too long! Forcing new game session.");
-                        hasLoaded = true; // Prevent the real load from running if it finishes late
-                        
-                        // We can't be sure if data exists, so initNewUser is the safest bet
-                        // It will create a new save, which is better than being stuck.
-                        await initNewUser(); // This function will set default data and save it
-                        
-                        showScreen('menu');
+                    let hasFinishedLoading = false;
 
+                    // This function is the "gate." Only the first thing to call it wins.
+                    const finishLoading = async (didError = false) => {
+                        if (hasFinishedLoading) return; // Already done, stop.
+                        hasFinishedLoading = true;
+                        clearTimeout(loadingTimeout); // Stop the safety timer
+
+                        if (didError) {
+                            // If we got here from an error or timeout, we MUST start a new game
+                            console.warn("Loading failed or timed out, starting new user session.");
+                            await initNewUser(); // This just sets the local variables
+                            await saveUserData(); // Asynchronously save the new data
+                        }
+                        
+                        // If we got here with no error, the data is already loaded (or was new)
+                        showScreen('menu');
+                    };
+
+                    // 1. The Safety Timer: If loading takes > 8s, force a new game
+                    const loadingTimeout = setTimeout(() => {
+                        finishLoading(true); 
                     }, 8000); // 8-second timeout
 
+                    // 2. The Load Attempt
                     try {
-                        await loadUserData(); // This function loads or inits new user if no doc
-                        if (hasLoaded) return; // Timeout already fired, so just stop.
-                        
-                        hasLoaded = true;
-                        clearTimeout(loadingTimeout); // Success! Clear the safety net.
-                        showScreen('menu');
-
+                        await loadUserData(); // This function loads or inits/saves new user data
+                        finishLoading(false); // Success!
                     } catch (error) {
-                        if (hasLoaded) return; // Timeout already fired, so just stop.
-
-                        console.error("Failed to load data, starting new user:", error);
-                        hasLoaded = true;
-                        clearTimeout(loadingTimeout); // Failed! Clear the safety net.
-
-                        await initNewUser(); // Fallback to new user
-                        showScreen('menu');
+                        console.error("Error in loadUserData, forcing new game session:", error);
+                        finishLoading(true); // Error!
                     }
                     
                 } else { // Not logged in or is anonymous
@@ -969,7 +966,12 @@
             }
             
             async function loadUserData() {
-                if (!userDocRef) return; // Should not happen if called correctly
+                if (!userDocRef) {
+                    // This should not happen if handleAuth is working, but as a fallback:
+                    await initNewUser();
+                    await saveUserData();
+                    return;
+                }
                 try {
                     const docSnap = await getDoc(userDocRef);
                     if (docSnap.exists()) {
@@ -982,16 +984,18 @@
                         cardCollection = data.cardCollection || initNewUserCards(false); 
                         playerDeck = data.playerDeck || initNewUserCards(true); 
                     } else {
-                        // This is a new user, set them up
+                        // This is a new user, set them up and save
                         await initNewUser();
+                        await saveUserData();
                     }
                 } catch (error) {
-                    console.error("Error loading user data:", error);
-                    await initNewUser(); // Fallback
+                    console.error("Error loading user data, will force new user:", error);
+                    throw error; // Re-throw the error so handleAuth's catch block fires
                 }
             }
             
             async function initNewUser() {
+                // This function just sets local variables
                 trophies = 0;
                 gold = 500;
                 towerLevel = 1;
@@ -999,7 +1003,6 @@
                 trophyChests = [];
                 cardCollection = initNewUserCards(false);
                 playerDeck = initNewUserCards(true);
-                await saveUserData();
             }
 
             // NEW: "Guest (No Save)" logic
