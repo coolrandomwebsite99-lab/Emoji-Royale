@@ -714,7 +714,7 @@
           apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
           authDomain: "emoji-royale-8fb68.firebaseapp.com",
           projectId: "emoji-royale-8fb68",
-          storageBucket: "emoji-royale-8fb68.appspot.com",
+          storageBucket: "emoji-royale-8fb68.firebasestorage.app",
           messagingSenderId: "1021589049311",
           appId: "1:1021589049311:web:61ce6353950831e298be6a",
           measurementId: "G-FDQ9L0MQGM"
@@ -902,21 +902,28 @@
 
 
             async function handleAuth(user) {
+                // --- FIX: Don't auto-login on first page load ---
+                if (isInitialAuthCheck) {
+                    isInitialAuthCheck = false; // Set flag
+                    return; // Do nothing, stay on login screen
+                }
+
                 if (user && !user.isAnonymous) { // Only Google Sign-in saves
                     userId = user.uid;
                     userDocRef = doc(db, 'artifacts', appId, 'users', userId);
                     isDataSaved = true;
                     showScreen('loading');
                     loadingScreen.querySelector('p').textContent = 'Loading Progress...';
+                    
                     // --- FIX: Add try/catch/finally to prevent getting stuck ---
                     try {
-                        await loadUserData();
+                        await loadUserData(); // Try to load
                     } catch (error) {
                         console.error("Error loading, starting new user:", error);
                         await initNewUser(); // Fallback to a new user profile
                     } finally {
                         // This *guarantees* we leave the loading screen
-                        setTimeout(() => showScreen('menu'), 500); // Short delay
+                        showScreen('menu'); // REMOVED the delay
                     }
                 } else {
                     // Not logged in or is anonymous
@@ -940,6 +947,7 @@
                     cardCollection = data.cardCollection || initNewUserCards(false); 
                     playerDeck = data.playerDeck || initNewUserCards(true); 
                 } else {
+                    // This is the "nothing to load" case
                     await initNewUser();
                 }
             }
@@ -1018,9 +1026,11 @@
                     // onAuthStateChanged will handle the screen change
                 } catch (error) {
                     if (error.code === 'auth/unauthorized-domain') {
-                        loginError.textContent = 'Google Sign-in is not set up.';
+                        loginError.textContent = 'Login failed: Domain not authorized.';
+                    } else if (error.code === 'auth/popup-closed-by-user') {
+                        loginError.textContent = 'Login cancelled.';
                     } else {
-                        loginError.textContent = 'Could not sign in. Please try again later.';
+                        loginError.textContent = 'Login failed. Please try again.';
                     } 
                 }
             });
@@ -1912,7 +1922,6 @@
                 spawnBarbarians() {
                     if (this.spawnedBarbs) return; // Only spawn once
                     this.spawnedBarbs = true;
-                    // --- BATTLE RAM FIX: Push to gameObjects, not a temp array ---
                     gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, this.barbLevel));
                     gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, this.barbLevel));
                 }
@@ -2321,17 +2330,16 @@
                     runAI();
                     aiThinkTimer = 30 + Math.random() * 30; // Think every 0.5-1s
                 }
+                gameObjects.forEach(obj => obj.update());
                 
                 // --- BATTLE RAM FIX ---
-                // We must loop over a *copy* of the array if we modify it
-                const currentObjects = [...gameObjects];
-                for (const obj of currentObjects) {
-                    obj.update();
-                }
-                
+                let unitsToSpawn = [];
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
-                    // If Battle Ram died, it should have already spawned its barbs
+                    // If Battle Ram died, add its spawns to a temp list
+                    if (obj instanceof BattleRam && !obj.spawnedBarbs) {
+                        obj.spawnBarbarians(); // This will add new Barbarians to gameObjects
+                    }
                     if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { return false; }
                     if (obj instanceof Tower || obj instanceof Building) {
                         if (obj.isKing) { checkGameOver(); return true; }
@@ -2453,15 +2461,7 @@
             // --- Init App ---
             initCardSystem(); // Define all cards
             onAuthStateChanged(auth, (user) => {
-                // --- FIX: This block prevents auto-login on page load ---
-                if (isInitialAuthCheck) {
-                    isInitialAuthCheck = false; // Set flag to false and do nothing
-                    return; 
-                }
-                // --- End of Fix ---
-
-                // This will now only run *after* the user clicks a login button
-                handleAuth(user); 
+                handleAuth(user);
             }); // Wait for user login
         };
 
