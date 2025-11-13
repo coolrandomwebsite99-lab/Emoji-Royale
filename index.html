@@ -496,11 +496,7 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <!-- NEW: Debug Button -->
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
-                    <span class="text-4xl">🧪</span>
-                    <span class="text-xs">Debug</span>
-                </button>
+                <!-- REMOVED: Debug Button -->
             </div>
         </div>
     </div>
@@ -548,10 +544,7 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
-                    <span class="text-4xl">🧪</span>
-                    <span class="text-xs">Debug</span>
-                </button>
+                <!-- REMOVED: Debug Button -->
             </div>
         </div>
     </div>
@@ -603,56 +596,17 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
-                    <span class="text-4xl">🧪</span>
-                    <span class="text-xs">Debug</span>
-                </button>
+                <!-- REMOVED: Debug Button -->
             </div>
         </div>
     </div>
 
     <!-- 
     ========================================================
-    SCREEN: DEBUG (NEW)
+    SCREEN: DEBUG (REMOVED)
     ========================================================
     -->
-    <div id="debugScreen" class="screen flex-col items-center p-4">
-        <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
-            <h1 class="text-3xl font-bold">Debug Menu</h1>
-            <p class="text-gray-400 text-center my-4">For testing only!</p>
-            
-            <button id="debugArena2" class="debug-btn bg-green-600 hover:bg-green-700">Jump to Arena 2 (250 🏆)</button>
-            <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
-            <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
-            <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
-            <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
-            <button id="debugAddGold" class="debug-btn bg-yellow-400 text-gray-900 hover:bg-yellow-300">Get 1000 Gold 💰</button>
-            <button id="debugReset" class="debug-btn bg-gray-600 hover:bg-gray-700">Reset Account (New User)</button>
-
-        </div>
-        
-        <!-- Bottom Nav Bar -->
-        <div id="bottomNav" class="bg-gray-800 w-full rounded-t-lg shadow-inner p-2">
-            <div class="flex justify-around">
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="menu">
-                    <span class="text-4xl">⚔️</span>
-                    <span class="text-xs">Battle</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="deck">
-                    <span class="text-4xl">🃏</span>
-                    <span class="text-xs">Deck</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="tower">
-                    <span class="text-4xl">👑</span>
-                    <span class="text-xs">Tower</span>
-                </button>
-                <button class="nav-btn active flex flex-col items-center text-yellow-400" data-screen="debug">
-                    <span class="text-4xl">🧪</span>
-                    <span class="text-xs">Debug</span>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Debug screen HTML has been removed -->
 
 
     <!-- 
@@ -865,7 +819,7 @@
             const gameScreen = document.getElementById('gameScreen');
             const deckScreen = document.getElementById('deckScreen');
             const towerScreen = document.getElementById('towerScreen');
-            const debugScreen = document.getElementById('debugScreen'); // NEW
+            // const debugScreen = document.getElementById('debugScreen'); // REMOVED
             const battleButton = document.getElementById('battleButton');
             const trophyDisplay = document.getElementById('trophyDisplay');
             const goldDisplay = document.getElementById('goldDisplay');
@@ -902,15 +856,10 @@
             const chestRewardList = document.getElementById('chestRewardList');
             const chestCloseButton = document.getElementById('chestCloseButton');
             const gameLevelTextContainer = document.getElementById('gameLevelTextContainer');
-            // Debug Buttons
-            const debugArena2 = document.getElementById('debugArena2');
-            const debugArena3 = document.getElementById('debugArena3');
-            const debugUnlockAll = document.getElementById('debugUnlockAll');
-            const debugUpgradeAll = document.getElementById('debugUpgradeAll');
-            const debugGetChest = document.getElementById('debugGetChest');
-            const debugAddGold = document.getElementById('debugAddGold');
-            const debugReset = document.getElementById('debugReset');
-
+            // Debug Buttons REMOVED
+            // const debugArena2 = document.getElementById('debugArena2');
+            // ... all other debug buttons removed
+            
             // --- Game Elements (from gameScreen) ---
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
@@ -984,9 +933,8 @@
             async function loadUserData() {
                 if (!userDocRef) {
                     // This should not happen if handleAuth is working, but as a fallback:
-                    await initNewUser();
-                    await saveUserData(); // Try to save this new user
-                    return;
+                    initNewUser(); // Just set local vars
+                    return; // Don't try to save
                 }
                 try {
                     const docSnap = await getDoc(userDocRef);
@@ -1000,9 +948,12 @@
                         cardCollection = data.cardCollection || initNewUserCards(false); 
                         playerDeck = data.playerDeck || initNewUserCards(true); 
                     } else {
-                        // This is a new user, set them up and save
-                        await initNewUser();
-                        await saveUserData();
+                        // This is a new user, set them up locally.
+                        initNewUser();
+                        // --- THIS IS THE FIX ---
+                        // DO NOT 'await saveUserData()' here.
+                        // This was causing the hang-up.
+                        // The save will happen naturally after the first game.
                     }
                 } catch (error) {
                     console.error("Error loading user data, will force new user:", error);
@@ -1108,183 +1059,9 @@
 
 
             // ==============================================
-            // SCREEN & NAVIGATION LOGIC
+            // DEBUG MENU LOGIC (REMOVED)
             // ==============================================
-            function showScreen(screenId) {
-                currentScreen = screenId;
-                screens.forEach(s => { s.id === screenId + 'Screen' ? s.classList.add('active') : s.classList.remove('active'); });
-                
-                if (screenId === 'menu' || screenId === 'deck' || screenId === 'tower' || screenId === 'debug') {
-                    navButtons.forEach(btn => { if (btn.dataset.screen === screenId) { btn.classList.add('text-yellow-400'); btn.classList.remove('text-gray-400'); } else { btn.classList.remove('text-yellow-400'); btn.classList.add('text-gray-400'); } });
-                }
-                
-                if (screenId === 'deck') { renderDeckScreen(); }
-                if (screenId === 'tower') { renderTowerScreen(); }
-                if (screenId === 'menu') { updateArena(); trophyDisplay.textContent = `🏆 ${trophies}`; goldDisplay.textContent = `💰 ${gold}`; renderChests(); updateBattleButtonState(); }
-            }
-
-            function updateArena() {
-                let currentTrophyFloor = 0;
-                let arenaDisplayName = "Arena 1: Emoji Valley";
-                let emoji = "🏞️";
-                currentArenaTheme = 'arena-1';
-                
-                for (const floor in arenaFloors) { if (trophies >= parseInt(floor)) { currentTrophyFloor = parseInt(floor); arenaDisplayName = arenaFloors[floor]; } }
-                currentArenaFloor = currentTrophyFloor;
-                
-                if (arenaDisplayName.includes("Laughing Village")) {
-                    emoji = "🏘️";
-                    currentArenaTheme = 'arena-2';
-                } else if (arenaDisplayName.includes("Lava Town")) {
-                    emoji = "🌋";
-                    currentArenaTheme = 'arena-3';
-                }
-                arenaName.textContent = arenaDisplayName;
-                arenaEmoji.textContent = emoji;
-                canvas.className = currentArenaTheme;
-            }
-
-            function renderChests() {
-                const slots = document.querySelectorAll('#chestSlots .chest-slot');
-                slots.forEach((slot, index) => {
-                    slot.innerHTML = '';
-                    slot.onclick = null;
-                    if (trophyChests[index]) {
-                        slot.innerHTML = `📦`;
-                        slot.classList.remove('text-gray-500', 'bg-gray-700');
-                        slot.classList.add('bg-yellow-700', 'cursor-pointer');
-                        slot.onclick = () => openChest(index);
-                    } else {
-                        slot.innerHTML = ``;
-                        slot.classList.add('text-gray-500', 'bg-gray-700');
-                        slot.classList.remove('bg-yellow-700', 'cursor-pointer');
-                    }
-                });
-            }
-            
-            function openChest(index) {
-                const chest = trophyChests[index];
-                if (!chest) return;
-                trophyChests.splice(index, 1);
-                
-                const rewardGold = 50 + Math.floor(Math.random() * 50);
-                gold += rewardGold;
-                let rewardsHTML = `<div><span class="text-3xl">💰</span> <span class="text-yellow-400">${rewardGold} Gold</span></div>`;
-                
-                const unlockedCards = getUnlockedCards(true); // Get list of cards this player *can* win
-                const numCardStacks = 2 + Math.floor(Math.random() * 2);
-                
-                for(let i = 0; i < numCardStacks; i++) {
-                    const cardId = unlockedCards[Math.floor(Math.random() * unlockedCards.length)];
-                    const cardCount = 3 + Math.floor(Math.random() * 5);
-                    
-                    if (cardId === 'tower') {
-                        towerCardCount += cardCount;
-                        rewardsHTML += `<div><span class="text-3xl">👑</span> ${cardCount}x Tower Cards</div>`;
-                    } else {
-                        // FIX: Ensure card exists in collection
-                        if (!cardCollection[cardId]) {
-                            cardCollection[cardId] = { level: 1, count: 0 };
-                        }
-                        cardCollection[cardId].count += cardCount;
-                        rewardsHTML += `<div><span class="text-3xl">${allCards[cardId].emoji}</span> ${cardCount}x ${allCards[cardId].name}</div>`;
-                    }
-                }
-                
-                chestRewardList.innerHTML = rewardsHTML;
-                chestOpenOverlay.style.display = 'flex';
-                
-                renderChests();
-                updateArena();
-                saveUserData();
-            }
-            chestCloseButton.addEventListener('click', () => {
-                chestOpenOverlay.style.display = 'none';
-            });
-
-            navButtons.forEach(btn => { btn.addEventListener('click', () => { showScreen(btn.dataset.screen); }); });
-            battleButton.addEventListener('click', () => {
-                if (battleButton.disabled) return;
-                menuScreen.classList.remove('active');
-                loadingScreen.classList.add('active');
-                loadingScreen.querySelector('p').textContent = 'Finding Opponent...';
-                setTimeout(() => {
-                    showScreen('game');
-                    messageText.textContent = 'Get Ready!';
-                    startButton.style.display = 'none';
-                    menuButton.style.display = 'none';
-                    messageOverlay.style.display = 'flex';
-                    setTimeout(() => {
-                        initGame();
-                        lastTime = performance.now();
-                        gameLoopId = requestAnimationFrame(gameLoop);
-                    }, 1500);
-                }, 2000);
-            });
-            menuButton.addEventListener('click', () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); });
-
-            // ==============================================
-            // DEBUG MENU LOGIC (NEW)
-            // ==============================================
-            debugArena2.addEventListener('click', () => {
-                trophies = 250;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            debugArena3.addEventListener('click', () => {
-                trophies = 500;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            debugUnlockAll.addEventListener('click', () => {
-                for (const cardId in allCards) {
-                    if (cardId === 'tower') continue;
-                    if (!cardCollection[cardId]) {
-                        cardCollection[cardId] = { level: 1, count: 1 };
-                    } else if (cardCollection[cardId].count === 0) {
-                        cardCollection[cardId].count = 1;
-                    }
-                }
-                saveUserData();
-                alert('All cards unlocked!');
-            });
-            debugUpgradeAll.addEventListener('click', () => {
-                for (const cardId in cardCollection) {
-                    const cardData = cardCollection[cardId];
-                    if (cardData.count > 0 && cardData.level < 15) { // Only upgrade unlocked cards, cap at 15
-                        cardData.level++;
-                    }
-                }
-                if (towerLevel < 15) towerLevel++;
-                saveUserData();
-                alert('All owned cards and tower upgraded +1 level!');
-            });
-            debugGetChest.addEventListener('click', () => {
-                if (trophyChests.length < 4) {
-                    trophyChests.push({ id: 'wood', openTime: 0 });
-                    renderChests();
-                    saveUserData();
-                    alert('Got a chest!');
-                } else {
-                    alert('Chest slots are full!');
-                }
-            });
-            debugAddGold.addEventListener('click', () => {
-                gold += 1000;
-                goldDisplay.textContent = `💰 ${gold}`;
-                saveUserData();
-                alert('+1000 Gold!');
-            });
-            debugReset.addEventListener('click', () => {
-                if (confirm('Are you sure you want to reset all progress? This will save!')) {
-                    initNewUser(); // This just sets local
-                    saveUserData(); // This saves the reset
-                    showScreen('menu');
-                    alert('Account reset!');
-                }
-            });
+            // All debug button event listeners have been removed
 
 
             // ==============================================
