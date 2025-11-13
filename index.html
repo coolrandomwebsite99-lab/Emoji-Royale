@@ -359,13 +359,34 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
+
+        /* In-Game Level Text */
+        .game-level-indicator {
+            position: absolute;
+            font-size: 0.7rem;
+            font-weight: 800;
+            background-color: rgba(0,0,0,0.7);
+            color: #fde047; /* yellow-300 */
+            padding: 1px 4px;
+            border-radius: 3px;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .tower-level {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            opacity: 0.4;
+            text-shadow: 0 0 5px black;
+        }
+
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-2">
     
     <!-- 
     ========================================================
-    SCREEN: LOGIN (FIXED)
+    SCREEN: LOGIN
     ========================================================
     -->
     <div id="loginScreen" class="screen active flex-col justify-center items-center">
@@ -696,29 +717,25 @@
     </div>
 
 
-    <!-- 
-    ========================================================
-    MAIN SCRIPT (Combined)
-    ========================================================
-    -->
     <script type="module">
-        // --- Import Firebase Functions ---
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Config (User Provided) ---
+        // --- Firebase Config (User-Provided) ---
+        // This is your project's config. It's safe to have here!
         const firebaseConfig = {
             apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
             authDomain: "emoji-royale-8fb68.firebaseapp.com",
             projectId: "emoji-royale-8fb68",
-            storageBucket: "emoji-royale-8fb68.appspot.com",
+            storageBucket: "emoji-royale-8fb68.firebasestorage.app",
             messagingSenderId: "1021589049311",
             appId: "1:1021589049311:web:61ce6353950831e298be6a",
             measurementId: "G-FDQ9L0MQGM"
         };
 
-        // --- Initialize Firebase ---
+        // --- Initialize Firebase (Combined Script) ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -726,7 +743,7 @@
         // setLogLevel('debug'); // Uncomment for debugging Firestore
 
         // --- Firebase Globals ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Use __app_id
+        const appId = "emoji-royale-8fb68"; // Use your actual project ID
         let userDocRef; // Reference to the user's document in Firestore
         let userId; // The user's unique ID
         
@@ -748,7 +765,8 @@
         let aiDiscardPile = [];
         let towerLevel = 1;
         let towerCardCount = 0;
-        let isInitialAuthCheck = true; // FIX: To prevent auto-login
+        let isInitialAuthCheck = true; // --- FIX: Flag to stop auto-login ---
+        
         // --- NEW: Level Cap at 15 ---
         const towerUpgradeCosts = {
             1: { cards: 2, gold: 50 }, 2: { cards: 4, gold: 150 }, 3: { cards: 10, gold: 400 },
@@ -896,31 +914,53 @@
             // ==============================================
             // FIREBASE & USER DATA
             // ==============================================
-
-            // FIX: This function now *only* runs when the user CLICKS a login button
-            // or if it's the "guest" button
+            
+            // --- FIX: This function handles the "stuck on loading" bug ---
             async function handleAuth(user) {
                 if (user && !user.isAnonymous) { // Only Google Sign-in saves
                     userId = user.uid;
-                    // Use the public space for simplicity in this example
                     userDocRef = doc(db, 'artifacts', appId, 'users', userId);
                     isDataSaved = true;
                     showScreen('loading');
                     loadingScreen.querySelector('p').textContent = 'Loading Progress...';
+
+                    let hasLoaded = false;
                     
+                    // Safety timeout: If loading takes > 8 seconds, force start.
+                    const loadingTimeout = setTimeout(async () => {
+                        if (hasLoaded) return; // If it loaded just in time, do nothing.
+                        
+                        console.warn("Loading took too long! Forcing new game session.");
+                        hasLoaded = true; // Prevent the real load from running if it finishes late
+                        
+                        // We can't be sure if data exists, so initNewUser is the safest bet
+                        // It will create a new save, which is better than being stuck.
+                        await initNewUser(); // This function will set default data and save it
+                        
+                        showScreen('menu');
+
+                    }, 8000); // 8-second timeout
+
                     try {
-                        await loadUserData(); // Try to load
+                        await loadUserData(); // This function loads or inits new user if no doc
+                        if (hasLoaded) return; // Timeout already fired, so just stop.
+                        
+                        hasLoaded = true;
+                        clearTimeout(loadingTimeout); // Success! Clear the safety net.
+                        showScreen('menu');
+
                     } catch (error) {
-                        console.error("Error loading user data:", error);
+                        if (hasLoaded) return; // Timeout already fired, so just stop.
+
+                        console.error("Failed to load data, starting new user:", error);
+                        hasLoaded = true;
+                        clearTimeout(loadingTimeout); // Failed! Clear the safety net.
+
                         await initNewUser(); // Fallback to new user
-                    } finally {
-                        // This ALWAYS runs, ensuring we never get stuck
-                        // REMOVED setTimeout to prevent getting stuck
                         showScreen('menu');
                     }
-
-                } else {
-                    // Not logged in or is anonymous
+                    
+                } else { // Not logged in or is anonymous
                     userId = null;
                     userDocRef = null;
                     isDataSaved = false;
@@ -930,18 +970,24 @@
             
             async function loadUserData() {
                 if (!userDocRef) return; // Should not happen if called correctly
-                const docSnap = await getDoc(userDocRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    trophies = data.trophies || 0;
-                    gold = data.gold || 500;
-                    towerLevel = data.towerLevel || 1;
-                    towerCardCount = data.towerCardCount || 0;
-                    trophyChests = data.trophyChests || [];
-                    cardCollection = data.cardCollection || initNewUserCards(false); 
-                    playerDeck = data.playerDeck || initNewUserCards(true); 
-                } else {
-                    await initNewUser();
+                try {
+                    const docSnap = await getDoc(userDocRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        trophies = data.trophies || 0;
+                        gold = data.gold || 500;
+                        towerLevel = data.towerLevel || 1;
+                        towerCardCount = data.towerCardCount || 0;
+                        trophyChests = data.trophyChests || [];
+                        cardCollection = data.cardCollection || initNewUserCards(false); 
+                        playerDeck = data.playerDeck || initNewUserCards(true); 
+                    } else {
+                        // This is a new user, set them up
+                        await initNewUser();
+                    }
+                } catch (error) {
+                    console.error("Error loading user data:", error);
+                    await initNewUser(); // Fallback
                 }
             }
             
@@ -986,6 +1032,7 @@
                     }
                 }
                 if (deckOnly) {
+                    // Return only the *IDs* of Arena 1 cards
                     return Object.keys(allCards).filter(id => allCards[id].arena === 1);
                 }
                 return newCollection;
@@ -1015,14 +1062,15 @@
             googleLoginBtn.addEventListener('click', async () => {
                 loginError.textContent = '';
                 try {
-                    // This will trigger onAuthStateChanged, which will call handleAuth
+                    // This will trigger the onAuthStateChanged listener, which will call handleAuth
                     await signInWithPopup(auth, provider);
                 } catch (error) {
-                    if (error.code === 'auth/unauthorized-domain') {
-                        loginError.textContent = 'Google Sign-in is not set up.';
-                    } else if (error.code === 'auth/popup-blocked') {
+                    if (error.code === 'auth/popup-blocked') {
                         loginError.textContent = 'Pop-up blocked! Please allow pop-ups.';
+                    } else if (error.code === 'auth/unauthorized-domain') {
+                        loginError.textContent = 'Sign-in domain not authorized.';
                     } else {
+                        console.error("Google Sign-in error:", error);
                         loginError.textContent = 'Login failed. Please try again.';
                     } 
                 }
@@ -1060,6 +1108,7 @@
                 let emoji = "🏞️";
                 currentArenaTheme = 'arena-1';
                 
+                // Find the highest arena floor the player has reached
                 for (const floor in arenaFloors) { if (trophies >= parseInt(floor)) { currentTrophyFloor = parseInt(floor); arenaDisplayName = arenaFloors[floor]; } }
                 currentArenaFloor = currentTrophyFloor;
                 
@@ -1116,10 +1165,6 @@
                         // FIX: Ensure card exists in collection
                         if (!cardCollection[cardId]) {
                             cardCollection[cardId] = { level: 1, count: 0 };
-                        }
-                        // Check if this is a new card unlock
-                        if (cardCollection[cardId].count === 0 && allCards[cardId].arena > 1) {
-                             rewardsHTML += `<div><span class="text-3xl">✨${allCards[cardId].emoji}✨</span> <span class="text-green-400">NEW CARD!</span></div>`;
                         }
                         cardCollection[cardId].count += cardCount;
                         rewardsHTML += `<div><span class="text-3xl">${allCards[cardId].emoji}</span> ${cardCount}x ${allCards[cardId].name}</div>`;
@@ -1184,11 +1229,7 @@
                 }
                 saveUserData();
                 // Use a custom modal instead of alert
-                messageText.textContent = 'All cards unlocked!';
-                messageOverlay.style.display = 'flex';
-                startButton.style.display = 'none';
-                menuButton.style.display = 'inline-block';
-                menuButton.onclick = () => { messageOverlay.style.display = 'none'; showScreen('debug'); };
+                showTemporaryMessage("All cards unlocked!");
             });
             debugUpgradeAll.addEventListener('click', () => {
                 for (const cardId in cardCollection) {
@@ -1199,64 +1240,79 @@
                 }
                 if (towerLevel < 15) towerLevel++;
                 saveUserData();
-                messageText.textContent = 'All owned cards and tower upgraded +1 level!';
-                messageOverlay.style.display = 'flex';
-                startButton.style.display = 'none';
-                menuButton.style.display = 'inline-block';
-                menuButton.onclick = () => { messageOverlay.style.display = 'none'; showScreen('debug'); };
+                showTemporaryMessage("All owned cards and tower upgraded +1 level!");
             });
             debugGetChest.addEventListener('click', () => {
                 if (trophyChests.length < 4) {
                     trophyChests.push({ id: 'wood', openTime: 0 });
                     renderChests();
                     saveUserData();
-                    messageText.textContent = 'Got a chest!';
+                    showTemporaryMessage("Got a chest!");
                 } else {
-                    messageText.textContent = 'Chest slots are full!';
+                    showTemporaryMessage("Chest slots are full!");
                 }
-                messageOverlay.style.display = 'flex';
-                startButton.style.display = 'none';
-                menuButton.style.display = 'inline-block';
-                menuButton.onclick = () => { messageOverlay.style.display = 'none'; showScreen('debug'); };
             });
             debugAddGold.addEventListener('click', () => {
                 gold += 1000;
                 goldDisplay.textContent = `💰 ${gold}`;
                 saveUserData();
-                messageText.textContent = '+1000 Gold!';
-                messageOverlay.style.display = 'flex';
-                startButton.style.display = 'none';
-                menuButton.style.display = 'inline-block';
-                menuButton.onclick = () => { messageOverlay.style.display = 'none'; showScreen('debug'); };
+                showTemporaryMessage("+1000 Gold!");
             });
             debugReset.addEventListener('click', () => {
-                // Custom confirmation modal
-                messageText.innerHTML = 'Are you sure you want to reset all progress?<br><small>This cannot be undone!</small>';
-                messageOverlay.style.display = 'flex';
-                startButton.style.display = 'inline-block';
-                startButton.textContent = 'Yes, Reset!';
-                startButton.className = 'login-btn bg-red-600 hover:bg-red-700';
-                menuButton.style.display = 'inline-block';
-                menuButton.textContent = 'Cancel';
-                menuButton.className = 'login-btn guest';
-                
-                startButton.onclick = () => {
+                // Use a custom modal instead of confirm
+                showCustomConfirm("Are you sure you want to reset all progress?", () => {
                     initNewUser(); // This saves
                     showScreen('menu');
-                    messageOverlay.style.display = 'none';
-                    // Restore default menu button
-                    menuButton.textContent = 'Back to Menu';
-                    menuButton.className = 'bg-red-600 hover:bg-red-700';
-                    menuButton.onclick = () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); };
-                };
-                menuButton.onclick = () => {
-                    messageOverlay.style.display = 'none';
-                    // Restore default menu button
-                    menuButton.textContent = 'Back to Menu';
-                    menuButton.className = 'bg-red-600 hover:bg-red-700';
-                    menuButton.onclick = () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); };
-                };
+                    showTemporaryMessage("Account reset!");
+                });
             });
+
+            // --- Custom Alert/Confirm Modals ---
+            function showTemporaryMessage(text) {
+                // A simple overlay message
+                messageText.textContent = text;
+                startButton.style.display = 'none';
+                menuButton.style.display = 'none';
+                messageOverlay.style.display = 'flex';
+                setTimeout(() => {
+                    if (currentScreen === 'game') {
+                         messageOverlay.style.display = 'none';
+                    }
+                }, 1500);
+            }
+
+            function showCustomConfirm(text, onConfirm) {
+                // Re-use message overlay for confirmation
+                messageText.innerHTML = `${text}<div id="confirmButtons"></div>`;
+                const confirmBtn = document.createElement('button');
+                confirmBtn.textContent = 'Yes, Reset';
+                confirmBtn.className = 'modal-btn remove'; // Use red color
+                confirmBtn.style.width = 'auto';
+                confirmBtn.style.padding = '0.5rem 1rem';
+                confirmBtn.style.fontSize = '1rem';
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.className = 'modal-btn'; // Use default color
+                cancelBtn.style.backgroundColor = '#6b7280';
+                cancelBtn.style.width = 'auto';
+                cancelBtn.style.padding = '0.5rem 1rem';
+                cancelBtn.style.fontSize = '1rem';
+
+                document.getElementById('confirmButtons').append(confirmBtn, cancelBtn);
+                
+                confirmBtn.onclick = () => {
+                    messageOverlay.style.display = 'none';
+                    onConfirm();
+                };
+                cancelBtn.onclick = () => {
+                    messageOverlay.style.display = 'none';
+                };
+
+                startButton.style.display = 'none';
+                menuButton.style.display = 'none';
+                messageOverlay.style.display = 'flex';
+            }
 
 
             // ==============================================
@@ -1311,22 +1367,24 @@
                 return cardEl;
             }
 
-            function getUnlockedCards(includeTower = false, arenaNum = 0) {
+            // --- AI DECK FIX: Use player's arena, not AI level ---
+            function getUnlockedCards(includeTower = false, forAIArena = 0) {
                 const unlocked = [];
-                // Use AI arena if provided, otherwise use player's arena
-                const arena = arenaNum > 0 ? arenaNum : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : 3));
+                // Use AI arena if provided, otherwise use player's trophies
+                const arenaNum = forAIArena > 0 ? forAIArena : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : 3));
                 
                 for (const cardId in allCards) {
-                    if (allCards[cardId].arena <= arena) {
+                    if (cardId === 'tower') continue; // Don't add 'tower' card to decks
+                    if (allCards[cardId].arena <= arenaNum) {
                         unlocked.push(cardId);
                     }
                 }
                 if (includeTower) {
+                    // This is for chest rewards only
                     unlocked.push('tower');
                 }
                 return unlocked;
             }
-
 
             function renderDeckScreen() {
                 deckCardGrid.innerHTML = '';
@@ -1343,15 +1401,7 @@
                 });
                 
                 // Render Collection & Locked Cards
-                // Sort cards by arena, then cost
-                const sortedCardIds = Object.keys(allCards).sort((a, b) => {
-                    if (allCards[a].arena !== allCards[b].arena) {
-                        return allCards[a].arena - allCards[b].arena;
-                    }
-                    return allCards[a].cost - allCards[b].cost;
-                });
-
-                for (const cardId of sortedCardIds) {
+                for (const cardId in allCards) {
                     if (cardId === 'tower') continue; 
                     
                     const cardData = cardCollection[cardId];
@@ -1433,7 +1483,7 @@
                     'archer': { name: 'Archer', cost: 4, emoji: '🏹', type: 'Ranged', unitClass: Archer, placementRadius: 10, isFlying: false, arena: 1, targets: 'Air & Ground',
                                 stats: { 1: { health: 250, damage: 40, hitSpeed: 1 } } },
                     'giant': { name: 'Giant', cost: 5, emoji: '💪', type: 'Tank', unitClass: Giant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings',
-                                stats: { 1: { health: 2000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Speed nerfed
+                                stats: { 1: { health: 2000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // SLOWED DOWN
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1 } } },
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
@@ -1453,7 +1503,7 @@
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2 } } },
                     // Arena 3
                     'fireDragon': { name: 'Fire Dragon', cost: 4, emoji: '🐲', type: 'Air', unitClass: FireDragon, placementRadius: 12, isFlying: true, arena: 3, targets: 'Air & Ground',
-                                stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5, splashRadius: 20 } } },
+                                stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5, splashRadius: 25 } } }, // Added splashRadius
                     'barbarians': { name: 'Barbarians', cost: 5, emoji: '🧔', type: 'Swarm', unitClass: Barbarians, placementRadius: 10, isFlying: false, arena: 3, targets: 'Ground',
                                 stats: { 1: { count: 5, health: 300, damage: 60, hitSpeed: 1.4 } } },
                     'battleRam': { name: 'Battle Ram', cost: 4, emoji: '🌲', type: 'WinCon', unitClass: BattleRam, placementRadius: 10, isFlying: false, arena: 3, targets: 'Buildings',
@@ -1509,10 +1559,11 @@
                 // --- FIX: Only loop stats if stats is not null ---
                 if (stats) {
                     for (const [key, value] of Object.entries(stats)) { 
-                        if (key !== 'barbLevel' && key !== 'speed') cardInfoStats.innerHTML += `<div>${key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}: <span>${value}</span></div>`; 
+                        if (key !== 'barbLevel' && key !== 'speed' && key !== 'splashRadius') cardInfoStats.innerHTML += `<div>${key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}: <span>${value}</span></div>`; 
                     }
                     if (card.type === 'Spell') { cardInfoStats.innerHTML += `<div>Radius: <span>${card.radius}</span></div>`; }
                     if (stats.damage && stats.hitSpeed) { const dps = (stats.damage / stats.hitSpeed).toFixed(1); cardInfoStats.innerHTML += `<div>DPS: <span>${dps}</span></div>`; }
+                    if (stats.splashRadius) { cardInfoStats.innerHTML += `<div>Splash Radius: <span>${stats.splashRadius}</span></div>`; }
                 }
 
                 cardInfoButtons.innerHTML = '';
@@ -1614,32 +1665,40 @@
                 renderHand();
                 
                 // AI
-                const aiArena = getAIArena();
-                const aiArenaCards = getUnlockedCards(false, aiArena); // AI deck based on its "arena"
-                let aiFullDeck = [];
-                while(aiFullDeck.length < 8) {
-                    aiFullDeck.push(aiArenaCards[Math.floor(Math.random() * aiArenaCards.length)]);
-                }
-                aiDeck = shuffleDeck(aiFullDeck); // Shuffle the 8-card deck
+                const aiArenaLevel = getAIArenaLevel(); // 1, 2, or 3
+                const aiCards = getUnlockedCards(false, aiArenaLevel); // AI deck based on its "arena"
                 
+                // --- AI DECK FIX: Build a random 8-card deck ---
+                let aiFullDeck = shuffleDeck(aiCards);
+                aiDeck = [];
+                for(let i=0; i < 8; i++) {
+                    if(aiFullDeck.length === 0) aiFullDeck = shuffleDeck(aiCards); // Refill if not enough cards
+                    aiDeck.push(aiFullDeck.pop());
+                }
+                
+                let aiShuffledGameDeck = shuffleDeck(aiDeck);
                 aiHand = [];
                 aiDiscardPile = [];
-                for (let i = 0; i < 4; i++) { if(aiDeck.length > 0) aiHand.push(aiDeck.pop()); }
-                if(aiDeck.length > 0) aiNextCard = aiDeck.pop();
-                else { // Handle case where deck has < 5 cards
-                     aiDeck = shuffleDeck(aiDiscardPile);
-                     aiNextCard = aiDeck.pop() || null;
-                }
+                for (let i = 0; i < 4; i++) { if(aiShuffledGameDeck.length > 0) aiHand.push(aiShuffledGameDeck.pop()); }
+                if(aiShuffledGameDeck.length > 0) aiNextCard = aiShuffledGameDeck.pop();
+                aiDiscardPile = aiShuffledGameDeck; // Put remaining 3 cards in discard
             }
             
             function aiPlayCard(cardId) {
                 if (!allCards[cardId]) return; // Safety check
                 aiElixir -= allCards[cardId].cost;
-                aiDiscardPile.push(cardId);
+                
                 const handIndex = aiHand.indexOf(cardId);
-                if (handIndex > -1) { aiHand.splice(handIndex, 1); }
+                if (handIndex > -1) { 
+                    aiDiscardPile.push(aiHand.splice(handIndex, 1)[0]);
+                }
+                
                 aiHand.push(aiNextCard);
-                if (aiDeck.length === 0) { aiDeck = shuffleDeck(aiDiscardPile); aiDiscardPile = []; }
+                
+                if (aiDeck.length === 0) { 
+                    aiDeck = shuffleDeck(aiDiscardPile); 
+                    aiDiscardPile = []; 
+                }
                 aiNextCard = aiDeck.pop() || null;
             }
 
@@ -1701,13 +1760,13 @@
             // GAME OBJECTS (CLASSES)
             // ==============================================
             class GameObject {
-                constructor(x, y, radius, team, health) { this.x = x; this.y = y; this.radius = radius; this.team = team; this.health = health; this.maxHealth = health; this.id = Math.random(); this.level = 1; }
-                drawHealthBar() { 
+                constructor(x, y, radius, team, health) { this.x = x; this.y = y; this.radius = radius; this.team = team; this.health = health; this.maxHealth = health; this.id = Math.random(); }
+                drawHealthBar(level) { 
                     if (this.health < this.maxHealth) { 
                         const barWidth = this.radius * 2; 
                         const barHeight = 5; 
                         const barX = this.x - this.radius; 
-                        const barY = this.y - this.radius - 15; // Raised up
+                        const barY = this.y - this.radius - (level ? 18 : 10); // Move up if level is shown
                         ctx.fillStyle = '#dc2626'; 
                         ctx.fillRect(barX, barY, barWidth, barHeight); 
                         ctx.fillStyle = '#16a34a'; 
@@ -1715,22 +1774,18 @@
                         ctx.strokeStyle = '#000'; 
                         ctx.strokeRect(barX, barY, barWidth, barHeight); 
                     } 
+                    if (level) {
+                        ctx.font = `800 10px Inter`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = '#fde047'; // yellow-300
+                        ctx.fillText(`Lvl ${level}`, this.x, this.y - this.radius - (level ? 18 : 10) - 2);
+                    }
                 }
-                drawLevel() {
-                    const levelY = (this instanceof Tower) ? this.y + this.radius + 15 : this.y - this.radius - 25;
-                    const levelX = (this instanceof Tower) ? this.x : this.x;
-                    const color = this.team === 'player' ? '#60a5fa' : '#f87171';
-                    ctx.font = `bold 12px Arial`;
-                    ctx.fillStyle = 'black';
-                    ctx.fillText(`Lvl ${this.level}`, levelX+1, levelY+1);
-                    ctx.fillStyle = color;
-                    ctx.fillText(`Lvl ${this.level}`, levelX, levelY);
-                }
-                draw(color, emoji) { 
+                draw(color, emoji, level) { 
                     ctx.beginPath(); 
                     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
-                    ctx.fillStyle = color; 
-                    ctx.fill(); 
+                    ctx.fillStyle = color; ctx.fill(); 
                     ctx.strokeStyle = 'black'; 
                     ctx.lineWidth = 2; 
                     ctx.stroke(); 
@@ -1740,8 +1795,7 @@
                         ctx.textBaseline = 'middle'; 
                         ctx.fillText(emoji, this.x, this.y); 
                     } 
-                    this.drawHealthBar(); 
-                    this.drawLevel();
+                    this.drawHealthBar(level); 
                 }
                 update() {}
             }
@@ -1751,6 +1805,7 @@
                     const s = towerStats[level] || towerStats[1];
                     super(x, y, isKing ? 25 : 20, team, isKing ? s.kingHealth : s.princessHealth);
                     this.isKing = isKing;
+                    this.level = level;
                     this.attackRange = 150;
                     this.attackDamage = s.damage;
                     this.attackCooldown = s.hitSpeed * 60;
@@ -1759,18 +1814,42 @@
                     this.isActive = false;
                     this.activationAnimation = 0;
                     this.dyingAnimationTimer = 0;
-                    this.level = level;
                 }
                 findTarget() { if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) { return; } this.target = null; let closestDist = this.attackRange; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Unit)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; this.target = obj; } } } }
                 attack() { if (this.target) { gameObjects.push(new Projectile(this.x, this.y, this.target, this.team, this.attackDamage)); this.cooldownTimer = this.attackCooldown; } }
                 update() { if (this.health <= 0) return; if (this.cooldownTimer > 0) { this.cooldownTimer--; } let kingNeedsToActivate = false; if (this.isKing) { const princessTowersDown = gameObjects.filter(t => t.team === this.team && !t.isKing && t.health > 0).length === 0; if (princessTowersDown || this.health < this.maxHealth) { if (!this.isActive) { this.isActive = true; this.activationAnimation = 30; } kingNeedsToActivate = true; } if (!kingNeedsToActivate) return; } this.findTarget(); if (this.target && this.cooldownTimer <= 0) { this.attack(); } }
-                draw() { ctx.save(); if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; const emoji = this.isKing ? '👑' : '👸'; ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); if (this.activationAnimation > 0) { this.activationAnimation--; ctx.fillStyle = `rgba(255, 255, 0, ${0.5 * (this.activationAnimation / 30)})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2); ctx.fill(); } this.drawHealthBar(); this.drawLevel(); ctx.restore(); }
+                draw() { 
+                    ctx.save(); 
+                    // Draw Level Text Behind Tower
+                    ctx.font = `bold 1.2rem Inter`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillText(this.level, this.x, this.y + 2);
+
+                    if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } 
+                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
+                    const emoji = this.isKing ? '👑' : '👸'; 
+                    ctx.fillStyle = color; 
+                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; 
+                    ctx.lineWidth = 2; 
+                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillText(emoji, this.x, this.y); 
+                    if (this.activationAnimation > 0) { this.activationAnimation--; ctx.fillStyle = `rgba(255, 255, 0, ${0.5 * (this.activationAnimation / 30)})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2); ctx.fill(); } 
+                    this.drawHealthBar(); // Don't pass level, it's drawn behind
+                    ctx.restore(); 
+                }
             }
 
             class Building extends GameObject {
                 constructor(x, y, team, level = 1, cardId) {
                     const s = allCards[cardId].stats[level];
                     super(x, y, 20, team, s.health);
+                    this.level = level;
                     this.maxLifetime = parseFloat(s.lifetime) * 60;
                     this.lifetime = this.maxLifetime;
                     this.dyingAnimationTimer = 0;
@@ -1779,7 +1858,6 @@
                     this.spawnLevel = level;
                     this.cardId = cardId;
                     this.emoji = allCards[cardId].emoji;
-                    this.level = level;
                 }
                 update() { 
                     if (this.health <= 0) return; 
@@ -1789,19 +1867,31 @@
                     this.spawnTimer--; 
                     if (this.spawnTimer <= 0) {
                         let unitToSpawn = null;
-                        let spawnId = '';
-                        if (this.cardId === 'hut') { unitToSpawn = Goblin; spawnId = 'goblins'; }
-                        if (this.cardId === 'barbarianHut') { unitToSpawn = Barbarian; spawnId = 'barbarians'; }
+                        if (this.cardId === 'hut') unitToSpawn = Goblin;
+                        if (this.cardId === 'barbarianHut') unitToSpawn = Barbarian;
                         
                         if (unitToSpawn) {
-                            // Get the level of the *spawned* unit, which might be different
-                            const spawnedUnitLevel = allCards[spawnId].stats[this.spawnLevel].level || this.spawnLevel;
-                            gameObjects.push(new unitToSpawn(this.x + (Math.random()*10-5), this.y + (Math.random()*10-5), this.team, spawnedUnitLevel));
+                            gameObjects.push(new unitToSpawn(this.x + (Math.random()*10-5), this.y + (Math.random()*10-5), this.team, this.spawnLevel));
                         }
                         this.spawnTimer = this.spawnRate; 
                     } 
                 }
-                draw() { ctx.save(); if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.emoji, this.x, this.y); this.drawHealthBar(); this.drawLevel(); ctx.restore(); }
+                draw() { 
+                    ctx.save(); 
+                    if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } 
+                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
+                    ctx.fillStyle = color; 
+                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; 
+                    ctx.lineWidth = 2; 
+                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillText(this.emoji, this.x, this.y); 
+                    this.drawHealthBar(this.level); // Pass level to show
+                    ctx.restore(); 
+                }
             }
             class GoblinHut extends Building { constructor(x, y, team, level = 1) { super(x, y, team, level, 'hut'); } }
             class BarbarianHut extends Building { constructor(x, y, team, level = 1) { super(x, y, team, level, 'barbarianHut'); } }
@@ -1820,6 +1910,7 @@
                     this.isFlying = isFlying;
                     this.targetsAir = targetsAir;
                     this.level = level;
+                    this.splashRadius = 0; // Default no splash
                 }
                 findTarget() {
                     let closestDist = Infinity;
@@ -1863,20 +1954,30 @@
                     if (this.target && this.cooldownTimer <= 0) { 
                         if (this.attackRange <= this.radius + this.target.radius + 5) { // Melee
                             this.target.health -= this.attackDamage; 
+                            if(this.splashRadius > 0) this.doSplash();
                         } else { // Ranged
                             let projectileType = Projectile;
-                            let splashRadius = 0;
-                            if (this.emoji === '🐲') {
-                                projectileType = FireballProjectile;
-                                splashRadius = allCards['fireDragon'].stats[this.level].splashRadius;
-                            }
-                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, this.attackDamage, splashRadius)); 
+                            if (this.splashRadius > 0) projectileType = FireballProjectile; // Use fireball for any splash
+                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, this.attackDamage, this.splashRadius)); 
                         } 
                         this.cooldownTimer = this.attackCooldown; 
                     } 
                 }
+                doSplash() {
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && obj.id !== this.target.id && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                            if (getDistance(this.target, obj) < this.splashRadius) {
+                                obj.health -= this.attackDamage; // For now, splash does full damage
+                            }
+                        }
+                    }
+                }
                 update() {
-                    if (this.health <= 0) return;
+                    if (this.health <= 0) {
+                        // BATTLE RAM FIX: Check if this unit is a BattleRam and spawn barbs
+                        if (this.spawnOnDeath) this.spawnOnDeath();
+                        return;
+                    }
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
                     if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
                         this.attack();
@@ -1888,7 +1989,7 @@
                         }
                     }
                 }
-                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji); }
+                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji, this.level); }
             }
 
             class Knight extends Unit { constructor(x, y, team, level = 1) { const s = allCards['knight'].stats[level]; super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '⚔️', false, false, level); } }
@@ -1922,7 +2023,13 @@
             class SkeletonArmy { constructor(x, y, team, level = 1) { const s = allCards['skeletonArmy'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
             class Barbarian extends Unit { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; super(x, y, 11, team, s.health, 1.1, 25, s.damage, s.hitSpeed, '🧔', false, false, level); } }
             class Barbarians { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Barbarian(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
-            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); } }
+            class FireDragon extends Unit { 
+                constructor(x, y, team, level = 1) { 
+                    const s = allCards['fireDragon'].stats[level]; 
+                    super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); 
+                    this.splashRadius = s.splashRadius;
+                } 
+            }
             class BattleRam extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['battleRam'].stats[level];
@@ -1930,34 +2037,32 @@
                     this.barbLevel = s.barbLevel;
                     this.chargeTimer = 3 * 60;
                     this.isCharging = false;
-                    this.hasSpawned = false; // BATTLE RAM FIX
                     this.findTarget = () => { let closestDist = Infinity; let newTarget = null; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Tower || obj instanceof Building)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } } this.target = newTarget; };
-                }
-                spawnBarbs() {
-                    if (this.hasSpawned) return; // Only spawn once
-                    this.hasSpawned = true;
-                    // Find the Barbarian's base stats level based on the Ram's level
-                    const barbStatsLevel = allCards['battleRam'].stats[this.level].barbLevel;
-                    gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, barbStatsLevel));
-                    gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, barbStatsLevel));
+                    // --- BATTLE RAM FIX: Add spawnOnDeath function ---
+                    this.spawnOnDeath = () => {
+                        gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, this.barbLevel));
+                        gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, this.barbLevel));
+                    };
                 }
                 update() {
-                    if (this.health <= 0 && !this.hasSpawned) {
-                        this.spawnBarbs();
+                    // Check for death first
+                    if (this.health <= 0) {
+                        if (this.spawnOnDeath) {
+                            this.spawnOnDeath();
+                            this.spawnOnDeath = null; // Spawn only once
+                        }
                         return;
                     }
-                    if (this.health <= 0) return; // Already spawned, just wait to be removed
-                    
+                    // Normal update logic
                     if (this.chargeTimer > 0) { this.chargeTimer--; if(this.chargeTimer === 0) this.isCharging = true; }
                     if (this.isCharging) this.speed = 2.4; else this.speed = 1.2;
-                    super.update();
+                    super.update(); // Run the parent Unit's update (findTarget, move, attack)
                 }
                 attack() { // Ram only attacks when it hits
                     if (this.target && this.cooldownTimer <= 0) { 
                         this.target.health -= this.attackDamage;
-                        this.health = 0; // Ram breaks
-                        this.spawnBarbs(); // BATTLE RAM FIX: Spawn immediately
-                        this.cooldownTimer = 9999; // Prevent multiple hits
+                        this.health = 0; // Ram breaks *after* dealing damage
+                        // The spawn logic will now be caught at the start of the *next* update() frame
                     } 
                 }
             }
@@ -1973,18 +2078,16 @@
                 update() { 
                     if (!this.target || this.target.health <= 0) { this.health = 0; return; } 
                     const dist = getDistance(this, this.target); 
-                    if (dist < this.speed + this.target.radius) { 
+                    if (dist < this.speed) { 
+                        this.target.health -= this.damage; 
                         if (this.splashRadius > 0) {
-                            // Hit all enemies in splash radius
                             for (const obj of gameObjects) {
-                                if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                if (obj.team !== this.team && obj.id !== this.target.id && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
                                     if (getDistance(this.target, obj) < this.splashRadius) {
-                                        obj.health -= this.damage;
+                                        obj.health -= this.damage; // Splash does full damage
                                     }
                                 }
                             }
-                        } else {
-                            this.target.health -= this.damage; 
                         }
                         this.health = 0; 
                         return; 
@@ -1996,7 +2099,12 @@
                 draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca'; ctx.fill(); }
             }
             class FireballProjectile extends Projectile {
-                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00'; ctx.fill(); }
+                draw() { 
+                    ctx.beginPath(); 
+                    ctx.arc(this.x, this.y, this.radius * (this.splashRadius > 0 ? 2.5 : 2), 0, Math.PI * 2); // Bigger if splash
+                    ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00'; 
+                    ctx.fill(); 
+                }
             }
 
             class Spell extends GameObject {
@@ -2089,14 +2197,14 @@
                 ctx.setLineDash([]);
             }
 
-            // AI level is for *stats*, not for deck
-            function getAILevel() {
+            // --- AI LEVEL FIX: Return stat level ---
+            function getAIStatLevel() {
                 if (trophies >= 500) return 5; 
                 if (trophies >= 250) return 3; 
                 return 1;
             }
-            // AI *Arena* is for deck building
-            function getAIArena() {
+            // --- AI LEVEL FIX: Return arena level ---
+            function getAIArenaLevel() {
                 if (trophies >= 500) return 3; 
                 if (trophies >= 250) return 2; 
                 return 1;
@@ -2118,13 +2226,8 @@
                 messageOverlay.style.display = 'none';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
-                // Restore default menu button click
-                menuButton.textContent = 'Back to Menu';
-                menuButton.className = 'bg-red-600 hover:bg-red-700';
-                menuButton.onclick = () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); };
 
-
-                const aiLevel = getAILevel(); // This is for stats
+                const aiLevel = getAIStatLevel(); // Get AI *stat* level (1, 3, or 5)
                 gameObjects.push(new Tower(LANE_LEFT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(LANE_RIGHT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(WIDTH / 2, HEIGHT - 50, 'player', true, towerLevel));
@@ -2137,13 +2240,13 @@
             }
 
             function runAI() {
-                const aiLevel = getAILevel(); // Stat level
+                const aiLevel = getAIStatLevel();
                 const playerUnits = gameObjects.filter(o => o.team === 'player' && o instanceof Unit && o.y < RIVER_Y + 50);
-                let bestCardId = null;
                 
-                // --- 1. Defensive AI ---
+                // 1. Defensive Logic
                 if (playerUnits.length > 0) {
-                    if (playerUnits.some(u => u instanceof SkeletonArmy || u instanceof GoblinGang) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
+                    let bestCardId = null;
+                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof GoblinGang) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
                     } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
                         bestCardId = 'tinyBot';
@@ -2151,29 +2254,36 @@
                         bestCardId = 'barbarians';
                     } else if (playerUnits.some(u => u instanceof FireDragon) && aiHand.includes('archer') && aiElixir >= allCards['archer'].cost) {
                         bestCardId = 'archer';
-                    } else if (playerUnits.length > 2 && aiHand.includes('goblins') && aiElixir >= allCards['goblins'].cost) {
+                    } else if (aiHand.includes('goblins') && aiElixir >= allCards['goblins'].cost) {
                         bestCardId = 'goblins';
                     }
                     if (bestCardId) { spawnAIUnit(bestCardId, aiLevel, true); return; }
                 }
                 
-                // --- 2. Offensive AI ---
-                if (aiElixir > 7) { // Be more aggressive
-                    bestCardId = null;
+                // 2. Offensive Logic
+                if (aiElixir > 8) {
+                    let bestCardId = null;
                     if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
-                    else if(aiHand.includes('battleRam') && aiElixir >= allCards['battleRam'].cost) { bestCardId = 'battleRam'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
-                    else if (aiHand.includes('knight') && aiElixir >= allCards['knight'].cost) { bestCardId = 'knight'; }
-                    else if (aiHand.includes('fireDragon') && aiElixir >= allCards['fireDragon'].cost) { bestCardId = 'fireDragon'; }
-
                     if (bestCardId) { spawnAIUnit(bestCardId, aiLevel, false); return; }
                 }
-
-                // --- 3. Spell AI ---
+                
+                // 3. Spell Logic
                 if (aiElixir === MAX_ELIXIR && aiHand.includes('fireball') && Math.random() < 0.2) {
                     spawnAIUnit('fireball', aiLevel, false);
                     return;
+                }
+
+                // 4. --- AI BRAIN FIX ---
+                // If elixir is high and no "smart" move was found, play *any* card
+                if (aiElixir >= 7) {
+                    // Find any playable card
+                    let fallbackCardId = aiHand.find(cardId => allCards[cardId] && allCards[cardId].cost <= aiElixir);
+                    if (fallbackCardId) {
+                        spawnAIUnit(fallbackCardId, aiLevel, false); // Play it offensively
+                        return;
+                    }
                 }
             }
 
@@ -2185,8 +2295,7 @@
                     const damage = card.stats[level].damage;
                     if (cardId === 'fireball') {
                         target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0 && o.health < 600);
-                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarians);
-                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof TinyBot);
+                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarian);
                     } else if (cardId === 'arrows') {
                         target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang));
                     }
@@ -2199,12 +2308,21 @@
                 const spawnX = Math.random() < 0.5 ? LANE_LEFT_X : LANE_RIGHT_X;
                 const spawnY = isDefensive ? (RIVER_Y - 20) : (50 + Math.random() * (RIVER_Y - 100));
                 let spawnRadius = card.placementRadius;
-                
-                // Simplified placement check for AI
-                if (spawnY < AI_SPAWN_LIMIT_Y && card.unitClass) {
+                let canSpawn = true;
+                for (const obj of gameObjects) {
+                    const dist = getDistance({x: spawnX, y: spawnY}, obj);
+                    if (dist < spawnRadius + obj.radius) { canSpawn = false; break; }
+                }
+                if (canSpawn && card.unitClass) {
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', level);
-                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
-                        gameObjects.push(newUnit);
+                    // --- BUILDING SPAWN FIX ---
+                    if (card.type.includes('Swarm')) {
+                        // Swarm class handles its own object pushing
+                    } else if (card.type.includes('Building')) {
+                        gameObjects.push(newUnit); // Push the building
+                    }
+                    else {
+                        gameObjects.push(newUnit); // Push single unit
                     }
                     aiPlayCard(cardId);
                 }
@@ -2355,21 +2473,19 @@
                     runAI();
                     aiThinkTimer = 30 + Math.random() * 30; // Think every 0.5-1s
                 }
-                
-                // Update and draw all objects
-                ctx.clearRect(0, 0, WIDTH, HEIGHT);
-                drawArena();
                 gameObjects.forEach(obj => obj.update());
-                gameObjects.forEach(obj => obj.draw());
                 
-                // Filter dead objects
+                // --- BATTLE RAM FIX: Check for dead units with spawnOnDeath ---
+                let newObjects = [];
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
-                    // BATTLE RAM FIX: Ensure barbs are spawned before removing
-                    if (obj instanceof BattleRam && !obj.hasSpawned) {
-                        obj.spawnBarbs();
-                        return false; // Remove immediately after spawning
+
+                    // If unit is dead, check if it needs to spawn something
+                    if (obj.spawnOnDeath) {
+                        obj.spawnOnDeath();
+                        obj.spawnOnDeath = null; // Ensure it only spawns once
                     }
+
                     if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { return false; }
                     if (obj instanceof Tower || obj instanceof Building) {
                         if (obj.isKing) { checkGameOver(); return true; }
@@ -2385,7 +2501,9 @@
                     if (isOvertime) { startTieBreaker(); }
                     else { checkOvertime(); }
                 }
-
+                ctx.clearRect(0, 0, WIDTH, HEIGHT);
+                drawArena();
+                gameObjects.forEach(obj => obj.draw());
                 if (gameRunning) {
                     gameLoopId = requestAnimationFrame(gameLoop);
                 }
@@ -2456,7 +2574,7 @@
                 const clampedY = Math.max(0, Math.min(HEIGHT, y));
                 
                 const card = allCards[selectedSpawningUnit.id];
-                const level = cardCollection[selectedSpawningUnit.id].level;
+                const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
                 
                 if (card.type === 'Spell') {
                     const damage = card.stats[level].damage;
@@ -2464,9 +2582,14 @@
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
                 } else {
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                    // Add to gameObjects *unless* it's a spawner that adds its own
-                    if (!card.type.includes('Swarm') && card.unitClass !== GoblinHut && card.unitClass !== BarbarianHut) {
-                         gameObjects.push(newUnit);
+                    // --- BUILDING SPAWN FIX ---
+                    if (card.type.includes('Swarm')) {
+                        // Swarm class handles its own object pushing
+                    } else if (card.type.includes('Building')) {
+                        gameObjects.push(newUnit); // Push the building
+                    }
+                    else {
+                        gameObjects.push(newUnit); // Push single unit
                     }
                     playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
                 }
@@ -2489,14 +2612,14 @@
             
             // --- Init App ---
             initCardSystem(); // Define all cards
-            // FIX: This listener now only handles the *response* to a login
+            
+            // --- FIX: Stop auto-login ---
             onAuthStateChanged(auth, (user) => {
-                // FIX: Only run auth logic *after* the initial page load check is done
                 if (isInitialAuthCheck) {
-                    isInitialAuthCheck = false; // First run is ignored
-                    return;
+                    isInitialAuthCheck = false; // Stop the first auto-login check
+                    return; // Do nothing, stay on login screen
                 }
-                // All subsequent runs (i.e., when user clicks "Sign in") will be handled
+                // This will only run *after* the user clicks "Sign in with Google"
                 handleAuth(user);
             });
         };
