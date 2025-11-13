@@ -935,8 +935,9 @@
                         if (didError) {
                             // If we got here from an error or timeout, we MUST start a new game
                             console.warn("Loading failed or timed out, starting new user session.");
-                            await initNewUser(); // This just sets the local variables
-                            await saveUserData(); // Asynchronously save the new data
+                            initNewUser(); // This just sets the local variables
+                            // --- THIS IS THE FIX: DO NOT 'await saveUserData()' HERE! ---
+                            // That function is what's hanging. Just load the menu.
                         }
                         
                         // If we got here with no error, the data is already loaded (or was new)
@@ -945,7 +946,7 @@
 
                     // 1. The Safety Timer: If loading takes > 8s, force a new game
                     const loadingTimeout = setTimeout(() => {
-                        finishLoading(true); 
+                        finishLoading(true); // Call with error=true to trigger initNewUser()
                     }, 8000); // 8-second timeout
 
                     // 2. The Load Attempt
