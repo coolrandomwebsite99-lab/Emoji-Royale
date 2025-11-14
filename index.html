@@ -22,11 +22,10 @@
             display: block;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            cursor: pointer; /* This is from your working file */
+            /* cursor: pointer; */ /* Removed to allow custom placement cursor */
             transition: background-color 0.5s ease; /* For arena theme change */
         }
         /* Arena Themes */
-        canvas.arena-1 { background-color: #2a623d; } /* Added this line from your file */
         canvas.arena-2 { background-color: #6abf82; }
         canvas.arena-3 { 
             background-color: #4a4a4a;
@@ -41,9 +40,7 @@
             max-width: 400px;
             margin: 0 auto;
         }
-
-        /* MODAL OVERLAY STYLES (Merged) */
-        .modal-overlay {
+        #messageOverlay, #chestOpenOverlay, #debugPasswordOverlay, #saveKeyOverlay, #loadKeyOverlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -55,39 +52,15 @@
             align-items: center;
             background-color: rgba(0, 0, 0, 0.85);
             color: white;
-            font-size: 1.5rem; /* Standardized font size */
+            font-size: 2.5rem;
             font-weight: bold;
             text-align: center;
             border-radius: 8px;
             z-index: 50;
-            padding: 1.5rem;
+            padding: 1rem;
         }
-        /* OLD MODAL OVERLAYS (from your file) */
-        #messageOverlay, #chestOpenOverlay, #debugPasswordOverlay {
-             font-size: 2.5rem;
-             padding: 1rem;
-        }
-        /* Make old modals use new class */
-        #messageOverlay, #chestOpenOverlay, #debugPasswordOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.85);
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            border-radius: 8px;
-            z-index: 50;
-        }
-
-        /* BUTTON STYLES (Merged) */
-        .modal-btn, #messageOverlay button, #chestOpenOverlay button, .login-btn, .debug-btn, #debugPasswordOverlay button {
+        #messageOverlay button, #chestOpenOverlay button, .login-btn, .debug-btn, #debugPasswordOverlay button,
+        #saveKeyOverlay button, #loadKeyOverlay button {
             font-size: 1rem;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
@@ -104,32 +77,31 @@
             width: 80%;
             max-width: 300px;
         }
-        
-        #messageOverlay button:hover, #chestOpenOverlay button:hover, .login-btn:hover, .debug-btn:hover, #debugPasswordOverlay button:hover, .modal-btn:hover {
+        #messageOverlay button:hover, #chestOpenOverlay button:hover, .login-btn:hover, .debug-btn:hover, #debugPasswordOverlay button:hover,
+        #saveKeyOverlay button:hover, #loadKeyOverlay button:hover {
             background-color: #4338ca;
         }
-
         .login-btn.google {
             background-color: #dc2626; /* red-600 */
         }
         .login-btn.google:hover {
             background-color: #b91c1c; /* red-700 */
         }
-        .login-btn.guest {
+        .login-btn.guest, .login-btn.load-key {
             background-color: #6b7280; /* gray-500 */
         }
-        .login-btn.guest:hover {
+        .login-btn.guest:hover, .login-btn.load-key:hover {
             background-color: #4b5563; /* gray-600 */
         }
-        
-        /* NEW Button Colors */
-        .cancel-btn { background-color: #dc2626; }
-        .cancel-btn:hover { background-color: #b91c1c; }
-        .confirm-btn { background-color: #16a34a; }
-        .confirm-btn:hover { background-color: #15803d; }
-        
-        /* Debug Password Input */
-        #debugPasswordInput {
+        .cancel-btn {
+            background-color: #dc2626 !important; /* red-600 */
+        }
+        .cancel-btn:hover {
+            background-color: #b91c1c !important; /* red-700 */
+        }
+
+        /* Debug & Key Input */
+        #debugPasswordInput, #loadKeyInput {
             font-size: 1rem;
             padding: 0.75rem;
             border-radius: 8px;
@@ -141,17 +113,8 @@
             max-width: 300px;
             text-align: center;
         }
-        #debugPasswordOverlay .cancel-btn {
-            background-color: #dc2626; /* red-600 */
-        }
-        #debugPasswordOverlay .cancel-btn:hover {
-            background-color: #b91c1c; /* red-700 */
-        }
-        
-        /* NEW Modal Input/Textarea Styles */
-        .modal-input {
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
+        #saveKeyOutput {
+            font-size: 0.9rem;
             padding: 0.75rem;
             border-radius: 8px;
             border: 2px solid #6b7280;
@@ -159,23 +122,20 @@
             color: white;
             margin-top: 20px;
             width: 100%;
-            max-width: 320px;
-            text-align: center;
+            max-width: 350px;
+            word-wrap: break-word;
+            min-height: 100px;
+            font-weight: normal;
+            font-family: monospace;
+            text-align: left;
         }
-        .modal-textarea {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 2px solid #6b7280;
-            background-color: #1f2937;
-            color: white;
-            margin-top: 1rem;
-            width: 100%;
-            max-width: 320px;
-            height: 120px;
-            resize: none;
+        .copy-btn {
+            background-color: #16a34a !important; /* green-600 */
         }
+        .copy-btn:hover {
+            background-color: #15803d !important; /* green-700 */
+        }
+
 
         /* Hide screens by default */
         .screen {
@@ -227,7 +187,6 @@
             border: 4px solid #374151; /* gray-700 */
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
             overflow: hidden;
-            transition: transform 0.1s, box-shadow 0.1s;
         }
         .card-ui.selected {
             border-color: #ec4899; /* pink-500 */
@@ -367,8 +326,7 @@
             color: white;
             font-weight: 600;
         }
-        /* Renamed .modal-btn to .modal-action-btn */
-        .modal-action-btn {
+        .modal-btn {
             width: 100%;
             font-size: 1.1rem;
             font-weight: 600;
@@ -379,10 +337,10 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .modal-action-btn.add { background-color: #16a34a; color: white; }
-        .modal-action-btn.remove { background-color: #dc2626; color: white; }
-        .modal-action-btn.upgrade { background-color: #16a34a; color: white; }
-        .modal-action-btn:disabled {
+        .modal-btn.add { background-color: #16a34a; color: white; }
+        .modal-btn.remove { background-color: #dc2626; color: white; }
+        .modal-btn.upgrade { background-color: #16a34a; color: white; }
+        .modal-btn:disabled {
             background-color: #6b7280; /* gray-500 */
             color: #d1d5db; /* gray-300 */
             cursor: not-allowed;
@@ -424,7 +382,8 @@
             opacity: 0.7;
             text-align: center;
             line-height: 1;
-            transform: translate(-50%, -50%); 
+            /* FIX: Use top/left instead of transform */
+            transform: translate(-50%, -50%); /* Keep this for centering */
         }
         #placementIndicator.spell {
             border: 4px dashed white;
@@ -462,8 +421,8 @@
             z-index: 10;
             pointer-events: none;
             display: none;
-            /* Clip-path will be set by JS */
-            clip-path: path('M 0 0 L 400 0 L 400 250 L 0 250 Z'); /* Default: Top half */
+            /* FIX: Use path() for complex clipping */
+            clip-path: path("M 0 0 L 400 0 L 400 250 L 0 250 Z");
         }
     </style>
 </head>
@@ -471,20 +430,20 @@
     
     <!-- 
     ========================================================
-    SCREEN: LOGIN (MERGED)
+    SCREEN: LOGIN (FIXED)
     ========================================================
     -->
     <div id="loginScreen" class="screen active flex-col justify-center items-center">
         <div class="text-6xl">👑</div>
         <h1 class="text-4xl font-bold mt-4">Emoji Royale</h1>
-        <p class="text-lg mt-2 text-gray-300">Sign in or play as guest!</p> <!-- UPDATED TEXT -->
+        <p class="text-lg mt-2 text-gray-300">Save your progress!</p>
         <p id="loginError" class="text-lg mt-2 text-red-500 font-bold h-6"></p> 
         
-        <!-- NEW: Load from Key Button -->
-        <button id="loadKeyBtn" class="login-btn guest">
+        <!-- "Enter Save Key" button -->
+        <button id="loadKeyBtn" class="login-btn load-key">
             Enter Save Key
         </button>
-        
+
         <!-- "Play as Guest (No Save)" button -->
         <button id="trueGuestLoginBtn" class="login-btn guest">
             Play as Guest
@@ -504,12 +463,12 @@
     
     <!-- 
     ========================================================
-    SCREEN: MENU (HOME) (MERGED)
+    SCREEN: MENU (HOME)
     ========================================================
     -->
     <div id="menuScreen" class="screen flex-col items-center p-4">
         <!-- Main Content Area -->
-        <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
+        <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-32">
             <!-- Header -->
             <div class="flex justify-between items-center w-full">
                 <div class="bg-gray-800 px-4 py-2 rounded-lg">
@@ -531,11 +490,6 @@
                 BATTLE!
             </button>
             
-            <!-- NEW: Save Data Button -->
-            <button id="saveDataKeyBtn" class="w-3/4 py-3 rounded-lg shadow-lg text-xl font-bold transition transform hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white mt-4">
-                Save Data
-            </button>
-            
             <!-- Chest Slots -->
             <div class="mt-8 w-full">
                 <h3 class="text-xl font-bold text-center mb-2">Your Chests</h3>
@@ -546,6 +500,11 @@
                     <div class="chest-slot bg-gray-700 h-24 rounded-lg flex items-center justify-center text-4xl text-gray-500"></div>
                 </div>
             </div>
+            
+            <!-- Save Data Button -->
+            <button id="saveDataButton" class="login-btn guest mt-8 w-3/4">
+                Save Data
+            </button>
         </div>
         
         <!-- Bottom Nav Bar -->
@@ -649,7 +608,7 @@
                     <div id="towerInfoProgressBar" style="width: 0%;"></div>
                     <div id="towerInfoProgressText">0 / 0</div>
                 </div>
-                <button id="towerUpgradeButton" class="modal-action-btn upgrade" disabled>
+                <button id="towerUpgradeButton" class="modal-btn upgrade" disabled>
                     Upgrade
                 </button>
             </div>
@@ -735,8 +694,8 @@
             <canvas id="gameCanvas" width="400" height="500"></canvas>
             <div id="messageOverlay">
                 <span id="messageText"></span>
-                <button id="startButton" class="modal-btn confirm-btn">Start Game</button> <!-- Added classes -->
-                <button id="menuButton" class="modal-btn cancel-btn">Back to Menu</button> <!-- Added classes -->
+                <button id="startButton">Start Game</button>
+                <button id="menuButton" class="bg-red-600 hover:bg-red-700">Back to Menu</button>
             </div>
             <!-- Placement "Ghost" Indicator -->
             <div id="placementIndicator"></div>
@@ -792,7 +751,7 @@
                 <div id="cardInfoProgressBar" style="width: 0%;"></div>
                 <div id="cardInfoProgressText">0 / 0</div>
             </div>
-            <button id="cardInfoButton" class="modal-action-btn"></button> <!-- Class renamed -->
+            <button id="cardInfoButton" class="modal-btn"></button>
         </div>
     </div>
     
@@ -807,7 +766,7 @@
         <div id="chestRewardList">
             <!-- Rewards injected by JS -->
         </div>
-        <button id="chestCloseButton" class="modal-btn confirm-btn">Awesome!</button> <!-- Added classes -->
+        <button id="chestCloseButton">Awesome!</button>
     </div>
 
     <!-- 
@@ -817,35 +776,36 @@
     -->
     <div id="debugPasswordOverlay">
         <h2 class="text-2xl font-bold">Enter Debug Password</h2>
-        <input type="password" id="debugPasswordInput" class="modal-input" placeholder="Password"> <!-- Class added -->
-        <button id="debugPasswordSubmit" class="modal-btn confirm-btn">Enter</button> <!-- Added classes -->
-        <button id="debugPasswordCancel" class="modal-btn cancel-btn">Cancel</button> <!-- Class added -->
+        <input type="password" id="debugPasswordInput" placeholder="Password">
+        <button id="debugPasswordSubmit">Enter</button>
+        <button id="debugPasswordCancel" class="cancel-btn">Cancel</button>
     </div>
 
     <!-- 
     ========================================================
-    NEW: SAVE KEY MODAL
+    SAVE KEY MODAL (NEW)
     ========================================================
     -->
-    <div id="saveKeyOverlay" class="modal-overlay">
-        <h2 class="text-2xl font-bold">Save Your Progress</h2>
-        <p class="text-sm font-normal text-gray-300 mt-2">Copy this key and save it somewhere safe! Paste it on the login screen to load your data.</p>
-        <textarea id="saveKeyText" class="modal-textarea" readonly placeholder="Click 'Generate' to get your key..."></textarea>
-        <button id="generateKeyBtn" class="modal-btn confirm-btn">Generate Save Key</button>
-        <button id="closeSaveKeyBtn" class="modal-btn cancel-btn">Close</button>
+    <div id="saveKeyOverlay">
+        <h2 class="text-2xl font-bold">Your Save Key</h2>
+        <p class="text-sm font-normal text-gray-300 mt-2">Copy this key and save it somewhere safe!</p>
+        <div id="saveKeyOutput"></div>
+        <button id="saveKeyCopyButton" class="copy-btn">Copy to Clipboard</button>
+        <button id="saveKeyCloseButton" class="cancel-btn">Close</button>
     </div>
 
     <!-- 
     ========================================================
-    NEW: LOAD KEY MODAL
+    LOAD KEY MODAL (NEW)
     ========================================================
     -->
-    <div id="loadKeyOverlay" class="modal-overlay">
-        <h2 class="text-2xl font-bold">Load Progress</h2>
-        <p class="text-sm font-normal text-gray-300 mt-2">Paste your save key below to load your data.</p>
-        <textarea id="loadKeyInput" class="modal-textarea" placeholder="Paste your save key here..."></textarea>
-        <button id="loadKeySubmitBtn" class="modal-btn confirm-btn">Load Data</button>
-        <button id="closeLoadKeyBtn" class="modal-btn cancel-btn">Cancel</button>
+    <div id="loadKeyOverlay">
+        <h2 class="text-2xl font-bold">Enter Save Key</h2>
+        <p class="text-sm font-normal text-gray-300 mt-2">Paste your save key below to load your progress.</p>
+        <textarea id="loadKeyInput" rows="4" placeholder="Paste your key here..."></textarea>
+        <p id="loadKeyError" class="text-lg mt-2 text-red-500 font-bold h-6"></p> 
+        <button id="loadKeySubmitButton">Load Progress</button>
+        <button id="loadKeyCloseButton" class="cancel-btn">Cancel</button>
     </div>
 
 
@@ -857,11 +817,10 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
-        // MERGED: Using the real config
         const firebaseConfig = {
           apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
           authDomain: "emoji-royale-8fb68.firebaseapp.com",
@@ -872,21 +831,12 @@
           measurementId: "G-FDQ9L0MQGM"
         };
 
-        // Initialize Firebase (TRY-CATCH block for safety)
-        let app, auth, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            // setLogLevel('debug'); // Uncomment for debugging Firestore
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
-            // Show an error to the user on the login screen
-            const loginError = document.getElementById('loginError');
-            if(loginError) {
-                loginError.textContent = 'Game server is offline. Please try again later.';
-            }
-        }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        // setLogLevel('debug'); // Uncomment for debugging Firestore
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Use __app_id
         let userDocRef; // Reference to the user's document in Firestore
@@ -953,20 +903,22 @@
             10: { cards: 1000, gold: 50000 }, 11: { cards: 1500, gold: 75000 }, 12: { cards: 2000, gold: 100000 },
             13: { cards: 3000, gold: 150000 }, 14: { cards: 5000, gold: 200000 },
         };
-        let isDataSaved = false; // Flag to control saving (default to false for guest)
-        let isGuestSession = false; // NEW: Flag for guest mode
+        
+        let isDataSaved = false; // Flag to control saving (start false for guest)
         let isInitialAuthCheck = true; // Flag to stop auto-login
         let loadTimeout; // Timer for stuck loads
         let isLoading = false; // Flag to prevent double-loads
+
+        // Click vs Drag logic
+        let isDragging = false;
+        let justSelectedCard = false; // NEW: Flag for click-to-place
+        let cardDragStartX = 0;
+        let cardDragStartY = 0;
+        const DRAG_SENSITIVITY = 10; // Pixels
         
-        // --- NEW: Drag logic state ---
-        let isDragging = false; // Are we currently dragging a card?
-        let startDragPos = { x: 0, y: 0 }; // Where did the drag start?
-        const DRAG_SENSITIVITY = 10; // Pixels to move before it's a "drag"
-
-        // NEW: Save key cooldown
-        let saveKeyCooldown = 0;
-
+        // Save Key logic
+        let lastSaveKeyTime = 0;
+        const SAVE_KEY_COOLDOWN = 30000; // 30 seconds
 
         // --- Start Game ---
         window.onload = () => {
@@ -976,19 +928,16 @@
             const HEIGHT = 500;
             const RIVER_Y = HEIGHT / 2;
             const BRIDGE_Y = RIVER_Y;
-            // NEW: Define spawn zone lines
-            const PLAYER_SPAWN_LIMIT_Y = RIVER_Y; // Can't spawn past river
+            const PLAYER_SPAWN_LIMIT_Y = RIVER_Y;
             const AI_SPAWN_LIMIT_Y = RIVER_Y;
-            const PLAYER_NEW_SPAWN_LIMIT_Y = HEIGHT * 0.30; // New line after taking tower
-            
+            // NEW: Tighter spawn limit
+            const AI_SPAWN_LIMIT_FAR = HEIGHT * 0.3; // 30% from top
             const LANE_LEFT_X = WIDTH / 4;
             const LANE_RIGHT_X = (WIDTH / 4) * 3;
             const MAX_ELIXIR = 10;
             const BASE_ELIXIR_REGEN_RATE = 0.008;
             const REGULATION_TIME = 120 * 60;
             const OVERTIME_TIME = 120 * 60;
-            const TROOP_AGGRO_RANGE = 100; // NEW: Range for troops to see enemies
-            const BUILDING_AGGRO_RANGE = 120; // NEW: Range for Giants to see buildings
 
             // --- Game State ---
             let gameObjects = [];
@@ -1013,8 +962,9 @@
             const screens = document.querySelectorAll('.screen');
             const navButtons = document.querySelectorAll('.nav-btn');
             const loginScreen = document.getElementById('loginScreen');
-            // const googleLoginBtn = document.getElementById('googleLoginBtn'); // Removed
+            // const googleLoginBtn = document.getElementById('googleLoginBtn');
             const trueGuestLoginBtn = document.getElementById('trueGuestLoginBtn'); // FIXED
+            const loadKeyBtn = document.getElementById('loadKeyBtn'); // NEW
             const loginError = document.getElementById('loginError'); 
             const loadingScreen = document.getElementById('loadingScreen');
             const menuScreen = document.getElementById('menuScreen');
@@ -1071,18 +1021,17 @@
             const debugPasswordInput = document.getElementById('debugPasswordInput');
             const debugPasswordSubmit = document.getElementById('debugPasswordSubmit');
             const debugPasswordCancel = document.getElementById('debugPasswordCancel');
-            
-            // NEW: Save/Load Key Elements
-            const loadKeyBtn = document.getElementById('loadKeyBtn');
-            const saveDataKeyBtn = document.getElementById('saveDataKeyBtn');
+            // Save/Load Key
+            const saveDataButton = document.getElementById('saveDataButton');
             const saveKeyOverlay = document.getElementById('saveKeyOverlay');
-            const saveKeyText = document.getElementById('saveKeyText');
-            const generateKeyBtn = document.getElementById('generateKeyBtn');
-            const closeSaveKeyBtn = document.getElementById('closeSaveKeyBtn');
+            const saveKeyOutput = document.getElementById('saveKeyOutput');
+            const saveKeyCopyButton = document.getElementById('saveKeyCopyButton');
+            const saveKeyCloseButton = document.getElementById('saveKeyCloseButton');
             const loadKeyOverlay = document.getElementById('loadKeyOverlay');
             const loadKeyInput = document.getElementById('loadKeyInput');
-            const loadKeySubmitBtn = document.getElementById('loadKeySubmitBtn');
-            const closeLoadKeyBtn = document.getElementById('closeLoadKeyBtn');
+            const loadKeyError = document.getElementById('loadKeyError');
+            const loadKeySubmitButton = document.getElementById('loadKeySubmitButton');
+            const loadKeyCloseButton = document.getElementById('loadKeyCloseButton');
 
 
             // --- Game Elements (from gameScreen) ---
@@ -1097,11 +1046,144 @@
 
 
             // ==============================================
-            // FIREBASE & USER DATA (Simplified for Guest Mode)
+            // SAVE/LOAD KEY LOGIC
             // ==============================================
             
-            // NOTE: All Firebase auth logic is removed for now,
-            // focusing on guest and save-key logic.
+            function getSaveData() {
+                // Compile all player data into one object
+                return {
+                    trophies,
+                    gold,
+                    towerLevel,
+                    towerCardCount,
+                    trophyChests,
+                    cardCollection,
+                    playerDeck,
+                    version: 1 // For future-proofing
+                };
+            }
+
+            function loadSaveData(data) {
+                // Safely load data from the object
+                trophies = data.trophies || 0;
+                gold = data.gold || 500;
+                towerLevel = data.towerLevel || 1;
+                towerCardCount = data.towerCardCount || 0;
+                trophyChests = data.trophyChests || [];
+                // Ensure all cards exist in the collection
+                cardCollection = data.cardCollection || {};
+                for (const cardId in allCards) {
+                    if (cardId === 'tower') continue;
+                    if (!cardCollection[cardId]) {
+                        cardCollection[cardId] = { level: 1, count: (allCards[cardId].arena === 1) ? 1 : 0 };
+                    }
+                }
+                playerDeck = data.playerDeck || initNewUserCards(true);
+                // Validate deck
+                playerDeck = playerDeck.filter(id => allCards[id] && cardCollection[id] && cardCollection[id].count > 0);
+                if (playerDeck.length > 8) playerDeck = playerDeck.slice(0, 8);
+                
+                isDataSaved = true; // We have data, so we can save it
+                saveUserData(); // Save this loaded data to local storage
+            }
+
+            // Button: "Save Data" on main menu
+            saveDataButton.addEventListener('click', () => {
+                const now = Date.now();
+                if (now - lastSaveKeyTime < SAVE_KEY_COOLDOWN) {
+                    saveKeyOutput.textContent = `Please wait ${Math.ceil((SAVE_KEY_COOLDOWN - (now - lastSaveKeyTime)) / 1000)}s...`;
+                    saveKeyCopyButton.disabled = true;
+                } else {
+                    lastSaveKeyTime = now;
+                    const data = getSaveData();
+                    // Compress and encode
+                    const jsonString = JSON.stringify(data);
+                    const base64String = btoa(jsonString); // Base64 encode
+                    saveKeyOutput.textContent = base64String;
+                    saveKeyCopyButton.disabled = false;
+                    saveKeyCopyButton.textContent = 'Copy to Clipboard';
+                }
+                saveKeyOverlay.style.display = 'flex';
+            });
+            saveKeyCloseButton.addEventListener('click', () => {
+                saveKeyOverlay.style.display = 'none';
+            });
+            saveKeyCopyButton.addEventListener('click', () => {
+                try {
+                    // Use execCommand as a fallback for clipboard
+                    const textArea = document.createElement("textarea");
+                    textArea.value = saveKeyOutput.textContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand("copy");
+                    textArea.remove();
+                    saveKeyCopyButton.textContent = 'Copied!';
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    saveKeyCopyButton.textContent = 'Copy Failed!';
+                }
+            });
+
+            // Button: "Enter Save Key" on login screen
+            loadKeyBtn.addEventListener('click', () => {
+                loadKeyInput.value = '';
+                loadKeyError.textContent = '';
+                loadKeyOverlay.style.display = 'flex';
+            });
+            loadKeyCloseButton.addEventListener('click', () => {
+                loadKeyOverlay.style.display = 'none';
+            });
+            loadKeySubmitButton.addEventListener('click', () => {
+                const key = loadKeyInput.value.trim();
+                if (!key) {
+                    loadKeyError.textContent = 'Key cannot be empty.';
+                    return;
+                }
+                try {
+                    // Decode and parse
+                    const jsonString = atob(key); // Base64 decode
+                    const data = JSON.parse(jsonString);
+                    
+                    if (!data || typeof data.version === 'undefined') {
+                        throw new Error('Invalid key format.');
+                    }
+                    
+                    // Load the data
+                    loadSaveData(data);
+                    
+                    // Success! Go to menu
+                    loadKeyOverlay.style.display = 'none';
+                    showScreen('loading');
+                    loadingScreen.querySelector('p').textContent = 'Progress Loaded!';
+                    setTimeout(() => showScreen('menu'), 1000);
+
+                } catch (error) {
+                    console.error("Error loading key:", error);
+                    loadKeyError.textContent = 'Invalid or corrupt save key.';
+                }
+            });
+
+
+            // ==============================================
+            // LOCAL STORAGE & USER DATA
+            // ==============================================
+            
+            // This function now just handles loading from *local* storage
+            async function loadUserData() {
+                try {
+                    const savedData = localStorage.getItem('emojiRoyaleSave');
+                    if (savedData) {
+                        const data = JSON.parse(atob(savedData)); // Decode
+                        loadSaveData(data);
+                    } else {
+                        // This is a new guest
+                        initNewUser();
+                    }
+                } catch (error) {
+                    console.error("Error loading local data:", error);
+                    initNewUser(); // Start fresh if data is corrupt
+                }
+            }
             
             function initNewUser() {
                 trophies = 0;
@@ -1111,45 +1193,14 @@
                 trophyChests = [];
                 cardCollection = initNewUserCards(false);
                 playerDeck = initNewUserCards(true);
+                isDataSaved = true; // We can save this new user's data
+                saveUserData(); // Do an initial save
             }
 
-            // "Guest (No Save)" logic
+            // "Play as Guest (No Save)" logic
             function initGuestSession() {
                 initNewUser(); // Load default data
-                
-                // Disable Firebase saving
-                userDocRef = null; 
-                userId = null;
-                isDataSaved = false; // Prevent Firebase save attempts
-                isGuestSession = true; // Identify as guest
-            }
-            
-            // NEW: Get all data for save key
-            function getSaveData() {
-                return {
-                    trophies,
-                    gold,
-                    towerLevel,
-                    towerCardCount,
-                    trophyChests,
-                    cardCollection,
-                    playerDeck,
-                    v: 1 // Version number, in case we change format
-                };
-            }
-            
-            // NEW: Load all data from save key
-            function loadSaveData(data) {
-                if (!data || data.v !== 1) {
-                    throw new Error("Invalid or outdated save key.");
-                }
-                trophies = data.trophies || 0;
-                gold = data.gold || 500;
-                towerLevel = data.towerLevel || 1;
-                towerCardCount = data.towerCardCount || 0;
-                trophyChests = data.trophyChests || [];
-                cardCollection = data.cardCollection || initNewUserCards(false);
-                playerDeck = data.playerDeck || initNewUserCards(true);
+                isDataSaved = true; // Enable saving (to local storage)
             }
 
             function initNewUserCards(deckOnly = false) {
@@ -1157,108 +1208,47 @@
                 
                 // Add all cards to collection with count 0 (except Arena 1)
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; 
+                    if (cardId === 'tower') continue; // FIX: Don't add 'tower' to collection
                     newCollection[cardId] = { level: 1, count: 0 };
                 }
                 
                 // Add Arena 1 cards with count 1
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; 
+                    if (cardId === 'tower') continue; // FIX: Don't add 'tower' to collection
                     if (allCards[cardId].arena === 1) {
                         newCollection[cardId] = { level: 1, count: 1 };
                     }
                 }
                 
                 if (deckOnly) {
+                    // FIX: Filter out 'tower' from starting deck
                     return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower');
                 }
                 return newCollection;
             }
 
             async function saveUserData() {
-                // This function is now a placeholder.
-                // We don't save to Firebase in guest mode.
-                // The "Save Data" button will generate a key instead.
-                if (!isGuestSession) {
-                    console.log("Attempted to save, but not in a guest session.");
+                if (!isDataSaved) return;
+                
+                try {
+                    const dataToSave = getSaveData();
+                    const base64String = btoa(JSON.stringify(dataToSave));
+                    localStorage.setItem('emojiRoyaleSave', base64String);
+                } catch (error) {
+                    console.error("Error saving user data:", error);
                 }
             }
             
             // "Play as Guest (No Save)" button
             trueGuestLoginBtn.addEventListener('click', () => {
                 loginError.textContent = ''; // Clear errors
-                initGuestSession(); // Load default data, disable saving
                 showScreen('loading');
                 loadingScreen.querySelector('p').textContent = 'Starting Guest Game...';
-                setTimeout(() => showScreen('menu'), 1000); // Short delay
-            });
-
-            // NEW: Save/Load Key Listeners
-            loadKeyBtn.addEventListener('click', () => {
-                loadKeyInput.value = '';
-                loadKeyInput.placeholder = 'Paste your save key here...';
-                loadKeyOverlay.style.display = 'flex';
-            });
-            closeLoadKeyBtn.addEventListener('click', () => {
-                loadKeyOverlay.style.display = 'none';
-            });
-            loadKeySubmitBtn.addEventListener('click', () => {
-                const key = loadKeyInput.value.trim();
-                if (!key) return;
-                try {
-                    const jsonString = atob(key); // Decode Base64
-                    const loadedData = JSON.parse(jsonString); // Parse JSON
-                    loadSaveData(loadedData); // Load data into global state
-                    
-                    // Success!
-                    isGuestSession = true; // We are in a guest session
-                    isDataSaved = false; // Firebase saving is off
-                    loadKeyOverlay.style.display = 'none';
-                    showScreen('loading');
-                    loadingScreen.querySelector('p').textContent = 'Loading Progress...';
+                
+                // We must load data *after* showing loading screen
+                loadUserData().then(() => {
                     setTimeout(() => showScreen('menu'), 1000); // Short delay
-
-                } catch (e) {
-                    console.error("Failed to load save key:", e);
-                    loadKeyInput.value = '';
-                    loadKeyInput.placeholder = 'Invalid key! Please try again.';
-                }
-            });
-            
-            saveDataKeyBtn.addEventListener('click', () => {
-                saveKeyText.value = '';
-                generateKeyBtn.disabled = saveKeyCooldown > 0;
-                generateKeyBtn.textContent = saveKeyCooldown > 0 ? `Wait ${saveKeyCooldown}s` : 'Generate Save Key';
-                saveKeyOverlay.style.display = 'flex';
-            });
-            closeSaveKeyBtn.addEventListener('click', () => {
-                saveKeyOverlay.style.display = 'none';
-            });
-            generateKeyBtn.addEventListener('click', () => {
-                if (saveKeyCooldown > 0) return;
-                
-                // Get all data
-                const dataToSave = getSaveData();
-                const jsonString = JSON.stringify(dataToSave);
-                const base64String = btoa(jsonString); // Encode to Base64
-                saveKeyText.value = base64String;
-                
-                // Start 30s cooldown
-                saveKeyCooldown = 30;
-                generateKeyBtn.disabled = true;
-                generateKeyBtn.textContent = `Wait ${saveKeyCooldown}s`;
-                
-                const interval = setInterval(() => {
-                    saveKeyCooldown--;
-                    if (saveKeyCooldown > 0) {
-                        generateKeyBtn.textContent = `Wait ${saveKeyCooldown}s`;
-                    } else {
-                        clearInterval(interval);
-                        saveKeyCooldown = 0;
-                        generateKeyBtn.disabled = false;
-                        generateKeyBtn.textContent = 'Generate Save Key';
-                    }
-                }, 1000);
+                });
             });
 
 
@@ -1371,7 +1361,7 @@
                 
                 renderChests();
                 updateArena();
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
             }
             chestCloseButton.addEventListener('click', () => {
                 chestOpenOverlay.style.display = 'none';
@@ -1412,13 +1402,13 @@
             debugArena2.addEventListener('click', () => {
                 trophies = 250;
                 updateArena();
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
                 showScreen('menu');
             });
             debugArena3.addEventListener('click', () => {
                 trophies = 500;
                 updateArena();
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
                 showScreen('menu');
             });
             debugUnlockAll.addEventListener('click', () => {
@@ -1430,7 +1420,8 @@
                         cardCollection[cardId].count = 1;
                     }
                 }
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
+                // Use a custom modal later, for now, just log
                 console.log('All cards unlocked!');
             });
             debugUpgradeAll.addEventListener('click', () => {
@@ -1441,14 +1432,14 @@
                     }
                 }
                 if (towerLevel < 15) towerLevel++;
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
                 console.log('All owned cards and tower upgraded +1 level!');
             });
             debugGetChest.addEventListener('click', () => {
                 if (trophyChests.length < 4) {
                     trophyChests.push({ id: 'wood', openTime: 0 });
                     renderChests();
-                    // saveUserData(); // Guest mode doesn't auto-save
+                    saveUserData();
                     console.log('Got a chest!');
                 } else {
                     console.log('Chest slots are full!');
@@ -1457,14 +1448,14 @@
             debugAddGold.addEventListener('click', () => {
                 gold += 1000;
                 goldDisplay.textContent = `💰 ${gold}`;
-                // saveUserData(); // Guest mode doesn't auto-save
+                saveUserData();
                 console.log('+1000 Gold!');
             });
             debugReset.addEventListener('click', () => {
                 // Use a custom modal later
                 if (true) { // Replaced confirm()
                     initNewUser(); // This saves
-                    // saveUserData(); // Guest mode doesn't auto-save
+                    saveUserData(); // Force save
                     showScreen('menu');
                     console.log('Account reset!');
                 }
@@ -1612,7 +1603,7 @@
                     towerLevel++;
                     goldDisplay.textContent = `💰 ${gold}`;
                     renderTowerScreen();
-                    // saveUserData(); // Guest mode doesn't auto-save
+                    saveUserData();
                 }
             });
 
@@ -1637,11 +1628,12 @@
                     'archer': { name: 'Archer', cost: 4, emoji: '🏹', type: 'Ranged', unitClass: Archer, placementRadius: 10, isFlying: false, arena: 1, targets: 'Air & Ground',
                                 stats: { 1: { health: 250, damage: 40, hitSpeed: 1 } } },
                     'giant': { name: 'Giant', cost: 5, emoji: '💪', type: 'Tank', unitClass: Giant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings',
-                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Slower speed, 1000 HP
+                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Slower speed, NERFED health
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1 } } },
+                    // SKELETON NERF
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
-                                stats: { 1: { count: 3, health: 50, damage: 15, hitSpeed: 1 } } },
+                                stats: { 1: { count: 3, health: 10, damage: 2, hitSpeed: 1.2 } } },
                     'tinyBot': { name: 'Tiny Bot', cost: 4, emoji: '🤖', type: 'Melee', unitClass: TinyBot, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
                                 stats: { 1: { health: 700, damage: 250, hitSpeed: 1.8 } } },
                     'fireball': { name: 'Fireball', cost: 4, emoji: '🔥', type: 'Spell', radius: 50, placementRadius: 50, arena: 1, targets: 'Air & Ground',
@@ -1651,8 +1643,9 @@
                     // Arena 2
                     'hut': { name: 'Goblin House', cost: 5, emoji: '🏠', type: 'Building', unitClass: GoblinHut, placementRadius: 20, isFlying: false, arena: 2, targets: '-',
                                 stats: { 1: { health: 800, spawn_speed: '5s', lifetime: '30s' } } },
+                    // SKELETON NERF
                     'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground',
-                                stats: { 1: { count: 15, health: 50, damage: 15, hitSpeed: 1 } } },
+                                stats: { 1: { count: 15, health: 10, damage: 2, hitSpeed: 1.2 } } },
                     'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground',
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2 } } },
                     // Arena 3
@@ -1733,12 +1726,12 @@
                     addRemoveBtn.id = 'addRemoveBtn';
                     if (isInDeck) {
                         addRemoveBtn.textContent = 'Remove from Deck';
-                        addRemoveBtn.className = 'modal-action-btn remove'; // Class renamed
+                        addRemoveBtn.className = 'modal-btn remove';
                         addRemoveBtn.disabled = false;
                         addRemoveBtn.onclick = () => removeFromDeck(cardId);
                     } else {
                         addRemoveBtn.textContent = 'Add to Deck';
-                        addRemoveBtn.className = 'modal-action-btn add'; // Class renamed
+                        addRemoveBtn.className = 'modal-btn add';
                         addRemoveBtn.onclick = () => addToDeck(cardId);
                         addRemoveBtn.disabled = playerDeck.length >= 8;
                         if (playerDeck.length >= 8) addRemoveBtn.textContent = 'Deck is Full (8/8)';
@@ -1756,14 +1749,14 @@
                         cardInfoProgressText.textContent = `${displayCount} / ${costs.cards}`;
                         const canUpgrade = displayCount >= costs.cards && gold >= costs.gold;
                         cardInfoProgressBar.classList.toggle('can-upgrade', canUpgrade);
-                        cardInfoButton.className = 'modal-action-btn upgrade'; // Class renamed
+                        cardInfoButton.className = 'modal-btn upgrade';
                         cardInfoButton.textContent = `Upgrade (💰 ${costs.gold})`;
                         cardInfoButton.disabled = !canUpgrade;
                         cardInfoButton.onclick = () => upgradeCard(cardId);
                     } else {
                         // Is max level
                         cardInfoProgressContainer.style.display = 'none';
-                        cardInfoButton.className = 'modal-action-btn'; // Class renamed
+                        cardInfoButton.className = 'modal-btn';
                         cardInfoButton.textContent = 'Max Level (15)';
                         cardInfoButton.disabled = true;
                     }
@@ -1778,7 +1771,7 @@
                     playerDeck.push(cardId);
                     renderDeckScreen();
                     openCardModal(cardId);
-                    // await saveUserData(); // Guest mode doesn't auto-save
+                    await saveUserData();
                 }
             }
             async function removeFromDeck(cardId) {
@@ -1787,7 +1780,7 @@
                     playerDeck.splice(index, 1);
                     renderDeckScreen();
                     openCardModal(cardId);
-                    // await saveUserData(); // Guest mode doesn't auto-save
+                    await saveUserData();
                 }
             }
             async function upgradeCard(cardId) {
@@ -1800,7 +1793,7 @@
                     goldDisplay.textContent = `💰 ${gold}`;
                     renderDeckScreen();
                     openCardModal(cardId);
-                    // await saveUserData(); // Guest mode doesn't auto-save
+                    await saveUserData();
                 }
             }
 
@@ -1833,6 +1826,7 @@
                     aiDeck.push(availableCards.splice(cardIndex, 1)[0]);
                 }
                 
+                // AI DECK CYCLE FIX
                 aiDeck = shuffleDeck(aiDeck);
                 aiHand = [];
                 aiDiscardPile = [];
@@ -1840,15 +1834,28 @@
                 if(aiDeck.length > 0) aiNextCard = aiDeck.pop();
             }
             
-            // NEW: AI Play Card logic uses the same cycle
+            // AI DECK CYCLE FIX
             function aiPlayCard(cardId) {
                 if (!allCards[cardId]) return; // Safety check
                 aiElixir -= allCards[cardId].cost;
-                aiDiscardPile.push(cardId);
+                
                 const handIndex = aiHand.indexOf(cardId);
-                if (handIndex > -1) { aiHand.splice(handIndex, 1); }
-                if (aiNextCard) { aiHand.push(aiNextCard); }
-                if (aiDeck.length === 0) { aiDeck = shuffleDeck(aiDiscardPile); aiDiscardPile = []; }
+                if (handIndex === -1) {
+                    console.error("AI tried to play card it doesn't have:", cardId);
+                    return; // Don't crash
+                }
+                
+                aiDiscardPile.push(cardId);
+                aiHand.splice(handIndex, 1);
+                
+                if (aiNextCard) {
+                    aiHand.push(aiNextCard);
+                }
+                
+                if (aiDeck.length === 0) { 
+                    aiDeck = shuffleDeck(aiDiscardPile); 
+                    aiDiscardPile = []; 
+                }
                 aiNextCard = aiDeck.pop() || null;
             }
 
@@ -1858,8 +1865,8 @@
                     const cardEl = createCardDOM(cardId, false, true);
                     cardEl.dataset.handIndex = index;
                     // Handle touch/mouse down for card selection
-                    cardEl.addEventListener('mousedown', (e) => handleCardSelect(e, cardEl, cardId));
-                    cardEl.addEventListener('touchstart', (e) => handleCardSelect(e, cardEl, cardId), { passive: false });
+                    cardEl.addEventListener('mousedown', (e) => handleCardPress(e, cardEl, cardId));
+                    cardEl.addEventListener('touchstart', (e) => handleCardPress(e, cardEl, cardId), { passive: false });
                     cardHandEl.appendChild(cardEl);
                 });
                 nextCardSlotEl.innerHTML = '';
@@ -1868,14 +1875,14 @@
                 }
                 updateCardUI();
             }
-            
+
             function cancelPlacement() {
+                isDragging = false;
+                justSelectedCard = false;
                 isSpawningSpell = false;
                 placementIndicator.style.display = 'none';
                 placementOverlay.style.display = 'none'; // Hide red overlay
                 selectedSpawningUnit = null;
-                isDragging = false;
-                startDragPos = { x: 0, y: 0 };
                 document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
                 updateCardUI();
             }
@@ -2098,7 +2105,8 @@
                     super(x, y, radius, team, health);
                     this.level = level; // Store level
                     this.speed = speed;
-                    this.attackRange = attackRange;
+                    this.attackRange = attackRange; // This is melee/vision range
+                    this.projectileRange = 0; // For ranged units
                     this.attackDamage = attackDamage;
                     this.attackCooldown = attackCooldown * 60;
                     this.cooldownTimer = 0;
@@ -2106,91 +2114,113 @@
                     this.emoji = emoji;
                     this.isFlying = isFlying;
                     this.targetsAir = targetsAir;
-                    this.targetsBuildings = false; // NEW: Default to targeting anything
+                    this.aggroRange = 150; // NEW: Standard aggro range
                 }
                 
-                // NEW: Smarter findTarget logic
+                // NEW: Check if new target is better
+                isTargetCloser(newTarget) {
+                    if (!this.target) return true;
+                    if (this.target.health <= 0) return true;
+                    
+                    const distToCurrent = getDistance(this, this.target);
+                    const distToNew = getDistance(this, newTarget);
+                    
+                    // If new target is within attack range and current isn't
+                    if (distToNew <= (this.projectileRange || this.attackRange) && distToCurrent > (this.projectileRange || this.attackRange)) {
+                        return true;
+                    }
+                    
+                    // If new target is just closer (and not a tower)
+                    if (distToNew < distToCurrent) {
+                        return true;
+                    }
+                    
+                    // User request: If current target is closer, stick to it
+                    if (distToCurrent < distToNew) {
+                        return false;
+                    }
+
+                    return false; // Stick to current
+                }
+
                 findTarget() {
-                    // 1. If I have a valid target, check if I should switch
-                    if (this.target && this.target.health > 0) {
-                        const distToCurrent = getDistance(this, this.target);
-                        // If I'm melee and in range, don't switch
-                        if (this.attackRange <= this.radius + this.target.radius + 5 && distToCurrent <= this.attackRange) {
-                            return;
+                    // 1. Check if current target is still valid and best
+                    if (this.target && this.target.health > 0 && !this.isTargetCloser(this.target)) {
+                         // Check if still in aggro range
+                        if (getDistance(this, this.target) < this.aggroRange) {
+                            return; // Keep current target
                         }
+                    }
 
-                        // If I'm building-focused, stick to it unless it's dead
-                        if (this.targetsBuildings) {
-                            return; 
-                        }
+                    let newTarget = null;
+                    let targetLane = (this.x < WIDTH / 2) ? 'left' : 'right';
+                    
+                    // Find all towers first
+                    const playerKing = gameObjects.find(t => t.team === 'player' && t.isKing);
+                    const aiKing = gameObjects.find(t => t.team === 'ai' && t.isKing);
+                    const playerLeftTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x < WIDTH / 2);
+                    const playerRightTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x > WIDTH / 2);
+                    const aiLeftTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x < WIDTH / 2);
+                    const aiRightTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x > WIDTH / 2);
 
-                        // Check for *closer* enemies
-                        for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Unit)) { // Only check for units
-                                if (!this.targetsAir && obj.isFlying) continue; // Can't target air
-                                
-                                const distToNew = getDistance(this, obj);
-                                // NEW: Only switch if new target is in range AND closer than current target
-                                if (distToNew < TROOP_AGGRO_RANGE && distToNew < distToCurrent) {
-                                    this.target = obj;
-                                    return; // Switched to new, closer target
+                    // 1. Find closest enemy unit within aggro range
+                    let closestUnit = null;
+                    let closestUnitDist = this.aggroRange;
+                    
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Unit)) {
+                            if (!this.targetsAir && obj.isFlying) continue; // Can't target air
+                            
+                            const dist = getDistance(this, obj);
+                            if (dist < closestUnitDist) {
+                                // User request: Only switch if new target is closer
+                                if (this.isTargetCloser(obj)) {
+                                    closestUnitDist = dist;
+                                    closestUnit = obj;
                                 }
                             }
                         }
-                        return; // Keep current target
+                    }
+                    
+                    if (closestUnit) {
+                        newTarget = closestUnit;
                     }
 
-                    // 2. If I don't have a valid target, find one
-                    this.target = null;
-                    let closestDist = Infinity;
-                    let newTarget = null;
-                    
-                    // 2a. Check for units in aggro range first
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Unit)) {
-                            if (!this.targetsAir && obj.isFlying) continue;
-                            const dist = getDistance(this, obj);
-                            if (dist < TROOP_AGGRO_RANGE && dist < closestDist) {
-                                closestDist = dist;
-                                newTarget = obj;
+                    // 2. If no unit, find appropriate tower
+                    if (!newTarget) {
+                        if (this.team === 'player') {
+                            if (targetLane === 'left' && aiLeftTower && aiLeftTower.health > 0) {
+                                newTarget = aiLeftTower; // Target left tower
+                            } else if (targetLane === 'right' && aiRightTower && aiRightTower.health > 0) {
+                                newTarget = aiRightTower; // Target right tower
+                            } else {
+                                // Lane tower is down, go for King
+                                newTarget = aiKing;
+                            }
+                        } else { // AI
+                            if (targetLane === 'left' && playerLeftTower && playerLeftTower.health > 0) {
+                                newTarget = playerLeftTower; // Target left tower
+                            } else if (targetLane === 'right' && playerRightTower && playerRightTower.health > 0) {
+                                newTarget = playerRightTower; // Target right tower
+                            } else {
+                                // Lane tower is down, go for King
+                                newTarget = playerKing;
                             }
                         }
                     }
-                    if (newTarget) {
-                        this.target = newTarget;
-                        return;
-                    }
-
-                    // 2b. If no units in range, find closest tower
-                    closestDist = Infinity;
-                    let closestTower = null;
-                    // Find closest tower in my lane
-                    const myLaneX = (this.x < WIDTH / 2) ? LANE_LEFT_X : LANE_RIGHT_X;
-                    
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Tower)) {
-                            const dist = getDistance(this, obj);
-                            // Prioritize tower in the same lane
-                            let laneBonus = ( (obj.x < WIDTH / 2 && myLaneX < WIDTH / 2) || (obj.x > WIDTH / 2 && myLaneX > WIDTH / 2) ) ? 0 : 50;
-                            
-                            if (dist + laneBonus < closestDist) {
-                                closestDist = dist + laneBonus;
-                                closestTower = obj;
-                            }
-                        }
-                    }
-                    if(closestTower) {
-                        this.target = closestTower;
-                        return;
-                    }
+                    this.target = newTarget;
                 }
                 
                 move() {
                     if (!this.target) return;
+                    
+                    const targetRange = this.projectileRange > 0 ? this.projectileRange : this.attackRange;
                     const dist = getDistance(this, this.target);
-                    if (dist <= this.attackRange) { return; }
+                    if (dist <= targetRange) { return; } // In range, stop moving
+                    
                     let targetX = this.target.x;
                     let targetY = this.target.y;
+                    
                     if (!this.isFlying) {
                         const needsToCross = (this.team === 'player' && this.y > RIVER_Y && this.target.y < RIVER_Y) || (this.team === 'ai' && this.y < RIVER_Y && this.target.y > RIVER_Y);
                         if (needsToCross) {
@@ -2209,7 +2239,7 @@
                 }
                 attack() { 
                     if (this.target && this.cooldownTimer <= 0) { 
-                        if (this.attackRange <= this.radius + this.target.radius + 5) { // Melee
+                        if (this.projectileRange <= 0) { // Melee
                             this.target.health -= this.attackDamage; 
                         } else { // Ranged
                             let projectileType = Projectile;
@@ -2228,69 +2258,69 @@
                     if (this.health <= 0) return;
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
                     
-                    this.findTarget(); // Always check for new targets
+                    this.findTarget(); // Always check for new/better targets
                     
-                    if (this.target && this.target.health > 0) {
-                        if (getDistance(this, this.target) <= this.attackRange) {
-                            this.attack();
+                    if (this.target) {
+                        const targetRange = this.projectileRange > 0 ? this.projectileRange : this.attackRange;
+                        if (getDistance(this, this.target) <= targetRange) {
+                            this.attack(); // Attack if in range
                         } else {
-                            this.move();
+                            this.move(); // Move if not in range
                         }
                     } else {
-                        // No target, just move towards enemy side (if not building-focused)
-                        if (!this.targetsBuildings) {
-                            const angle = (this.team === 'player') ? -Math.PI / 2 : Math.PI / 2;
-                            this.y += Math.sin(angle) * this.speed;
-                        }
+                        // No target found (e.g., game over), just stand
                     }
                 }
                 draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji, this.level); }
             }
 
             class Knight extends Unit { constructor(x, y, team, level = 1) { const s = allCards['knight'].stats[level]; super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '⚔️', false, false, level); } }
-            class Archer extends Unit { constructor(x, y, team, level = 1) { const s = allCards['archer'].stats[level]; super(x, y, 10, team, s.health, 1.2, 120, s.damage, s.hitSpeed, '🏹', false, true, level); } }
+            class Archer extends Unit { constructor(x, y, team, level = 1) { const s = allCards['archer'].stats[level]; super(x, y, 10, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '🏹', false, true, level); this.projectileRange = 120; } }
             class Giant extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['giant'].stats[level];
                     super(x, y, 18, team, s.health, s.speed, 30, s.damage, s.hitSpeed, '💪', false, false, level);
-                    this.targetsBuildings = true; // NEW: Set building-only targeting
-                    this.findTarget = () => { // NEW: Override findTarget
-                        // 1. If target is valid, keep it
-                        if (this.target && this.target.health > 0 && (this.target instanceof Tower || this.target instanceof Building)) {
-                            return;
-                        }
-                        
-                        // 2. Find new building/tower target
-                        this.target = null;
-                        let closestDist = Infinity;
+                    this.findTarget = () => {
                         let newTarget = null;
+                        let targetLane = (this.x < WIDTH / 2) ? 'left' : 'right';
                         
-                        // Check for towers first
-                        for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Tower)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
-                                }
-                            }
+                        const playerKing = gameObjects.find(t => t.team === 'player' && t.isKing);
+                        const aiKing = gameObjects.find(t => t.team === 'ai' && t.isKing);
+                        const playerLeftTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x < WIDTH / 2);
+                        const playerRightTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x > WIDTH / 2);
+                        const aiLeftTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x < WIDTH / 2);
+                        const aiRightTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x > WIDTH / 2);
+
+                        // Building-only targeting
+                        if (this.team === 'player') {
+                            if (targetLane === 'left' && aiLeftTower && aiLeftTower.health > 0) newTarget = aiLeftTower;
+                            else if (targetLane === 'right' && aiRightTower && aiRightTower.health > 0) newTarget = aiRightTower;
+                            else newTarget = aiKing;
+                        } else {
+                            if (targetLane === 'left' && playerLeftTower && playerLeftTower.health > 0) newTarget = playerLeftTower;
+                            else if (targetLane === 'right' && playerRightTower && playerRightTower.health > 0) newTarget = playerRightTower;
+                            else newTarget = playerKing;
                         }
-                        
-                        // If no towers, check for other buildings
-                        if (!newTarget) {
-                            for (const obj of gameObjects) {
-                                if (obj.team !== this.team && (obj instanceof Building)) {
-                                    const dist = getDistance(this, obj);
-                                    if (dist < closestDist) { 
-                                        closestDist = dist; 
-                                        newTarget = obj; 
-                                    }
-                                }
-                            }
-                        }
-                        
                         this.target = newTarget;
                     };
+                }
+                // NEW: Add an explicit update method to Giant
+                update() {
+                    if (this.health <= 0) return;
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    
+                    this.findTarget(); // This will now 100% call the Giant's building-only findTarget
+                    
+                    if (this.target) {
+                        const targetRange = this.projectileRange > 0 ? this.projectileRange : this.attackRange;
+                        if (getDistance(this, this.target) <= targetRange) {
+                            this.attack(); // Attack if in range
+                        } else {
+                            this.move(); // Move if not in range
+                        }
+                    } else {
+                        // No target found (e.g., game over), just stand
+                    }
                 }
             }
             class Goblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblins'].stats[level]; super(x, y, 8, team, s.health, 1.5, 20, s.damage, s.hitSpeed, '👺', false, false, level); } }
@@ -2300,12 +2330,12 @@
             class Skeletons { constructor(x, y, team, level = 1) { const s = allCards['skeletons'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
             
             // --- NEW CARD CLASSES ---
-            class SpearGoblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; super(x, y, 8, team, s.spear_health, 1.5, 100, s.spear_damage, s.spear_hitSpeed, '🎯', false, true, level); } }
+            class SpearGoblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; super(x, y, 8, team, s.spear_health, 1.5, 20, s.spear_damage, s.spear_hitSpeed, '🎯', false, true, level); this.projectileRange = 100; } }
             class GoblinGang { constructor(x, y, team, level = 1) { const s = allCards['goblinGang'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Goblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } for (let i = 0; i < s.spear_count; i++) { gameObjects.push(new SpearGoblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } } }
             class SkeletonArmy { constructor(x, y, team, level = 1) { const s = allCards['skeletonArmy'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
             class Barbarian extends Unit { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; super(x, y, 11, team, s.health, 1.1, 25, s.damage, s.hitSpeed, '🧔', false, false, level); } }
             class Barbarians { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Barbarian(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
-            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); } }
+            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '🐲', true, true, level); this.projectileRange = 110; } }
             class BattleRam extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['battleRam'].stats[level];
@@ -2314,14 +2344,26 @@
                     this.chargeTimer = 3 * 60;
                     this.isCharging = false;
                     this.didHit = false; // Flag to prevent double spawns
-                    this.targetsBuildings = true; // NEW: Set building-only targeting
-                    this.findTarget = () => { // NEW: Override findTarget (same as Giant)
-                        if (this.target && this.target.health > 0 && (this.target instanceof Tower || this.target instanceof Building)) return;
-                        this.target = null;
-                        let closestDist = Infinity;
+                    this.findTarget = () => {
                         let newTarget = null;
-                        for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Tower)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } }
-                        if (!newTarget) { for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Building)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } } }
+                        let targetLane = (this.x < WIDTH / 2) ? 'left' : 'right';
+                        
+                        const playerKing = gameObjects.find(t => t.team === 'player' && t.isKing);
+                        const aiKing = gameObjects.find(t => t.team === 'ai' && t.isKing);
+                        const playerLeftTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x < WIDTH / 2);
+                        const playerRightTower = gameObjects.find(t => t.team === 'player' && !t.isKing && t.x > WIDTH / 2);
+                        const aiLeftTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x < WIDTH / 2);
+                        const aiRightTower = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x > WIDTH / 2);
+
+                        if (this.team === 'player') {
+                            if (targetLane === 'left' && aiLeftTower && aiLeftTower.health > 0) newTarget = aiLeftTower;
+                            else if (targetLane === 'right' && aiRightTower && aiRightTower.health > 0) newTarget = aiRightTower;
+                            else newTarget = aiKing;
+                        } else {
+                            if (targetLane === 'left' && playerLeftTower && playerLeftTower.health > 0) newTarget = playerLeftTower;
+                            else if (targetLane === 'right' && playerRightTower && playerRightTower.health > 0) newTarget = playerRightTower;
+                            else newTarget = playerKing;
+                        }
                         this.target = newTarget;
                     };
                 }
@@ -2343,7 +2385,20 @@
                     
                     if (this.chargeTimer > 0) { this.chargeTimer--; if(this.chargeTimer === 0) this.isCharging = true; }
                     if (this.isCharging) this.speed = 2.4; else this.speed = 1.2;
-                    super.update(); // Run the base Unit's update (which calls findTarget, move, attack)
+                    
+                    // Call parent update, but without its findTarget
+                    if (this.health <= 0) return;
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    
+                    this.findTarget(); // Use Ram's custom findTarget
+                    
+                    if (this.target) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
+                            this.attack(); // Attack if in range
+                        } else {
+                            this.move(); // Move if not in range
+                        }
+                    }
                 }
                 attack() { // Ram only attacks when it hits
                     if (this.target && this.cooldownTimer <= 0) { 
@@ -2536,6 +2591,7 @@
                 const playerUnits = gameObjects.filter(o => o.team === 'player' && o instanceof Unit && o.y < RIVER_Y + 50);
                 if (playerUnits.length > 0) {
                     let bestCardId = null;
+                    // --- AI DECK CYCLE FIX: Check aiHand ---
                     if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
                     } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
@@ -2671,11 +2727,11 @@
                 
                 if (aiLeft && aiLeft.health <= 0 && !aiLeftTowerDestroyed) {
                     aiLeftTowerDestroyed = true;
-                    if(selectedSpawningUnit) updatePlacementOverlay(); // Update overlay if card is selected
+                    if(selectedSpawningUnit) updatePlacementOverlay();
                 }
                 if (aiRight && aiRight.health <= 0 && !aiRightTowerDestroyed) {
                     aiRightTowerDestroyed = true;
-                    if(selectedSpawningUnit) updatePlacementOverlay(); // Update overlay if card is selected
+                    if(selectedSpawningUnit) updatePlacementOverlay();
                 }
                 
                 // Can check player towers here too if AI gets spawn zones
@@ -2683,28 +2739,31 @@
             
             // NEW: Update the clip-path of the red overlay
             function updatePlacementOverlay() {
-                // Define the zones. 50% is the river. 30% is the new "far end" line.
-                const farY = (PLAYER_NEW_SPAWN_LIMIT_Y / HEIGHT) * 100; // 30%
-                const riverY = (RIVER_Y / HEIGHT) * 100; // 50%
-
-                const leftDestroyed = aiLeftTowerDestroyed;
-                const rightDestroyed = aiRightTowerDestroyed;
-
-                let clipPathStr = '';
-                if (!leftDestroyed && !rightDestroyed) {
-                    // Block entire top half
-                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${riverY}%, 0% ${riverY}%)`;
-                } else if (leftDestroyed && rightDestroyed) {
-                    // Block only the far end
-                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${farY}%, 0% ${farY}%)`;
-                } else if (leftDestroyed && !rightDestroyed) {
-                    // Block full right half + far left half
-                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${riverY}%, 50% ${riverY}%, 50% ${farY}%, 0% ${farY}%)`;
-                } else if (!leftDestroyed && rightDestroyed) {
-                    // Block full left half + far right half
-                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${farY}%, 50% ${farY}%, 50% ${riverY}%, 0% ${riverY}%)`;
+                // Use path() for complex clipping: M = moveto, L = lineto, Z = closepath
+                let pathString = "";
+                const H_RIVER = HEIGHT / 2;
+                const H_FAR = AI_SPAWN_LIMIT_FAR; // ~30%
+                
+                // If both towers are alive, block the whole top half
+                if (!aiLeftTowerDestroyed && !aiRightTowerDestroyed) {
+                    pathString = `M 0 0 L ${WIDTH} 0 L ${WIDTH} ${H_RIVER} L 0 ${H_RIVER} Z`;
+                } 
+                // If both are destroyed, block only the far end
+                else if (aiLeftTowerDestroyed && aiRightTowerDestroyed) {
+                    pathString = `M 0 0 L ${WIDTH} 0 L ${WIDTH} ${H_FAR} L 0 ${H_FAR} Z`;
                 }
-                placementOverlay.style.clipPath = clipPathStr;
+                // If only left is destroyed, block right half + far-left
+                else if (aiLeftTowerDestroyed) {
+                    pathString = `M ${WIDTH/2} 0 L ${WIDTH} 0 L ${WIDTH} ${H_RIVER} L ${WIDTH/2} ${H_RIVER} Z ` + // Block right half
+                                 `M 0 0 L ${WIDTH/2} 0 L ${WIDTH/2} ${H_FAR} L 0 ${H_FAR} Z`; // Block far-left
+                }
+                // If only right is destroyed, block left half + far-right
+                else if (aiRightTowerDestroyed) {
+                    pathString = `M 0 0 L ${WIDTH/2} 0 L ${WIDTH/2} ${H_RIVER} L 0 ${H_RIVER} Z ` + // Block left half
+                                 `M ${WIDTH/2} 0 L ${WIDTH} 0 L ${WIDTH} ${H_FAR} L ${WIDTH/2} ${H_FAR} Z`; // Block far-right
+                }
+                
+                placementOverlay.style.clipPath = `path("${pathString}")`;
             }
 
 
@@ -2784,7 +2843,7 @@
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
-                // await saveUserData(); // Guest mode doesn't auto-save
+                await saveUserData();
             }
 
             async function showLoseScreen(message = 'You Lose!') {
@@ -2799,7 +2858,7 @@
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
-                // await saveUserData(); // Guest mode doesn't auto-save
+                await saveUserData();
             }
 
             function gameLoop(timestamp) {
@@ -2873,8 +2932,8 @@
                 } else { 
                     clientX = e.clientX; clientY = e.clientY; 
                 }
-                const x = clientX - rect.left;
-                const y = clientY - rect.top;
+                const x = (clientX - rect.left) * (WIDTH / rect.width);
+                const y = (clientY - rect.top) * (HEIGHT / rect.height);
                 return { x, y };
             }
 
@@ -2883,8 +2942,7 @@
                 let inAllowedZone = false;
                 if (y > RIVER_Y) {
                     inAllowedZone = true; // Always allowed in player's base
-                } else if (y > PLAYER_NEW_SPAWN_LIMIT_Y) { // Between river and "far end"
-                    // Check enemy territory
+                } else if (y > AI_SPAWN_LIMIT_FAR) { // Check enemy territory
                     if (aiLeftTowerDestroyed && x < WIDTH / 2) inAllowedZone = true;
                     if (aiRightTowerDestroyed && x > WIDTH / 2) inAllowedZone = true;
                 }
@@ -2902,30 +2960,35 @@
                 return true;
             }
 
-            // --- NEW: Card Click/Drag Logic ---
+            // --- CLICK/DRAG LOGIC REWORK ---
 
-            function handleCardSelect(e, cardEl, cardId) {
-                e.preventDefault(); // Prevent scrolling/other actions
-                if (!gameRunning) return;
-                const card = allCards[cardId];
-                if (card.cost > playerElixir) { console.log("Not enough elixir!"); return; }
+            function handleCardPress(e, cardEl, cardId) {
+                e.preventDefault(); // Prevent scrolling
+                if (!gameRunning || justSelectedCard) return;
                 
-                // Deselect if already selected
+                const card = allCards[cardId];
+                if (card.cost > playerElixir) { return; }
+                
+                // If clicking the same card, cancel it
                 if (selectedSpawningUnit && selectedSpawningUnit.id === cardId) {
                     cancelPlacement();
                     return;
                 }
-
-                // Start tracking for drag
-                isDragging = false; // Not dragging *yet*
-                let pos = (e.touches && e.touches[0]) ? e.touches[0] : e;
-                startDragPos = { x: pos.clientX, y: pos.clientY };
-
+                
+                // Start a "selection"
+                isDragging = false;
+                justSelectedCard = true; // Flag to ignore mouseup
+                const pos = getCanvasClickPos(e);
+                cardDragStartX = pos.x;
+                cardDragStartY = pos.y;
+                
                 // Select the card
                 document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
-                placementOverlay.style.display = 'block'; // Show red overlay
+                cardEl.classList.add('selected');
+                placementIndicator.style.display = 'block';
+                placementOverlay.style.display = 'block';
                 placementIndicator.innerHTML = '';
-                
+
                 selectedSpawningUnit = {
                     id: cardId, cost: card.cost, type: card.type, radius: card.radius || 0, placementRadius: card.placementRadius,
                     emoji: card.emoji, isFlying: card.isFlying, handIndex: cardEl.dataset.handIndex
@@ -2945,65 +3008,50 @@
                     placementIndicator.style.height = `${placementRadius * 2}px`;
                     placementIndicator.innerHTML = card.emoji;
                 }
-                cardEl.classList.add('selected');
                 
-                // Update placement overlay based on destroyed towers
                 updatePlacementOverlay();
-                
-                // Move indicator to initial touch/mouse position
-                let initialPos = (e.touches && e.touches[0]) ? e.touches[0] : e;
-                movePlacementIndicator(initialPos);
-                // Show indicator, but hide if off-canvas
-                const { x, y } = getCanvasClickPos(initialPos);
-                if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
-                     placementIndicator.style.display = 'none';
-                } else {
-                     placementIndicator.style.display = 'block';
-                }
+                movePlacementIndicator(e);
             }
-            
+
             function handleDragMove(e) {
                 if (!selectedSpawningUnit) return;
                 e.preventDefault();
                 
-                let pos = (e.touches && e.touches[0]) ? e.touches[0] : e;
+                const pos = getCanvasClickPos(e);
                 
-                // Check if we've moved enough to be "dragging"
-                const dx = pos.clientX - startDragPos.x;
-                const dy = pos.clientY - startDragPos.y;
-                if (!isDragging && (dx*dx + dy*dy) > (DRAG_SENSITIVITY * DRAG_SENSITIVITY)) {
+                // Check if we've moved enough to be a "drag"
+                const dx = pos.x - cardDragStartX;
+                const dy = pos.y - cardDragStartY;
+                if (!isDragging && (dx * dx + dy * dy) > (DRAG_SENSITIVITY * DRAG_SENSITIVITY)) {
                     isDragging = true;
+                    justSelectedCard = false; // It's a drag, not a click
                 }
-
-                //if (isDragging) { // OLD logic: only move if dragging
-                // NEW logic: always move indicator if a card is selected
-                movePlacementIndicator(pos);
-                //}
+                
+                if (isDragging || justSelectedCard) {
+                    // Check if mouse is over the canvas
+                    const rect = canvas.getBoundingClientRect();
+                    let clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                    let clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+                    
+                    if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+                        // Mouse is outside canvas, hide indicator
+                        placementIndicator.style.display = 'none';
+                    } else {
+                        // Mouse is inside, show and move indicator
+                        placementIndicator.style.display = 'block';
+                        movePlacementIndicator(e);
+                    }
+                }
             }
-
+            
             function movePlacementIndicator(e) {
                 if (!selectedSpawningUnit) return;
                 
                 const { x, y } = getCanvasClickPos(e);
-                
-                // NEW: Hide indicator if off-canvas
-                // Check raw clientX/Y against rect
-                const rect = canvas.getBoundingClientRect();
-                const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-                const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-
-                if (isDragging && (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom)) {
-                    placementIndicator.style.display = 'none';
-                    canPlace = false; // Can't place off-canvas
-                    return;
-                }
-                
-                placementIndicator.style.display = 'block';
                 const clampedX = Math.max(0, Math.min(WIDTH, x));
                 const clampedY = Math.max(0, Math.min(HEIGHT, y));
                 let radius = isSpawningSpell ? spellRadius : placementRadius;
                 
-                // FIX: Use top/left
                 placementIndicator.style.left = `${clampedX}px`;
                 placementIndicator.style.top = `${clampedY}px`;
                 
@@ -3015,80 +3063,94 @@
                 placementIndicator.classList.toggle('cant-place', !canPlace);
             }
             
-            // Re-bind mouse/touch move to window to allow dragging off canvas
-            window.addEventListener('mousemove', handleDragMove);
-            window.addEventListener('touchmove', handleDragMove, { passive: false });
-
-
+            function handleDragEnd(e) {
+                if (justSelectedCard) {
+                    // This was a "click" to select. Don't do anything on mouseup.
+                    // The user will click the canvas to place.
+                    justSelectedCard = false;
+                    isDragging = false;
+                    return;
+                }
+                
+                if (!isDragging || !selectedSpawningUnit) {
+                    // Not dragging, or nothing selected.
+                    cancelPlacement();
+                    return;
+                }
+                
+                // This was a drag-and-drop
+                isDragging = false;
+                
+                // Check if mouse is off-canvas
+                const rect = canvas.getBoundingClientRect();
+                let clientX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : e.clientX;
+                let clientY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : e.clientY;
+                if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+                    cancelPlacement(); // Dropped off-canvas
+                    return;
+                }
+                
+                // Dropped on-canvas
+                handlePlacement(e);
+            }
+            
+            function handleCanvasClick(e) {
+                if (!selectedSpawningUnit || isDragging) {
+                    // Not in "click-to-place" mode
+                    return;
+                }
+                
+                // This is a "click-to-place" action
+                handlePlacement(e);
+            }
+            
             function handlePlacement(e) {
                 if (!selectedSpawningUnit || !gameRunning) {
                     cancelPlacement();
                     return;
-                };
-                
-                // If we were dragging, or if it's a click-to-place on the canvas
-                // NEW: Check if the event target is the canvas itself
-                const isCanvasClick = e.target === canvas;
-
-                if (isDragging || isCanvasClick) {
-                    if (!canPlace) {
-                        console.log("Cannot spawn there!");
-                        cancelPlacement();
-                        return;
-                    }
-                
-                    const { x, y } = getCanvasClickPos(e);
-                    const clampedX = Math.max(0, Math.min(WIDTH, x));
-                    const clampedY = Math.max(0, Math.min(HEIGHT, y));
-                    
-                    const card = allCards[selectedSpawningUnit.id];
-                    const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
-                    
-                    if (card.type === 'Spell') {
-                        const damage = card.stats[level].damage;
-                        gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
-                    } else {
-                        const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                        if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
-                            gameObjects.push(newUnit);
-                        }
-                    }
-                    
-                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
-                    cancelPlacement();
-                } else if (!isDragging && e.target.closest('.card-ui')) {
-                    // This was a "click" on a card, but not a drag.
-                    // We already selected the card, so just wait for the canvas click.
-                    // Do nothing here.
-                } else {
-                    // This was a click somewhere else (like the elixir bar)
-                    cancelPlacement();
                 }
+                
+                if (!canPlace) {
+                    cancelPlacement();
+                    return;
+                }
+                
+                const { x, y } = getCanvasClickPos(e);
+                const clampedX = Math.max(0, Math.min(WIDTH, x));
+                const clampedY = Math.max(0, Math.min(HEIGHT, y));
+                
+                const card = allCards[selectedSpawningUnit.id];
+                const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
+                
+                if (card.type === 'Spell') {
+                    const damage = card.stats[level].damage;
+                    gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
+                } else {
+                    const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
+                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
+                        gameObjects.push(newUnit);
+                    }
+                }
+                
+                playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
+                cancelPlacement();
             }
 
-            // Use mouseup/touchend on the *window* to catch drags released off-canvas
-            window.addEventListener('mouseup', handlePlacement);
-            window.addEventListener('touchend', handlePlacement, { passive: false });
+            // Re-bind move/end to window to catch drags
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
+            window.addEventListener('mouseup', handleDragEnd);
+            window.addEventListener('touchend', handleDragEnd, { passive: false });
             
-            // NEW: Add a click listener to the canvas for "click-to-place"
-            canvas.addEventListener('click', (e) => {
-                if (selectedSpawningUnit && !isDragging) {
-                    handlePlacement(e);
-                }
-            });
+            // Add click listener to canvas for "click-to-place"
+            canvas.addEventListener('click', handleCanvasClick);
 
             cardInfoCloseBtn.addEventListener('click', closeModal);
             
             // --- Init App ---
             initCardSystem(); // Define all cards
-            // Use guest login by default
-            // initGuestSession();
-            // showScreen('menu');
+            // Don't auto-login, wait for button press
             // onAuthStateChanged(auth, handleAuth); // Wait for user login
-            
-            // --- FIX: Only show login screen, let user choose ---
-            showScreen('login');
-
         };
 
     </script>
