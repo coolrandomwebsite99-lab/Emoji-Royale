@@ -22,10 +22,11 @@
             display: block;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            cursor: pointer;
+            cursor: pointer; /* This is from your working file */
             transition: background-color 0.5s ease; /* For arena theme change */
         }
         /* Arena Themes */
+        canvas.arena-1 { background-color: #2a623d; } /* Added this line from your file */
         canvas.arena-2 { background-color: #6abf82; }
         canvas.arena-3 { 
             background-color: #4a4a4a;
@@ -41,39 +42,8 @@
             margin: 0 auto;
         }
 
-        /* NEW: In-game level text */
-        #gameLevelTextContainer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 5;
-        }
-        .level-text {
-            position: absolute;
-            font-size: 0.75rem; /* 12px */
-            font-weight: 800;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid #fde047; /* yellow-300 */
-            transform: translateX(-50%);
-            white-space: nowrap;
-        }
-        .level-text.tower-level {
-            font-size: 1rem; /* 16px */
-            border: 2px solid black;
-            padding: 2px 6px;
-            opacity: 0.5;
-            z-index: -1; /* Behind tower */
-            transform: translate(-50%, -10%);
-        }
-
-        #messageOverlay, #chestOpenOverlay {
+        /* MODAL OVERLAY STYLES (Merged) */
+        .modal-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -85,14 +55,39 @@
             align-items: center;
             background-color: rgba(0, 0, 0, 0.85);
             color: white;
-            font-size: 2.5rem;
+            font-size: 1.5rem; /* Standardized font size */
             font-weight: bold;
             text-align: center;
             border-radius: 8px;
             z-index: 50;
-            padding: 1rem;
+            padding: 1.5rem;
         }
-        #messageOverlay button, #chestOpenOverlay button, .login-btn, .debug-btn {
+        /* OLD MODAL OVERLAYS (from your file) */
+        #messageOverlay, #chestOpenOverlay, #debugPasswordOverlay {
+             font-size: 2.5rem;
+             padding: 1rem;
+        }
+        /* Make old modals use new class */
+        #messageOverlay, #chestOpenOverlay, #debugPasswordOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 8px;
+            z-index: 50;
+        }
+
+        /* BUTTON STYLES (Merged) */
+        .modal-btn, #messageOverlay button, #chestOpenOverlay button, .login-btn, .debug-btn, #debugPasswordOverlay button {
             font-size: 1rem;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
@@ -109,9 +104,11 @@
             width: 80%;
             max-width: 300px;
         }
-        #messageOverlay button:hover, #chestOpenOverlay button:hover, .login-btn:hover, .debug-btn:hover {
+        
+        #messageOverlay button:hover, #chestOpenOverlay button:hover, .login-btn:hover, .debug-btn:hover, #debugPasswordOverlay button:hover, .modal-btn:hover {
             background-color: #4338ca;
         }
+
         .login-btn.google {
             background-color: #dc2626; /* red-600 */
         }
@@ -123,6 +120,61 @@
         }
         .login-btn.guest:hover {
             background-color: #4b5563; /* gray-600 */
+        }
+        
+        /* NEW Button Colors */
+        .cancel-btn { background-color: #dc2626; }
+        .cancel-btn:hover { background-color: #b91c1c; }
+        .confirm-btn { background-color: #16a34a; }
+        .confirm-btn:hover { background-color: #15803d; }
+        
+        /* Debug Password Input */
+        #debugPasswordInput {
+            font-size: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid #6b7280;
+            background-color: #1f2937;
+            color: white;
+            margin-top: 20px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        #debugPasswordOverlay .cancel-btn {
+            background-color: #dc2626; /* red-600 */
+        }
+        #debugPasswordOverlay .cancel-btn:hover {
+            background-color: #b91c1c; /* red-700 */
+        }
+        
+        /* NEW Modal Input/Textarea Styles */
+        .modal-input {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid #6b7280;
+            background-color: #1f2937;
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+        .modal-textarea {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid #6b7280;
+            background-color: #1f2937;
+            color: white;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 320px;
+            height: 120px;
+            resize: none;
         }
 
         /* Hide screens by default */
@@ -175,6 +227,7 @@
             border: 4px solid #374151; /* gray-700 */
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
             overflow: hidden;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
         .card-ui.selected {
             border-color: #ec4899; /* pink-500 */
@@ -314,7 +367,8 @@
             color: white;
             font-weight: 600;
         }
-        .modal-btn {
+        /* Renamed .modal-btn to .modal-action-btn */
+        .modal-action-btn {
             width: 100%;
             font-size: 1.1rem;
             font-weight: 600;
@@ -325,10 +379,10 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .modal-btn.add { background-color: #16a34a; color: white; }
-        .modal-btn.remove { background-color: #dc2626; color: white; }
-        .modal-btn.upgrade { background-color: #16a34a; color: white; }
-        .modal-btn:disabled {
+        .modal-action-btn.add { background-color: #16a34a; color: white; }
+        .modal-action-btn.remove { background-color: #dc2626; color: white; }
+        .modal-action-btn.upgrade { background-color: #16a34a; color: white; }
+        .modal-action-btn:disabled {
             background-color: #6b7280; /* gray-500 */
             color: #d1d5db; /* gray-300 */
             cursor: not-allowed;
@@ -370,8 +424,7 @@
             opacity: 0.7;
             text-align: center;
             line-height: 1;
-            /* FIX: Use top/left instead of transform */
-            transform: translate(-50%, -50%); /* Keep this for centering */
+            transform: translate(-50%, -50%); 
         }
         #placementIndicator.spell {
             border: 4px dashed white;
@@ -392,27 +445,49 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
+        /* Red 'Can't Place' Overlay */
+        #placementOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(220, 38, 38, 0.2),
+                rgba(220, 38, 38, 0.2) 10px,
+                rgba(220, 38, 38, 0.3) 10px,
+                rgba(220, 38, 38, 0.3) 20px
+            );
+            z-index: 10;
+            pointer-events: none;
+            display: none;
+            /* Clip-path will be set by JS */
+            clip-path: path('M 0 0 L 400 0 L 400 250 L 0 250 Z'); /* Default: Top half */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-2">
     
     <!-- 
     ========================================================
-    SCREEN: LOGIN (FIXED)
+    SCREEN: LOGIN (MERGED)
     ========================================================
     -->
     <div id="loginScreen" class="screen active flex-col justify-center items-center">
         <div class="text-6xl">👑</div>
         <h1 class="text-4xl font-bold mt-4">Emoji Royale</h1>
-        <p class="text-lg mt-2 text-gray-300">Sign in to save your progress!</p>
+        <p class="text-lg mt-2 text-gray-300">Sign in or play as guest!</p> <!-- UPDATED TEXT -->
         <p id="loginError" class="text-lg mt-2 text-red-500 font-bold h-6"></p> 
-        <button id="googleLoginBtn" class="login-btn google">
-            <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.018,36.341,44,30.606,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-            Sign in with Google
+        
+        <!-- NEW: Load from Key Button -->
+        <button id="loadKeyBtn" class="login-btn guest">
+            Enter Save Key
         </button>
+        
         <!-- "Play as Guest (No Save)" button -->
         <button id="trueGuestLoginBtn" class="login-btn guest">
-            Play as Guest (No Save)
+            Play as Guest
         </button>
     </div>
     
@@ -424,12 +499,12 @@
     <div id="loadingScreen" class="screen flex-col justify-center items-center bg-gray-900">
         <div class="text-8xl animate-pulse-king">👑</div>
         <h1 class="text-3xl font-bold mt-4">Emoji Royale</h1>
-        <p class="text-lg mt-2 text-gray-300">Loading Progress...</p>
+        <p class="text-lg mt-2 text-gray-300">Loading...</p>
     </div>
     
     <!-- 
     ========================================================
-    SCREEN: MENU (HOME)
+    SCREEN: MENU (HOME) (MERGED)
     ========================================================
     -->
     <div id="menuScreen" class="screen flex-col items-center p-4">
@@ -454,6 +529,11 @@
             <!-- Battle Button -->
             <button id="battleButton" class="bg-red-600 hover:bg-red-700 text-white w-3/4 py-4 rounded-lg shadow-lg text-3xl font-extrabold transition transform hover:scale-105">
                 BATTLE!
+            </button>
+            
+            <!-- NEW: Save Data Button -->
+            <button id="saveDataKeyBtn" class="w-3/4 py-3 rounded-lg shadow-lg text-xl font-bold transition transform hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white mt-4">
+                Save Data
             </button>
             
             <!-- Chest Slots -->
@@ -483,7 +563,11 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <!-- REMOVED: Debug Button -->
+                <!-- NEW: Debug Button -->
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
+                    <span class="text-4xl">🧪</span>
+                    <span class="text-xs">Debug</span>
+                </button>
             </div>
         </div>
     </div>
@@ -531,7 +615,10 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <!-- REMOVED: Debug Button -->
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
+                    <span class="text-4xl">🧪</span>
+                    <span class="text-xs">Debug</span>
+                </button>
             </div>
         </div>
     </div>
@@ -562,7 +649,7 @@
                     <div id="towerInfoProgressBar" style="width: 0%;"></div>
                     <div id="towerInfoProgressText">0 / 0</div>
                 </div>
-                <button id="towerUpgradeButton" class="modal-btn upgrade" disabled>
+                <button id="towerUpgradeButton" class="modal-action-btn upgrade" disabled>
                     Upgrade
                 </button>
             </div>
@@ -583,17 +670,56 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <!-- REMOVED: Debug Button -->
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
+                    <span class="text-4xl">🧪</span>
+                    <span class="text-xs">Debug</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- 
     ========================================================
-    SCREEN: DEBUG (REMOVED)
+    SCREEN: DEBUG (NEW)
     ========================================================
     -->
-    <!-- Debug screen HTML has been removed -->
+    <div id="debugScreen" class="screen flex-col items-center p-4">
+        <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
+            <h1 class="text-3xl font-bold">Debug Menu</h1>
+            <p class="text-gray-400 text-center my-4">For testing only!</p>
+            
+            <button id="debugArena2" class="debug-btn bg-green-600 hover:bg-green-700">Jump to Arena 2 (250 🏆)</button>
+            <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
+            <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
+            <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
+            <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
+            <button id="debugAddGold" class="debug-btn bg-yellow-400 text-gray-900 hover:bg-yellow-300">Get 1000 Gold 💰</button>
+            <button id="debugReset" class="debug-btn bg-gray-600 hover:bg-gray-700">Reset Account (New User)</button>
+
+        </div>
+        
+        <!-- Bottom Nav Bar -->
+        <div id="bottomNav" class="bg-gray-800 w-full rounded-t-lg shadow-inner p-2">
+            <div class="flex justify-around">
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="menu">
+                    <span class="text-4xl">⚔️</span>
+                    <span class="text-xs">Battle</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="deck">
+                    <span class="text-4xl">🃏</span>
+                    <span class="text-xs">Deck</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="tower">
+                    <span class="text-4xl">👑</span>
+                    <span class="text-xs">Tower</span>
+                </button>
+                <button class="nav-btn active flex flex-col items-center text-yellow-400" data-screen="debug">
+                    <span class="text-4xl">🧪</span>
+                    <span class="text-xs">Debug</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- 
@@ -604,15 +730,13 @@
     <div id="gameScreen" class="screen flex-col items-center p-2">
         <div id="gameContainer">
             <div id="timerDisplay" class="absolute top-2 left-1/2 -translate-x-1/2 text-2xl font-bold bg-black bg-opacity-50 px-4 py-1 rounded-lg z-10">2:00</div>
+            <!-- NEW: Placement Overlay -->
+            <div id="placementOverlay"></div>
             <canvas id="gameCanvas" width="400" height="500"></canvas>
-            
-            <!-- NEW: Container for in-game level text -->
-            <div id="gameLevelTextContainer"></div>
-
             <div id="messageOverlay">
                 <span id="messageText"></span>
-                <button id="startButton">Start Game</button>
-                <button id="menuButton" class="bg-red-600 hover:bg-red-700">Back to Menu</button>
+                <button id="startButton" class="modal-btn confirm-btn">Start Game</button> <!-- Added classes -->
+                <button id="menuButton" class="modal-btn cancel-btn">Back to Menu</button> <!-- Added classes -->
             </div>
             <!-- Placement "Ghost" Indicator -->
             <div id="placementIndicator"></div>
@@ -668,7 +792,7 @@
                 <div id="cardInfoProgressBar" style="width: 0%;"></div>
                 <div id="cardInfoProgressText">0 / 0</div>
             </div>
-            <button id="cardInfoButton" class="modal-btn"></button>
+            <button id="cardInfoButton" class="modal-action-btn"></button> <!-- Class renamed -->
         </div>
     </div>
     
@@ -683,42 +807,87 @@
         <div id="chestRewardList">
             <!-- Rewards injected by JS -->
         </div>
-        <button id="chestCloseButton">Awesome!</button>
+        <button id="chestCloseButton" class="modal-btn confirm-btn">Awesome!</button> <!-- Added classes -->
+    </div>
+
+    <!-- 
+    ========================================================
+    DEBUG PASSWORD MODAL (NEW)
+    ========================================================
+    -->
+    <div id="debugPasswordOverlay">
+        <h2 class="text-2xl font-bold">Enter Debug Password</h2>
+        <input type="password" id="debugPasswordInput" class="modal-input" placeholder="Password"> <!-- Class added -->
+        <button id="debugPasswordSubmit" class="modal-btn confirm-btn">Enter</button> <!-- Added classes -->
+        <button id="debugPasswordCancel" class="modal-btn cancel-btn">Cancel</button> <!-- Class added -->
+    </div>
+
+    <!-- 
+    ========================================================
+    NEW: SAVE KEY MODAL
+    ========================================================
+    -->
+    <div id="saveKeyOverlay" class="modal-overlay">
+        <h2 class="text-2xl font-bold">Save Your Progress</h2>
+        <p class="text-sm font-normal text-gray-300 mt-2">Copy this key and save it somewhere safe! Paste it on the login screen to load your data.</p>
+        <textarea id="saveKeyText" class="modal-textarea" readonly placeholder="Click 'Generate' to get your key..."></textarea>
+        <button id="generateKeyBtn" class="modal-btn confirm-btn">Generate Save Key</button>
+        <button id="closeSaveKeyBtn" class="modal-btn cancel-btn">Close</button>
+    </div>
+
+    <!-- 
+    ========================================================
+    NEW: LOAD KEY MODAL
+    ========================================================
+    -->
+    <div id="loadKeyOverlay" class="modal-overlay">
+        <h2 class="text-2xl font-bold">Load Progress</h2>
+        <p class="text-sm font-normal text-gray-300 mt-2">Paste your save key below to load your data.</p>
+        <textarea id="loadKeyInput" class="modal-textarea" placeholder="Paste your save key here..."></textarea>
+        <button id="loadKeySubmitBtn" class="modal-btn confirm-btn">Load Data</button>
+        <button id="closeLoadKeyBtn" class="modal-btn cancel-btn">Cancel</button>
     </div>
 
 
     <!-- 
     ========================================================
-    ========================================================
-    JAVASCRIPT
-    ========================================================
+    MAIN SCRIPT
     ========================================================
     -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
+        // MERGED: Using the real config
         const firebaseConfig = {
           apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
           authDomain: "emoji-royale-8fb68.firebaseapp.com",
           projectId: "emoji-royale-8fb68",
-          storageBucket: "emoji-royale-8fb68.appspot.com",
+          storageBucket: "emoji-royale-8fb68.firebasestorage.app",
           messagingSenderId: "1021589049311",
           appId: "1:1021589049311:web:61ce6353950831e298be6a",
           measurementId: "G-FDQ9L0MQGM"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        // setLogLevel('debug'); // Uncomment for debugging
-
-        // --- Firebase Globals ---
+        // Initialize Firebase (TRY-CATCH block for safety)
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            // setLogLevel('debug'); // Uncomment for debugging Firestore
+        } catch (e) {
+            console.error("Firebase initialization failed:", e);
+            // Show an error to the user on the login screen
+            const loginError = document.getElementById('loginError');
+            if(loginError) {
+                loginError.textContent = 'Game server is offline. Please try again later.';
+            }
+        }
+        
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Use __app_id
         let userDocRef; // Reference to the user's document in Firestore
         let userId; // The user's unique ID
@@ -784,8 +953,20 @@
             10: { cards: 1000, gold: 50000 }, 11: { cards: 1500, gold: 75000 }, 12: { cards: 2000, gold: 100000 },
             13: { cards: 3000, gold: 150000 }, 14: { cards: 5000, gold: 200000 },
         };
-        let isDataSaved = true; // Flag to control saving
+        let isDataSaved = false; // Flag to control saving (default to false for guest)
+        let isGuestSession = false; // NEW: Flag for guest mode
         let isInitialAuthCheck = true; // Flag to stop auto-login
+        let loadTimeout; // Timer for stuck loads
+        let isLoading = false; // Flag to prevent double-loads
+        
+        // --- NEW: Drag logic state ---
+        let isDragging = false; // Are we currently dragging a card?
+        let startDragPos = { x: 0, y: 0 }; // Where did the drag start?
+        const DRAG_SENSITIVITY = 10; // Pixels to move before it's a "drag"
+
+        // NEW: Save key cooldown
+        let saveKeyCooldown = 0;
+
 
         // --- Start Game ---
         window.onload = () => {
@@ -795,14 +976,19 @@
             const HEIGHT = 500;
             const RIVER_Y = HEIGHT / 2;
             const BRIDGE_Y = RIVER_Y;
-            const PLAYER_SPAWN_LIMIT_Y = RIVER_Y;
+            // NEW: Define spawn zone lines
+            const PLAYER_SPAWN_LIMIT_Y = RIVER_Y; // Can't spawn past river
             const AI_SPAWN_LIMIT_Y = RIVER_Y;
+            const PLAYER_NEW_SPAWN_LIMIT_Y = HEIGHT * 0.30; // New line after taking tower
+            
             const LANE_LEFT_X = WIDTH / 4;
             const LANE_RIGHT_X = (WIDTH / 4) * 3;
             const MAX_ELIXIR = 10;
             const BASE_ELIXIR_REGEN_RATE = 0.008;
             const REGULATION_TIME = 120 * 60;
             const OVERTIME_TIME = 120 * 60;
+            const TROOP_AGGRO_RANGE = 100; // NEW: Range for troops to see enemies
+            const BUILDING_AGGRO_RANGE = 120; // NEW: Range for Giants to see buildings
 
             // --- Game State ---
             let gameObjects = [];
@@ -817,13 +1003,17 @@
             let currentElixirRate = BASE_ELIXIR_REGEN_RATE;
             let isTieBreaker = false;
             let tieBreakerTick = 0;
-            let levelTextElements = {}; // For in-game levels
+            // NEW: Track destroyed towers for spawn zones
+            let playerLeftTowerDestroyed = false;
+            let playerRightTowerDestroyed = false;
+            let aiLeftTowerDestroyed = false;
+            let aiRightTowerDestroyed = false;
 
             // --- DOM Elements ---
             const screens = document.querySelectorAll('.screen');
             const navButtons = document.querySelectorAll('.nav-btn');
             const loginScreen = document.getElementById('loginScreen');
-            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            // const googleLoginBtn = document.getElementById('googleLoginBtn'); // Removed
             const trueGuestLoginBtn = document.getElementById('trueGuestLoginBtn'); // FIXED
             const loginError = document.getElementById('loginError'); 
             const loadingScreen = document.getElementById('loadingScreen');
@@ -831,7 +1021,7 @@
             const gameScreen = document.getElementById('gameScreen');
             const deckScreen = document.getElementById('deckScreen');
             const towerScreen = document.getElementById('towerScreen');
-            // const debugScreen = document.getElementById('debugScreen'); // REMOVED
+            const debugScreen = document.getElementById('debugScreen'); // NEW
             const battleButton = document.getElementById('battleButton');
             const trophyDisplay = document.getElementById('trophyDisplay');
             const goldDisplay = document.getElementById('goldDisplay');
@@ -845,6 +1035,7 @@
             const cardHandEl = document.getElementById('cardHand');
             const nextCardSlotEl = document.getElementById('nextCardSlot');
             const placementIndicator = document.getElementById('placementIndicator');
+            const placementOverlay = document.getElementById('placementOverlay'); // NEW
             const menuButton = document.getElementById('menuButton');
             const towerLevelDisplay = document.getElementById('towerLevelDisplay');
             const towerInfoStats = document.getElementById('towerInfoStats');
@@ -867,9 +1058,33 @@
             const chestOpenOverlay = document.getElementById('chestOpenOverlay');
             const chestRewardList = document.getElementById('chestRewardList');
             const chestCloseButton = document.getElementById('chestCloseButton');
-            const gameLevelTextContainer = document.getElementById('gameLevelTextContainer');
-            // Debug Buttons REMOVED
+            // Debug Buttons
+            const debugArena2 = document.getElementById('debugArena2');
+            const debugArena3 = document.getElementById('debugArena3');
+            const debugUnlockAll = document.getElementById('debugUnlockAll');
+            const debugUpgradeAll = document.getElementById('debugUpgradeAll');
+            const debugGetChest = document.getElementById('debugGetChest');
+            const debugAddGold = document.getElementById('debugAddGold');
+            const debugReset = document.getElementById('debugReset');
+            // Debug Password
+            const debugPasswordOverlay = document.getElementById('debugPasswordOverlay');
+            const debugPasswordInput = document.getElementById('debugPasswordInput');
+            const debugPasswordSubmit = document.getElementById('debugPasswordSubmit');
+            const debugPasswordCancel = document.getElementById('debugPasswordCancel');
             
+            // NEW: Save/Load Key Elements
+            const loadKeyBtn = document.getElementById('loadKeyBtn');
+            const saveDataKeyBtn = document.getElementById('saveDataKeyBtn');
+            const saveKeyOverlay = document.getElementById('saveKeyOverlay');
+            const saveKeyText = document.getElementById('saveKeyText');
+            const generateKeyBtn = document.getElementById('generateKeyBtn');
+            const closeSaveKeyBtn = document.getElementById('closeSaveKeyBtn');
+            const loadKeyOverlay = document.getElementById('loadKeyOverlay');
+            const loadKeyInput = document.getElementById('loadKeyInput');
+            const loadKeySubmitBtn = document.getElementById('loadKeySubmitBtn');
+            const closeLoadKeyBtn = document.getElementById('closeLoadKeyBtn');
+
+
             // --- Game Elements (from gameScreen) ---
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
@@ -882,64 +1097,11 @@
 
 
             // ==============================================
-            // FIREBASE & USER DATA
+            // FIREBASE & USER DATA (Simplified for Guest Mode)
             // ==============================================
-
-            // This is the function that runs on login
-            async function handleAuth(user) {
-                if (user && !user.isAnonymous) { // Only Google Sign-in saves
-                    userId = user.uid;
-                    userDocRef = doc(db, 'artifacts', appId, 'users', userId);
-                    isDataSaved = true;
-                    showScreen('loading');
-                    loadingScreen.querySelector('p').textContent = 'Loading Progress...';
-                    
-                    try {
-                        await loadUserData(); // Try to load
-                    } catch (error) {
-                        console.error("Error during load, creating new user locally:", error);
-                        initNewUser(); // Create a new local game if loading fails
-                    }
-                    // This is the fix: ALWAYS go to the menu after trying to load
-                    showScreen('menu'); 
-
-                } else {
-                    // Not logged in or is anonymous
-                    userId = null;
-                    userDocRef = null;
-                    isDataSaved = false;
-                    showScreen('login');
-                }
-            }
             
-            async function loadUserData() {
-                if (!userDocRef) {
-                    initNewUser(); // Just set local vars
-                    return; 
-                }
-                try {
-                    const docSnap = await getDoc(userDocRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        trophies = data.trophies || 0;
-                        gold = data.gold || 500;
-                        towerLevel = data.towerLevel || 1;
-                        towerCardCount = data.towerCardCount || 0;
-                        trophyChests = data.trophyChests || [];
-                        cardCollection = data.cardCollection || initNewUserCards(false); 
-                        playerDeck = data.playerDeck || initNewUserCards(true); 
-                    } else {
-                        // --- THIS IS THE FIX ---
-                        // This is a new user. Set them up locally.
-                        initNewUser();
-                        // DO NOT 'await saveUserData()'. This was the bug!
-                        // The save will happen naturally after the first game.
-                    }
-                } catch (error) {
-                    console.error("Error loading user data, will force new user:", error);
-                    initNewUser(); // Fallback to a new local game
-                }
-            }
+            // NOTE: All Firebase auth logic is removed for now,
+            // focusing on guest and save-key logic.
             
             function initNewUser() {
                 trophies = 0;
@@ -949,81 +1111,78 @@
                 trophyChests = [];
                 cardCollection = initNewUserCards(false);
                 playerDeck = initNewUserCards(true);
-                // --- THIS IS THE FIX ---
-                // REMOVED 'await saveUserData();' from this function.
             }
 
-            // NEW: "Guest (No Save)" logic
+            // "Guest (No Save)" logic
             function initGuestSession() {
-                trophies = 0;
-                gold = 500;
-                towerLevel = 1;
-                towerCardCount = 0;
-                trophyChests = [];
-                cardCollection = initNewUserCards(false);
-                playerDeck = initNewUserCards(true);
+                initNewUser(); // Load default data
                 
-                // Disable saving
+                // Disable Firebase saving
                 userDocRef = null; 
                 userId = null;
-                isDataSaved = false; // Prevent save attempts
+                isDataSaved = false; // Prevent Firebase save attempts
+                isGuestSession = true; // Identify as guest
+            }
+            
+            // NEW: Get all data for save key
+            function getSaveData() {
+                return {
+                    trophies,
+                    gold,
+                    towerLevel,
+                    towerCardCount,
+                    trophyChests,
+                    cardCollection,
+                    playerDeck,
+                    v: 1 // Version number, in case we change format
+                };
+            }
+            
+            // NEW: Load all data from save key
+            function loadSaveData(data) {
+                if (!data || data.v !== 1) {
+                    throw new Error("Invalid or outdated save key.");
+                }
+                trophies = data.trophies || 0;
+                gold = data.gold || 500;
+                towerLevel = data.towerLevel || 1;
+                towerCardCount = data.towerCardCount || 0;
+                trophyChests = data.trophyChests || [];
+                cardCollection = data.cardCollection || initNewUserCards(false);
+                playerDeck = data.playerDeck || initNewUserCards(true);
             }
 
             function initNewUserCards(deckOnly = false) {
                 let newCollection = {};
+                
                 // Add all cards to collection with count 0 (except Arena 1)
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue;
+                    if (cardId === 'tower') continue; 
                     newCollection[cardId] = { level: 1, count: 0 };
                 }
+                
                 // Add Arena 1 cards with count 1
                 for (const cardId in allCards) {
+                    if (cardId === 'tower') continue; 
                     if (allCards[cardId].arena === 1) {
                         newCollection[cardId] = { level: 1, count: 1 };
                     }
                 }
+                
                 if (deckOnly) {
-                    return Object.keys(allCards).filter(id => allCards[id].arena === 1);
+                    return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower');
                 }
                 return newCollection;
             }
 
             async function saveUserData() {
-                if (!userDocRef || !isDataSaved) return;
-                // isDataSaved = false; // This was part of an old bug, let's remove it
-                try {
-                    const dataToSave = {
-                        trophies,
-                        gold,
-                        towerLevel,
-                        towerCardCount,
-                        trophyChests,
-                        cardCollection,
-                        playerDeck,
-                        lastSaved: new Date().toISOString()
-                    };
-                    await setDoc(userDocRef, dataToSave, { merge: true });
-                } catch (error) {
-                    console.error("Error saving user data:", error);
+                // This function is now a placeholder.
+                // We don't save to Firebase in guest mode.
+                // The "Save Data" button will generate a key instead.
+                if (!isGuestSession) {
+                    console.log("Attempted to save, but not in a guest session.");
                 }
-                // isDataSaved = true;
             }
-            
-            googleLoginBtn.addEventListener('click', async () => {
-                loginError.textContent = '';
-                try {
-                    await signInWithPopup(auth, provider);
-                    // handleAuth will be triggered by onAuthStateChanged
-                } catch (error) {
-                    if (error.code === 'auth/unauthorized-domain') {
-                        loginError.textContent = 'Google Sign-in is not set up.';
-                    } else if (error.code === 'auth/popup-closed-by-user') {
-                        // User closed the popup, do nothing.
-                    } else {
-                        loginError.textContent = 'Could not sign in. Please try again later.';
-                    } 
-                }
-            });
             
             // "Play as Guest (No Save)" button
             trueGuestLoginBtn.addEventListener('click', () => {
@@ -1031,7 +1190,75 @@
                 initGuestSession(); // Load default data, disable saving
                 showScreen('loading');
                 loadingScreen.querySelector('p').textContent = 'Starting Guest Game...';
-                setTimeout(() => showScreen('menu'), 500); // Short delay
+                setTimeout(() => showScreen('menu'), 1000); // Short delay
+            });
+
+            // NEW: Save/Load Key Listeners
+            loadKeyBtn.addEventListener('click', () => {
+                loadKeyInput.value = '';
+                loadKeyInput.placeholder = 'Paste your save key here...';
+                loadKeyOverlay.style.display = 'flex';
+            });
+            closeLoadKeyBtn.addEventListener('click', () => {
+                loadKeyOverlay.style.display = 'none';
+            });
+            loadKeySubmitBtn.addEventListener('click', () => {
+                const key = loadKeyInput.value.trim();
+                if (!key) return;
+                try {
+                    const jsonString = atob(key); // Decode Base64
+                    const loadedData = JSON.parse(jsonString); // Parse JSON
+                    loadSaveData(loadedData); // Load data into global state
+                    
+                    // Success!
+                    isGuestSession = true; // We are in a guest session
+                    isDataSaved = false; // Firebase saving is off
+                    loadKeyOverlay.style.display = 'none';
+                    showScreen('loading');
+                    loadingScreen.querySelector('p').textContent = 'Loading Progress...';
+                    setTimeout(() => showScreen('menu'), 1000); // Short delay
+
+                } catch (e) {
+                    console.error("Failed to load save key:", e);
+                    loadKeyInput.value = '';
+                    loadKeyInput.placeholder = 'Invalid key! Please try again.';
+                }
+            });
+            
+            saveDataKeyBtn.addEventListener('click', () => {
+                saveKeyText.value = '';
+                generateKeyBtn.disabled = saveKeyCooldown > 0;
+                generateKeyBtn.textContent = saveKeyCooldown > 0 ? `Wait ${saveKeyCooldown}s` : 'Generate Save Key';
+                saveKeyOverlay.style.display = 'flex';
+            });
+            closeSaveKeyBtn.addEventListener('click', () => {
+                saveKeyOverlay.style.display = 'none';
+            });
+            generateKeyBtn.addEventListener('click', () => {
+                if (saveKeyCooldown > 0) return;
+                
+                // Get all data
+                const dataToSave = getSaveData();
+                const jsonString = JSON.stringify(dataToSave);
+                const base64String = btoa(jsonString); // Encode to Base64
+                saveKeyText.value = base64String;
+                
+                // Start 30s cooldown
+                saveKeyCooldown = 30;
+                generateKeyBtn.disabled = true;
+                generateKeyBtn.textContent = `Wait ${saveKeyCooldown}s`;
+                
+                const interval = setInterval(() => {
+                    saveKeyCooldown--;
+                    if (saveKeyCooldown > 0) {
+                        generateKeyBtn.textContent = `Wait ${saveKeyCooldown}s`;
+                    } else {
+                        clearInterval(interval);
+                        saveKeyCooldown = 0;
+                        generateKeyBtn.disabled = false;
+                        generateKeyBtn.textContent = 'Generate Save Key';
+                    }
+                }, 1000);
             });
 
 
@@ -1042,7 +1269,7 @@
                 currentScreen = screenId;
                 screens.forEach(s => { s.id === screenId + 'Screen' ? s.classList.add('active') : s.classList.remove('active'); });
                 
-                if (screenId === 'menu' || screenId === 'deck' || screenId === 'tower') {
+                if (screenId === 'menu' || screenId === 'deck' || screenId === 'tower' || screenId === 'debug') {
                     navButtons.forEach(btn => { if (btn.dataset.screen === screenId) { btn.classList.add('text-yellow-400'); btn.classList.remove('text-gray-400'); } else { btn.classList.remove('text-yellow-400'); btn.classList.add('text-gray-400'); } });
                 }
                 
@@ -1050,6 +1277,26 @@
                 if (screenId === 'tower') { renderTowerScreen(); }
                 if (screenId === 'menu') { updateArena(); trophyDisplay.textContent = `🏆 ${trophies}`; goldDisplay.textContent = `💰 ${gold}`; renderChests(); updateBattleButtonState(); }
             }
+
+            // NEW: Handle Debug password
+            function showDebugPassword() {
+                debugPasswordInput.value = '';
+                debugPasswordOverlay.style.display = 'flex';
+                debugPasswordInput.focus();
+            }
+            debugPasswordSubmit.addEventListener('click', () => {
+                if (debugPasswordInput.value.toUpperCase() === 'GEOMETRIC') {
+                    debugPasswordOverlay.style.display = 'none';
+                    showScreen('debug');
+                } else {
+                    debugPasswordInput.value = '';
+                    debugPasswordInput.placeholder = 'Wrong! Try again.';
+                }
+            });
+            debugPasswordCancel.addEventListener('click', () => {
+                debugPasswordOverlay.style.display = 'none';
+            });
+
 
             function updateArena() {
                 let currentTrophyFloor = 0;
@@ -1124,13 +1371,21 @@
                 
                 renderChests();
                 updateArena();
-                saveUserData();
+                // saveUserData(); // Guest mode doesn't auto-save
             }
             chestCloseButton.addEventListener('click', () => {
                 chestOpenOverlay.style.display = 'none';
             });
 
-            navButtons.forEach(btn => { btn.addEventListener('click', () => { showScreen(btn.dataset.screen); }); });
+            navButtons.forEach(btn => { 
+                btn.addEventListener('click', () => { 
+                    if (btn.dataset.screen === 'debug') {
+                        showDebugPassword();
+                    } else {
+                        showScreen(btn.dataset.screen); 
+                    }
+                }); 
+            });
             battleButton.addEventListener('click', () => {
                 if (battleButton.disabled) return;
                 menuScreen.classList.remove('active');
@@ -1152,9 +1407,68 @@
             menuButton.addEventListener('click', () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); });
 
             // ==============================================
-            // DEBUG MENU LOGIC (REMOVED)
+            // DEBUG MENU LOGIC (NEW)
             // ==============================================
-            // All debug button event listeners have been removed
+            debugArena2.addEventListener('click', () => {
+                trophies = 250;
+                updateArena();
+                // saveUserData(); // Guest mode doesn't auto-save
+                showScreen('menu');
+            });
+            debugArena3.addEventListener('click', () => {
+                trophies = 500;
+                updateArena();
+                // saveUserData(); // Guest mode doesn't auto-save
+                showScreen('menu');
+            });
+            debugUnlockAll.addEventListener('click', () => {
+                for (const cardId in allCards) {
+                    if (cardId === 'tower') continue;
+                    if (!cardCollection[cardId]) {
+                        cardCollection[cardId] = { level: 1, count: 1 };
+                    } else if (cardCollection[cardId].count === 0) {
+                        cardCollection[cardId].count = 1;
+                    }
+                }
+                // saveUserData(); // Guest mode doesn't auto-save
+                console.log('All cards unlocked!');
+            });
+            debugUpgradeAll.addEventListener('click', () => {
+                for (const cardId in cardCollection) {
+                    const cardData = cardCollection[cardId];
+                    if (cardData.count > 0 && cardData.level < 15) { // Only upgrade unlocked cards, cap at 15
+                        cardData.level++;
+                    }
+                }
+                if (towerLevel < 15) towerLevel++;
+                // saveUserData(); // Guest mode doesn't auto-save
+                console.log('All owned cards and tower upgraded +1 level!');
+            });
+            debugGetChest.addEventListener('click', () => {
+                if (trophyChests.length < 4) {
+                    trophyChests.push({ id: 'wood', openTime: 0 });
+                    renderChests();
+                    // saveUserData(); // Guest mode doesn't auto-save
+                    console.log('Got a chest!');
+                } else {
+                    console.log('Chest slots are full!');
+                }
+            });
+            debugAddGold.addEventListener('click', () => {
+                gold += 1000;
+                goldDisplay.textContent = `💰 ${gold}`;
+                // saveUserData(); // Guest mode doesn't auto-save
+                console.log('+1000 Gold!');
+            });
+            debugReset.addEventListener('click', () => {
+                // Use a custom modal later
+                if (true) { // Replaced confirm()
+                    initNewUser(); // This saves
+                    // saveUserData(); // Guest mode doesn't auto-save
+                    showScreen('menu');
+                    console.log('Account reset!');
+                }
+            });
 
 
             // ==============================================
@@ -1215,6 +1529,7 @@
                 const arenaNum = aiLevel > 0 ? aiLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : 3));
                 
                 for (const cardId in allCards) {
+                    if (cardId === 'tower') continue; // FIX: Never include tower in this list
                     if (allCards[cardId].arena <= arenaNum) {
                         unlocked.push(cardId);
                     }
@@ -1241,7 +1556,7 @@
                 
                 // Render Collection & Locked Cards
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; 
+                    if (cardId === 'tower') continue; // FIX: Don't show 'tower' in collection
                     
                     const cardData = cardCollection[cardId];
                     // --- CARD LOCKING FIX ---
@@ -1297,7 +1612,7 @@
                     towerLevel++;
                     goldDisplay.textContent = `💰 ${gold}`;
                     renderTowerScreen();
-                    saveUserData();
+                    // saveUserData(); // Guest mode doesn't auto-save
                 }
             });
 
@@ -1322,7 +1637,7 @@
                     'archer': { name: 'Archer', cost: 4, emoji: '🏹', type: 'Ranged', unitClass: Archer, placementRadius: 10, isFlying: false, arena: 1, targets: 'Air & Ground',
                                 stats: { 1: { health: 250, damage: 40, hitSpeed: 1 } } },
                     'giant': { name: 'Giant', cost: 5, emoji: '💪', type: 'Tank', unitClass: Giant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings',
-                                stats: { 1: { health: 2000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Speed reduced to 0.6
+                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.6 } } }, // Slower speed, 1000 HP
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1 } } },
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground',
@@ -1334,20 +1649,20 @@
                     'arrows': { name: 'Arrows', cost: 3, emoji: '🎯', type: 'Spell', radius: 80, placementRadius: 80, arena: 1, targets: 'Air & Ground',
                                 stats: { 1: { damage: 140 } } },
                     // Arena 2
-                    'hut': { name: 'Goblin House', cost: 5, emoji: '🏠', type: 'Building', unitClass: GoblinHut, placementRadius: 20, isFlying: false, arena: 2, targets: '-', // Renamed
+                    'hut': { name: 'Goblin House', cost: 5, emoji: '🏠', type: 'Building', unitClass: GoblinHut, placementRadius: 20, isFlying: false, arena: 2, targets: '-',
                                 stats: { 1: { health: 800, spawn_speed: '5s', lifetime: '30s' } } },
-                    'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground', // Renamed
+                    'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground',
                                 stats: { 1: { count: 15, health: 50, damage: 15, hitSpeed: 1 } } },
-                    'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground', // Renamed
+                    'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground',
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2 } } },
                     // Arena 3
                     'fireDragon': { name: 'Fire Dragon', cost: 4, emoji: '🐲', type: 'Air', unitClass: FireDragon, placementRadius: 12, isFlying: true, arena: 3, targets: 'Air & Ground',
-                                stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5, splashRadius: 20 } } }, // Added splash
+                                stats: { 1: { health: 800, damage: 120, hitSpeed: 1.5, splashRadius: 25 } } },
                     'barbarians': { name: 'Barbarians', cost: 5, emoji: '🧔', type: 'Swarm', unitClass: Barbarians, placementRadius: 10, isFlying: false, arena: 3, targets: 'Ground',
                                 stats: { 1: { count: 5, health: 300, damage: 60, hitSpeed: 1.4 } } },
-                    'battleRam': { name: 'Battle Ram', cost: 4, emoji: '🌲', type: 'WinCon', unitClass: BattleRam, placementRadius: 10, isFlying: false, arena: 3, targets: 'Buildings', // Emoji updated
+                    'battleRam': { name: 'Battle Ram', cost: 4, emoji: '🌲', type: 'WinCon', unitClass: BattleRam, placementRadius: 10, isFlying: false, arena: 3, targets: 'Buildings',
                                 stats: { 1: { health: 700, damage: 200, chargeSpeed: 2.5, barbLevel: 1 } } },
-                    'barbarianHut': { name: 'Barbarian House', cost: 7, emoji: '🏘️', type: 'Building', unitClass: BarbarianHut, placementRadius: 20, isFlying: false, arena: 3, targets: '-', // Renamed
+                    'barbarianHut': { name: 'Barbarian House', cost: 7, emoji: '🏘️', type: 'Building', unitClass: BarbarianHut, placementRadius: 20, isFlying: false, arena: 3, targets: '-',
                                 stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
@@ -1356,8 +1671,6 @@
                 for (const cardId in allCards) {
                     if (cardId === 'tower') continue;
                     const card = allCards[cardId];
-                    if (!card.stats) continue; // Skip spells with no scaling stats object
-
                     for (let level = 2; level <= 15; level++) { // Cap at 15
                         if (!card.stats[level]) {
                             const prevStats = card.stats[level - 1];
@@ -1369,7 +1682,7 @@
                             if (newStats.spear_health) newStats.spear_health = Math.round(newStats.spear_health * 1.1);
                             if (newStats.spear_damage) newStats.spear_damage = Math.round(newStats.spear_damage * 1.1);
                             // Update levels for spawner cards
-                            if (cardId === 'battleRam' || cardId === 'barbarianHut' || cardId === 'barbHut') newStats.barbLevel = level;
+                            if (cardId === 'battleRam' || cardId === 'barbarianHut') newStats.barbLevel = level;
                             card.stats[level] = newStats;
                         }
                     }
@@ -1420,12 +1733,12 @@
                     addRemoveBtn.id = 'addRemoveBtn';
                     if (isInDeck) {
                         addRemoveBtn.textContent = 'Remove from Deck';
-                        addRemoveBtn.className = 'modal-btn remove';
+                        addRemoveBtn.className = 'modal-action-btn remove'; // Class renamed
                         addRemoveBtn.disabled = false;
                         addRemoveBtn.onclick = () => removeFromDeck(cardId);
                     } else {
                         addRemoveBtn.textContent = 'Add to Deck';
-                        addRemoveBtn.className = 'modal-btn add';
+                        addRemoveBtn.className = 'modal-action-btn add'; // Class renamed
                         addRemoveBtn.onclick = () => addToDeck(cardId);
                         addRemoveBtn.disabled = playerDeck.length >= 8;
                         if (playerDeck.length >= 8) addRemoveBtn.textContent = 'Deck is Full (8/8)';
@@ -1443,14 +1756,14 @@
                         cardInfoProgressText.textContent = `${displayCount} / ${costs.cards}`;
                         const canUpgrade = displayCount >= costs.cards && gold >= costs.gold;
                         cardInfoProgressBar.classList.toggle('can-upgrade', canUpgrade);
-                        cardInfoButton.className = 'modal-btn upgrade';
+                        cardInfoButton.className = 'modal-action-btn upgrade'; // Class renamed
                         cardInfoButton.textContent = `Upgrade (💰 ${costs.gold})`;
                         cardInfoButton.disabled = !canUpgrade;
                         cardInfoButton.onclick = () => upgradeCard(cardId);
                     } else {
                         // Is max level
                         cardInfoProgressContainer.style.display = 'none';
-                        cardInfoButton.className = 'modal-btn';
+                        cardInfoButton.className = 'modal-action-btn'; // Class renamed
                         cardInfoButton.textContent = 'Max Level (15)';
                         cardInfoButton.disabled = true;
                     }
@@ -1465,7 +1778,7 @@
                     playerDeck.push(cardId);
                     renderDeckScreen();
                     openCardModal(cardId);
-                    await saveUserData();
+                    // await saveUserData(); // Guest mode doesn't auto-save
                 }
             }
             async function removeFromDeck(cardId) {
@@ -1474,7 +1787,7 @@
                     playerDeck.splice(index, 1);
                     renderDeckScreen();
                     openCardModal(cardId);
-                    await saveUserData();
+                    // await saveUserData(); // Guest mode doesn't auto-save
                 }
             }
             async function upgradeCard(cardId) {
@@ -1487,7 +1800,7 @@
                     goldDisplay.textContent = `💰 ${gold}`;
                     renderDeckScreen();
                     openCardModal(cardId);
-                    await saveUserData();
+                    // await saveUserData(); // Guest mode doesn't auto-save
                 }
             }
 
@@ -1505,32 +1818,36 @@
                 renderHand();
                 
                 // AI
-                const aiArenaLevel = getAILevel(true); // Get Arena (1, 2, or 3)
-                const aiArenaCards = getUnlockedCards(false, aiArenaLevel); // AI deck based on its "arena"
+                const aiArenaLevel = getAILevel(); // This is 1, 2, or 3
+                const aiStatLevel = (aiArenaLevel === 1) ? 1 : (aiArenaLevel === 2) ? 3 : 5; // This is 1, 3, or 5
                 
-                // --- AI DECK FIX ---
-                // Build a random 8-card deck for the AI
-                let aiFullDeck = shuffleDeck(aiArenaCards);
+                // AI gets cards from its arena level, NO tower card
+                const aiArenaCards = getUnlockedCards(false, aiArenaLevel);
+                
+                // Build a random 8-card deck
                 aiDeck = [];
+                let availableCards = [...aiArenaCards];
                 for (let i = 0; i < 8; i++) {
-                    if(aiFullDeck.length === 0) aiFullDeck = shuffleDeck(aiArenaCards); // Reshuffle if not enough cards
-                    aiDeck.push(aiFullDeck.pop());
+                    if (availableCards.length === 0) availableCards = [...aiArenaCards]; // Refill if needed
+                    let cardIndex = Math.floor(Math.random() * availableCards.length);
+                    aiDeck.push(availableCards.splice(cardIndex, 1)[0]);
                 }
                 
+                aiDeck = shuffleDeck(aiDeck);
                 aiHand = [];
                 aiDiscardPile = [];
                 for (let i = 0; i < 4; i++) { if(aiDeck.length > 0) aiHand.push(aiDeck.pop()); }
                 if(aiDeck.length > 0) aiNextCard = aiDeck.pop();
-                else { aiNextCard = aiDiscardPile.pop() || aiHand[0]; } // Failsafe
             }
             
+            // NEW: AI Play Card logic uses the same cycle
             function aiPlayCard(cardId) {
                 if (!allCards[cardId]) return; // Safety check
                 aiElixir -= allCards[cardId].cost;
                 aiDiscardPile.push(cardId);
                 const handIndex = aiHand.indexOf(cardId);
                 if (handIndex > -1) { aiHand.splice(handIndex, 1); }
-                aiHand.push(aiNextCard);
+                if (aiNextCard) { aiHand.push(aiNextCard); }
                 if (aiDeck.length === 0) { aiDeck = shuffleDeck(aiDiscardPile); aiDiscardPile = []; }
                 aiNextCard = aiDeck.pop() || null;
             }
@@ -1540,7 +1857,9 @@
                 hand.forEach((cardId, index) => {
                     const cardEl = createCardDOM(cardId, false, true);
                     cardEl.dataset.handIndex = index;
-                    cardEl.addEventListener('click', () => selectCard(cardEl, cardId));
+                    // Handle touch/mouse down for card selection
+                    cardEl.addEventListener('mousedown', (e) => handleCardSelect(e, cardEl, cardId));
+                    cardEl.addEventListener('touchstart', (e) => handleCardSelect(e, cardEl, cardId), { passive: false });
                     cardHandEl.appendChild(cardEl);
                 });
                 nextCardSlotEl.innerHTML = '';
@@ -1549,33 +1868,16 @@
                 }
                 updateCardUI();
             }
-
-            function selectCard(cardEl, cardId) {
-                if (!gameRunning) return;
-                const card = allCards[cardId];
-                if (card.cost > playerElixir) { console.log("Not enough elixir!"); return; }
+            
+            function cancelPlacement() {
+                isSpawningSpell = false;
+                placementIndicator.style.display = 'none';
+                placementOverlay.style.display = 'none'; // Hide red overlay
+                selectedSpawningUnit = null;
+                isDragging = false;
+                startDragPos = { x: 0, y: 0 };
                 document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
-                placementIndicator.style.display = 'block';
-                placementIndicator.innerHTML = '';
-                selectedSpawningUnit = {
-                    id: cardId, cost: card.cost, type: card.type, radius: card.radius || 0, placementRadius: card.placementRadius,
-                    emoji: card.emoji, isFlying: card.isFlying, handIndex: cardEl.dataset.handIndex
-                };
-                if (card.type === 'Spell') {
-                    isSpawningSpell = true;
-                    spellRadius = card.radius;
-                    placementIndicator.className = 'spell';
-                    placementIndicator.style.width = `${card.radius * 2}px`;
-                    placementIndicator.style.height = `${card.radius * 2}px`;
-                } else {
-                    isSpawningSpell = false;
-                    placementRadius = card.placementRadius;
-                    placementIndicator.className = '';
-                    placementIndicator.style.width = `${placementRadius * 2}px`;
-                    placementIndicator.style.height = `${placementRadius * 2}px`;
-                    placementIndicator.innerHTML = card.emoji;
-                }
-                cardEl.classList.add('selected');
+                updateCardUI();
             }
 
             function playCard(cardId, handIndex) {
@@ -1593,30 +1895,56 @@
             // GAME OBJECTS (CLASSES)
             // ==============================================
             class GameObject {
-                constructor(x, y, radius, team, health) { this.x = x; this.y = y; this.radius = radius; this.team = team; this.health = health; this.maxHealth = health; this.id = Math.random(); this.level = 1; }
-                drawHealthBar() { if (this.health < this.maxHealth) { const barWidth = this.radius * 2; const barHeight = 5; const barX = this.x - this.radius; const barY = this.y - this.radius - (this.isFlying ? 15 : 10); ctx.fillStyle = '#dc2626'; ctx.fillRect(barX, barY, barWidth, barHeight); ctx.fillStyle = '#16a34a'; ctx.fillRect(barX, barY, barWidth * (this.health / this.maxHealth), barHeight); ctx.strokeStyle = '#000'; ctx.strokeRect(barX, barY, barWidth, barHeight); } }
-                draw(color, emoji) { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke(); if (emoji) { ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); } this.drawHealthBar(); }
+                constructor(x, y, radius, team, health) { this.x = x; this.y = y; this.radius = radius; this.team = team; this.health = health; this.maxHealth = health; this.id = Math.random(); }
+                drawHealthBar(level) { 
+                    const barWidth = this.radius * 2; 
+                    const barHeight = 5; 
+                    const barX = this.x - this.radius; 
+                    const barY = this.y - this.radius - (this instanceof Tower ? 5 : 10); // Towers' bars are closer
+                    
+                    if (this.health < this.maxHealth) {
+                        ctx.fillStyle = '#dc2626'; 
+                        ctx.fillRect(barX, barY, barWidth, barHeight); 
+                        ctx.fillStyle = '#16a34a'; 
+                        ctx.fillRect(barX, barY, barWidth * (this.health / this.maxHealth), barHeight); 
+                        ctx.strokeStyle = '#000'; 
+                        ctx.strokeRect(barX, barY, barWidth, barHeight); 
+                    }
+                    
+                    // Draw Level
+                    if (level) {
+                        ctx.font = 'bold 10px Inter';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = this.team === 'player' ? '#fff' : '#fde047'; // Player level white, AI yellow
+                        
+                        let textX = this.x;
+                        let textY = barY - 2; // Above health bar
+                        
+                        if (this instanceof Tower) {
+                             textY = this.y + this.radius + 12; // Below tower
+                        }
+                        
+                        ctx.fillText(`Lvl ${level}`, textX, textY);
+                    }
+                }
+                draw(color, emoji, level) { 
+                    ctx.beginPath(); 
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
+                    ctx.fillStyle = color; 
+                    ctx.fill(); 
+                    ctx.strokeStyle = 'black'; 
+                    ctx.lineWidth = 2; 
+                    ctx.stroke(); 
+                    if (emoji) { 
+                        ctx.font = `${this.radius * 1.5}px Arial`; 
+                        ctx.textAlign = 'center'; 
+                        ctx.textBaseline = 'middle'; 
+                        ctx.fillText(emoji, this.x, this.y); 
+                    } 
+                    this.drawHealthBar(level); 
+                }
                 update() {}
-                // For level text
-                updateLevelText() {
-                    let el = levelTextElements[this.id];
-                    if (!el) {
-                        el = document.createElement('div');
-                        el.className = 'level-text';
-                        levelTextElements[this.id] = el;
-                        gameLevelTextContainer.appendChild(el);
-                    }
-                    el.style.left = `${this.x}px`;
-                    el.style.top = `${this.y - this.radius - (this.isFlying ? 28 : 22)}px`;
-                    el.textContent = `Lvl ${this.level}`;
-                }
-                removeLevelText() {
-                    let el = levelTextElements[this.id];
-                    if (el) {
-                        el.remove();
-                        delete levelTextElements[this.id];
-                    }
-                }
             }
 
             class Tower extends GameObject {
@@ -1624,37 +1952,87 @@
                     const s = towerStats[level] || towerStats[1];
                     super(x, y, isKing ? 25 : 20, team, isKing ? s.kingHealth : s.princessHealth);
                     this.isKing = isKing;
-                    this.level = level;
+                    this.level = level; // Store level
                     this.attackRange = 150;
                     this.attackDamage = s.damage;
                     this.attackCooldown = s.hitSpeed * 60;
                     this.cooldownTimer = 0;
                     this.target = null;
-                    this.isActive = false;
+                    this.isActive = isKing ? false : true; // Princess towers are active by default
                     this.activationAnimation = 0;
                     this.dyingAnimationTimer = 0;
-
-                    // --- ADDED BACK ---
-                    // Create level text for towers
-                    let el = document.createElement('div');
-                    el.className = 'level-text tower-level';
-                    el.textContent = `Lvl ${this.level}`;
-                    el.style.left = `${this.x}px`;
-                    el.style.top = `${this.y}px`;
-                    levelTextElements[this.id] = el;
-                    gameLevelTextContainer.appendChild(el);
                 }
-                findTarget() { if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) { return; } this.target = null; let closestDist = this.attackRange; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Unit)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; this.target = obj; } } } }
-                attack() { if (this.target) { gameObjects.push(new Projectile(this.x, this.y, this.target, this.team, this.attackDamage)); this.cooldownTimer = this.attackCooldown; } }
-                update() { if (this.health <= 0) return; if (this.cooldownTimer > 0) { this.cooldownTimer--; } let kingNeedsToActivate = false; if (this.isKing) { const princessTowersDown = gameObjects.filter(t => t.team === this.team && !t.isKing && t.health > 0).length === 0; if (princessTowersDown || this.health < this.maxHealth) { if (!this.isActive) { this.isActive = true; this.activationAnimation = 30; } kingNeedsToActivate = true; } if (!kingNeedsToActivate) return; } this.findTarget(); if (this.target && this.cooldownTimer <= 0) { this.attack(); } }
-                draw() { ctx.save(); if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; const emoji = this.isKing ? '👑' : '👸'; ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, this.x, this.y); if (this.activationAnimation > 0) { this.activationAnimation--; ctx.fillStyle = `rgba(255, 255, 0, ${0.5 * (this.activationAnimation / 30)})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2); ctx.fill(); } this.drawHealthBar(); ctx.restore(); }
-                // Make sure to remove level text
-                removeLevelText() {
-                    let el = levelTextElements[this.id];
-                    if (el) {
-                        el.remove();
-                        delete levelTextElements[this.id];
+                findTarget() { 
+                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) { return; } 
+                    this.target = null; 
+                    let closestDist = this.attackRange; 
+                    for (const obj of gameObjects) { 
+                        if (obj.team !== this.team && (obj instanceof Unit)) { 
+                            const dist = getDistance(this, obj); 
+                            if (dist < closestDist) { 
+                                closestDist = dist; 
+                                this.target = obj; 
+                            } 
+                        } 
+                    } 
+                }
+                attack() { 
+                    if (this.target) { 
+                        gameObjects.push(new Projectile(this.x, this.y, this.target, this.team, this.attackDamage)); 
+                        this.cooldownTimer = this.attackCooldown; 
+                    } 
+                }
+                update() { 
+                    if (this.health <= 0) return; 
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; } 
+                    
+                    let kingNeedsToActivate = false;
+                    if (this.isKing) { 
+                        const princessTowersDown = gameObjects.filter(t => t.team === this.team && !t.isKing && t.health > 0).length === 0; 
+                        if (princessTowersDown || this.health < this.maxHealth) { 
+                            if (!this.isActive) { 
+                                this.isActive = true; 
+                                this.activationAnimation = 30; 
+                            } 
+                            kingNeedsToActivate = true; 
+                        } 
+                        if (!kingNeedsToActivate) return; 
+                    } 
+                    
+                    // Only active towers attack
+                    if (this.isActive) {
+                        this.findTarget(); 
+                        if (this.target && this.cooldownTimer <= 0) { this.attack(); } 
                     }
+                }
+                draw() { 
+                    ctx.save(); 
+                    if (this.dyingAnimationTimer > 0) { 
+                        ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); 
+                        const shakeX = (Math.random() - 0.5) * 4; 
+                        const shakeY = (Math.random() - 0.5) * 4; 
+                        ctx.translate(shakeX, shakeY); 
+                    } 
+                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
+                    const emoji = this.isKing ? '👑' : '👸'; 
+                    ctx.fillStyle = color; 
+                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; 
+                    ctx.lineWidth = 2; 
+                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillText(emoji, this.x, this.y); 
+                    if (this.activationAnimation > 0) { 
+                        this.activationAnimation--; 
+                        ctx.fillStyle = `rgba(255, 255, 0, ${0.5 * (this.activationAnimation / 30)})`; 
+                        ctx.beginPath(); 
+                        ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2); 
+                        ctx.fill(); 
+                    } 
+                    this.drawHealthBar(this.level); // Pass level to health bar
+                    ctx.restore(); 
                 }
             }
 
@@ -1662,7 +2040,7 @@
                 constructor(x, y, team, level = 1, cardId) {
                     const s = allCards[cardId].stats[level];
                     super(x, y, 20, team, s.health);
-                    this.level = level;
+                    this.level = level; // Store level
                     this.maxLifetime = parseFloat(s.lifetime) * 60;
                     this.lifetime = this.maxLifetime;
                     this.dyingAnimationTimer = 0;
@@ -1674,7 +2052,6 @@
                 }
                 update() { 
                     if (this.health <= 0) return; 
-                    this.updateLevelText(); // Update level text position
                     this.lifetime--; 
                     this.health = this.maxHealth * (this.lifetime / this.maxLifetime); 
                     if (this.lifetime <= 0) { this.health = 0; return; } 
@@ -1690,7 +2067,27 @@
                         this.spawnTimer = this.spawnRate; 
                     } 
                 }
-                draw() { ctx.save(); if (this.dyingAnimationTimer > 0) { ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); const shakeX = (Math.random() - 0.5) * 4; const shakeY = (Math.random() - 0.5) * 4; ctx.translate(shakeX, shakeY); } const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; ctx.fillStyle = color; ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); ctx.font = `${this.radius * 1.5}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.emoji, this.x, this.y); this.drawHealthBar(); ctx.restore(); }
+                draw() { 
+                    ctx.save(); 
+                    if (this.dyingAnimationTimer > 0) { 
+                        ctx.globalAlpha = Math.max(0, this.dyingAnimationTimer / 30); 
+                        const shakeX = (Math.random() - 0.5) * 4; 
+                        const shakeY = (Math.random() - 0.5) * 4; 
+                        ctx.translate(shakeX, shakeY); 
+                    } 
+                    const color = this.team === 'player' ? '#3b82f6' : '#ef4444'; 
+                    ctx.fillStyle = color; 
+                    ctx.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.strokeStyle = 'black'; 
+                    ctx.lineWidth = 2; 
+                    ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+                    ctx.font = `${this.radius * 1.5}px Arial`; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillText(this.emoji, this.x, this.y); 
+                    this.drawHealthBar(this.level); // Pass level
+                    ctx.restore(); 
+                }
             }
             class GoblinHut extends Building { constructor(x, y, team, level = 1) { super(x, y, team, level, 'hut'); } }
             class BarbarianHut extends Building { constructor(x, y, team, level = 1) { super(x, y, team, level, 'barbarianHut'); } }
@@ -1699,6 +2096,7 @@
             class Unit extends GameObject {
                 constructor(x, y, radius, team, health, speed, attackRange, attackDamage, attackCooldown, emoji, isFlying = false, targetsAir = false, level = 1) {
                     super(x, y, radius, team, health);
+                    this.level = level; // Store level
                     this.speed = speed;
                     this.attackRange = attackRange;
                     this.attackDamage = attackDamage;
@@ -1708,25 +2106,85 @@
                     this.emoji = emoji;
                     this.isFlying = isFlying;
                     this.targetsAir = targetsAir;
-                    this.level = level; // Added level
-                    this.splashRadius = 0; // For splash damage
+                    this.targetsBuildings = false; // NEW: Default to targeting anything
                 }
+                
+                // NEW: Smarter findTarget logic
                 findTarget() {
+                    // 1. If I have a valid target, check if I should switch
+                    if (this.target && this.target.health > 0) {
+                        const distToCurrent = getDistance(this, this.target);
+                        // If I'm melee and in range, don't switch
+                        if (this.attackRange <= this.radius + this.target.radius + 5 && distToCurrent <= this.attackRange) {
+                            return;
+                        }
+
+                        // If I'm building-focused, stick to it unless it's dead
+                        if (this.targetsBuildings) {
+                            return; 
+                        }
+
+                        // Check for *closer* enemies
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && (obj instanceof Unit)) { // Only check for units
+                                if (!this.targetsAir && obj.isFlying) continue; // Can't target air
+                                
+                                const distToNew = getDistance(this, obj);
+                                // NEW: Only switch if new target is in range AND closer than current target
+                                if (distToNew < TROOP_AGGRO_RANGE && distToNew < distToCurrent) {
+                                    this.target = obj;
+                                    return; // Switched to new, closer target
+                                }
+                            }
+                        }
+                        return; // Keep current target
+                    }
+
+                    // 2. If I don't have a valid target, find one
+                    this.target = null;
                     let closestDist = Infinity;
                     let newTarget = null;
+                    
+                    // 2a. Check for units in aggro range first
                     for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
-                            if (!this.targetsAir && obj.isFlying) continue; // Can't target air
-                            
+                        if (obj.team !== this.team && (obj instanceof Unit)) {
+                            if (!this.targetsAir && obj.isFlying) continue;
                             const dist = getDistance(this, obj);
-                            if (dist < closestDist) {
+                            if (dist < TROOP_AGGRO_RANGE && dist < closestDist) {
                                 closestDist = dist;
                                 newTarget = obj;
                             }
                         }
                     }
-                    this.target = newTarget;
+                    if (newTarget) {
+                        this.target = newTarget;
+                        return;
+                    }
+
+                    // 2b. If no units in range, find closest tower
+                    closestDist = Infinity;
+                    let closestTower = null;
+                    // Find closest tower in my lane
+                    const myLaneX = (this.x < WIDTH / 2) ? LANE_LEFT_X : LANE_RIGHT_X;
+                    
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Tower)) {
+                            const dist = getDistance(this, obj);
+                            // Prioritize tower in the same lane
+                            let laneBonus = ( (obj.x < WIDTH / 2 && myLaneX < WIDTH / 2) || (obj.x > WIDTH / 2 && myLaneX > WIDTH / 2) ) ? 0 : 50;
+                            
+                            if (dist + laneBonus < closestDist) {
+                                closestDist = dist + laneBonus;
+                                closestTower = obj;
+                            }
+                        }
+                    }
+                    if(closestTower) {
+                        this.target = closestTower;
+                        return;
+                    }
                 }
+                
                 move() {
                     if (!this.target) return;
                     const dist = getDistance(this, this.target);
@@ -1755,27 +2213,38 @@
                             this.target.health -= this.attackDamage; 
                         } else { // Ranged
                             let projectileType = Projectile;
-                            if (this.emoji === '🐲') projectileType = FireballProjectile; // Fire Dragon
-                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, this.attackDamage, this.splashRadius)); 
+                            let damage = this.attackDamage;
+                            let splash = 0;
+                            if (this.emoji === '🐲') {
+                                projectileType = FireballProjectile;
+                                splash = allCards['fireDragon'].stats[this.level].splashRadius;
+                            }
+                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, damage, splash)); 
                         } 
                         this.cooldownTimer = this.attackCooldown; 
                     } 
                 }
                 update() {
                     if (this.health <= 0) return;
-                    this.updateLevelText(); // Update level text
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
-                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
-                        this.attack();
-                    } else {
-                        this.findTarget();
-                        this.move();
-                        if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
+                    
+                    this.findTarget(); // Always check for new targets
+                    
+                    if (this.target && this.target.health > 0) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
                             this.attack();
+                        } else {
+                            this.move();
+                        }
+                    } else {
+                        // No target, just move towards enemy side (if not building-focused)
+                        if (!this.targetsBuildings) {
+                            const angle = (this.team === 'player') ? -Math.PI / 2 : Math.PI / 2;
+                            this.y += Math.sin(angle) * this.speed;
                         }
                     }
                 }
-                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji); }
+                draw() { const color = this.team === 'player' ? '#60a5fa' : '#f87171'; super.draw(color, this.emoji, this.level); }
             }
 
             class Knight extends Unit { constructor(x, y, team, level = 1) { const s = allCards['knight'].stats[level]; super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '⚔️', false, false, level); } }
@@ -1784,15 +2253,42 @@
                 constructor(x, y, team, level = 1) {
                     const s = allCards['giant'].stats[level];
                     super(x, y, 18, team, s.health, s.speed, 30, s.damage, s.hitSpeed, '💪', false, false, level);
-                    this.findTarget = () => {
+                    this.targetsBuildings = true; // NEW: Set building-only targeting
+                    this.findTarget = () => { // NEW: Override findTarget
+                        // 1. If target is valid, keep it
+                        if (this.target && this.target.health > 0 && (this.target instanceof Tower || this.target instanceof Building)) {
+                            return;
+                        }
+                        
+                        // 2. Find new building/tower target
+                        this.target = null;
                         let closestDist = Infinity;
                         let newTarget = null;
+                        
+                        // Check for towers first
                         for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Tower || obj instanceof Building)) {
+                            if (obj.team !== this.team && (obj instanceof Tower)) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { closestDist = dist; newTarget = obj; }
+                                if (dist < closestDist) { 
+                                    closestDist = dist; 
+                                    newTarget = obj; 
+                                }
                             }
                         }
+                        
+                        // If no towers, check for other buildings
+                        if (!newTarget) {
+                            for (const obj of gameObjects) {
+                                if (obj.team !== this.team && (obj instanceof Building)) {
+                                    const dist = getDistance(this, obj);
+                                    if (dist < closestDist) { 
+                                        closestDist = dist; 
+                                        newTarget = obj; 
+                                    }
+                                }
+                            }
+                        }
+                        
                         this.target = newTarget;
                     };
                 }
@@ -1809,7 +2305,7 @@
             class SkeletonArmy { constructor(x, y, team, level = 1) { const s = allCards['skeletonArmy'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Skeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
             class Barbarian extends Unit { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; super(x, y, 11, team, s.health, 1.1, 25, s.damage, s.hitSpeed, '🧔', false, false, level); } }
             class Barbarians { constructor(x, y, team, level = 1) { const s = allCards['barbarians'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Barbarian(x + Math.random()*10-5, y + Math.random()*10-5, team, level)); } } }
-            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); this.splashRadius = s.splashRadius; } }
+            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.2, 110, s.damage, s.hitSpeed, '🐲', true, true, level); } }
             class BattleRam extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['battleRam'].stats[level];
@@ -1817,35 +2313,48 @@
                     this.barbLevel = s.barbLevel;
                     this.chargeTimer = 3 * 60;
                     this.isCharging = false;
-                    this.spawnedBarbs = false; // --- BATTLE RAM FIX ---
-                    this.findTarget = () => { let closestDist = Infinity; let newTarget = null; for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Tower || obj instanceof Building)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } } this.target = newTarget; };
+                    this.didHit = false; // Flag to prevent double spawns
+                    this.targetsBuildings = true; // NEW: Set building-only targeting
+                    this.findTarget = () => { // NEW: Override findTarget (same as Giant)
+                        if (this.target && this.target.health > 0 && (this.target instanceof Tower || this.target instanceof Building)) return;
+                        this.target = null;
+                        let closestDist = Infinity;
+                        let newTarget = null;
+                        for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Tower)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } }
+                        if (!newTarget) { for (const obj of gameObjects) { if (obj.team !== this.team && (obj instanceof Building)) { const dist = getDistance(this, obj); if (dist < closestDist) { closestDist = dist; newTarget = obj; } } } }
+                        this.target = newTarget;
+                    };
                 }
-                spawnBarbarians() {
-                    if (this.spawnedBarbs) return; // Only spawn once
-                    this.spawnedBarbs = true;
+                
+                spawnBarbs() {
+                    if (this.didHit) return; // Don't spawn twice
+                    this.didHit = true;
                     gameObjects.push(new Barbarian(this.x + 5, this.y, this.team, this.barbLevel));
                     gameObjects.push(new Barbarian(this.x - 5, this.y, this.team, this.barbLevel));
+                    this.health = 0; // Ram is destroyed
                 }
+
                 update() {
-                    if (this.health <= 0) {
-                        this.spawnBarbarians(); // --- BATTLE RAM FIX ---
+                    if (this.health <= 0 && !this.didHit) {
+                        this.spawnBarbs(); // Spawn if killed by damage
                         return;
                     }
+                    if (this.didHit) return; // Already spawned, do nothing
+                    
                     if (this.chargeTimer > 0) { this.chargeTimer--; if(this.chargeTimer === 0) this.isCharging = true; }
                     if (this.isCharging) this.speed = 2.4; else this.speed = 1.2;
-                    super.update();
+                    super.update(); // Run the base Unit's update (which calls findTarget, move, attack)
                 }
                 attack() { // Ram only attacks when it hits
                     if (this.target && this.cooldownTimer <= 0) { 
                         this.target.health -= this.attackDamage;
-                        this.health = 0; // Ram breaks
-                        this.spawnBarbarians(); // --- BATTLE RAM FIX ---
+                        this.spawnBarbs(); // Spawn on hit
                     } 
                 }
             }
 
             class Projectile extends GameObject {
-                constructor(x, y, target, team, damage, splashRadius = 0) { // Added splashRadius
+                constructor(x, y, target, team, damage, splashRadius = 0) { 
                     super(x, y, 4, team, 1); 
                     this.target = target; 
                     this.damage = damage; 
@@ -1856,17 +2365,20 @@
                     if (!this.target || this.target.health <= 0) { this.health = 0; return; } 
                     const dist = getDistance(this, this.target); 
                     if (dist < this.speed) { 
+                        // Hit target
                         this.target.health -= this.damage; 
-                        // --- SPLASH DAMAGE LOGIC ---
+                        
+                        // Handle splash
                         if (this.splashRadius > 0) {
                             for (const obj of gameObjects) {
-                                if (obj.team !== this.team && obj.id !== this.target.id && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                if (obj.team !== this.team && obj !== this.target && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
                                     if (getDistance(this.target, obj) < this.splashRadius) {
-                                        obj.health -= this.damage; // Full splash for now
+                                        obj.health -= this.damage; // Splash does full damage
                                     }
                                 }
                             }
                         }
+                        
                         this.health = 0; 
                         return; 
                     } 
@@ -1874,10 +2386,21 @@
                     this.x += Math.cos(angle) * this.speed; 
                     this.y += Math.sin(angle) * this.speed; 
                 }
-                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca'; ctx.fill(); }
+                draw() { 
+                    ctx.beginPath(); 
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
+                    ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca'; 
+                    ctx.fill(); 
+                }
             }
+            
             class FireballProjectile extends Projectile {
-                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2); ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00'; ctx.fill(); }
+                draw() { 
+                    ctx.beginPath(); 
+                    ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2); 
+                    ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00'; 
+                    ctx.fill(); 
+                }
             }
 
             class Spell extends GameObject {
@@ -1962,29 +2485,14 @@
                 ctx.fillStyle = '#a16207'; // Brown
                 ctx.fillRect(LANE_LEFT_X - 25, RIVER_Y - 15, 50, 30);
                 ctx.fillRect(LANE_RIGHT_X - 25, RIVER_Y - 15, 50, 30);
-
-                // Spawnable Area
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.setLineDash([5, 5]);
-                ctx.strokeRect(10, RIVER_Y, WIDTH - 20, (HEIGHT - 10) - RIVER_Y);
-                ctx.setLineDash([]);
             }
 
-            function getAILevel(isArena = false) {
-                // isArena = true returns 1, 2, or 3
-                // isArena = false returns 1, 3, or 5 (stat level)
-                if (isArena) {
-                    if (trophies > 500) return 3; if (trophies > 250) return 2; return 1;
-                }
-                if (trophies > 500) return 5; if (trophies > 250) return 3; return 1;
+            function getAILevel() {
+                if (trophies > 500) return 3; if (trophies > 250) return 2; return 1;
             }
 
             function initGame() {
                 gameObjects = [];
-                // Clear all level text elements from DOM
-                gameLevelTextContainer.innerHTML = '';
-                levelTextElements = {};
-
                 playerElixir = 3;
                 aiElixir = 3;
                 selectedSpawningUnit = null;
@@ -1996,11 +2504,20 @@
                 isTieBreaker = false;
                 tieBreakerTick = 0;
                 
+                // Reset spawn zones
+                playerLeftTowerDestroyed = false;
+                playerRightTowerDestroyed = false;
+                aiLeftTowerDestroyed = false;
+                aiRightTowerDestroyed = false;
+                updatePlacementOverlay();
+                
                 messageOverlay.style.display = 'none';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
 
-                const aiStatLevel = getAILevel(false);
+                const aiArenaLevel = getAILevel();
+                const aiStatLevel = (aiArenaLevel === 1) ? 1 : (aiArenaLevel === 2) ? 3 : 5;
+                
                 gameObjects.push(new Tower(LANE_LEFT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(LANE_RIGHT_X, HEIGHT - 100, 'player', false, towerLevel));
                 gameObjects.push(new Tower(WIDTH / 2, HEIGHT - 50, 'player', true, towerLevel));
@@ -2013,11 +2530,13 @@
             }
 
             function runAI() {
-                const aiStatLevel = getAILevel(false);
+                const aiArenaLevel = getAILevel();
+                const aiStatLevel = (aiArenaLevel === 1) ? 1 : (aiArenaLevel === 2) ? 3 : 5;
+                
                 const playerUnits = gameObjects.filter(o => o.team === 'player' && o instanceof Unit && o.y < RIVER_Y + 50);
                 if (playerUnits.length > 0) {
                     let bestCardId = null;
-                    if (playerUnits.some(u => u instanceof Goblin || u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
+                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
                     } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
                         bestCardId = 'tinyBot';
@@ -2030,20 +2549,23 @@
                     }
                     if (bestCardId) { spawnAIUnit(bestCardId, aiStatLevel, true); return; }
                 }
-                if (aiElixir > 7) { // AI Fallback logic
+                
+                // Fallback: If elixir is high, play a card
+                if (aiElixir > 7) {
                     let bestCardId = null;
                     if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
                     else {
-                        // Play any affordable card
-                        const affordableCards = aiHand.filter(id => allCards[id] && allCards[id].cost <= aiElixir);
-                        if(affordableCards.length > 0) {
+                        // Play any random affordable unit
+                        let affordableCards = aiHand.filter(id => allCards[id] && allCards[id].cost <= aiElixir && allCards[id].type !== 'Spell');
+                        if (affordableCards.length > 0) {
                             bestCardId = affordableCards[Math.floor(Math.random() * affordableCards.length)];
                         }
                     }
                     if (bestCardId) { spawnAIUnit(bestCardId, aiStatLevel, false); return; }
                 }
+
                 if (aiElixir === MAX_ELIXIR && aiHand.includes('fireball') && Math.random() < 0.2) {
                     spawnAIUnit('fireball', aiStatLevel, false);
                     return;
@@ -2053,9 +2575,13 @@
             function spawnAIUnit(cardId, level, isDefensive = false) {
                 const card = allCards[cardId];
                 if (!card || card.cost > aiElixir) return;
+                
+                // Get AI's level for this card (currently just 'level')
+                const cardLevel = level;
+                
                 if (card.type === 'Spell') {
                     let target = null;
-                    const damage = card.stats[level].damage;
+                    const damage = card.stats[cardLevel].damage;
                     if (cardId === 'fireball') {
                         target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0 && o.health < 600);
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarian);
@@ -2068,20 +2594,37 @@
                     }
                     return;
                 }
-                const spawnX = Math.random() < 0.5 ? LANE_LEFT_X : LANE_RIGHT_X;
-                const spawnY = isDefensive ? (RIVER_Y - 20) : (50 + Math.random() * (RIVER_Y - 100));
-                let spawnRadius = card.placementRadius;
-                let canSpawn = true;
-                for (const obj of gameObjects) {
-                    const dist = getDistance({x: spawnX, y: spawnY}, obj);
-                    if (dist < spawnRadius + obj.radius) { canSpawn = false; break; }
+                
+                // Determine spawn Y
+                let spawnY;
+                if (isDefensive) {
+                    // Spawn behind princess towers
+                    spawnY = 150 + Math.random() * 50;
+                } else {
+                    // Spawn at the back
+                    spawnY = 50 + Math.random() * 50;
                 }
-                if (canSpawn && card.unitClass) {
-                    const newUnit = new card.unitClass(spawnX, spawnY, 'ai', level);
-                    if (card.type === 'Building') {
-                        gameObjects.push(newUnit); // --- BUILDING SPAWN FIX ---
+                
+                // Determine spawn X (which lane)
+                const spawnX = Math.random() < 0.5 ? LANE_LEFT_X : LANE_RIGHT_X;
+                
+                // Check if spawn is valid (not on top of another building)
+                let canSpawn = true;
+                if (card.type === 'Building') {
+                    for (const obj of gameObjects) {
+                        if (obj instanceof Tower || obj instanceof Building) {
+                            const dist = getDistance({x: spawnX, y: spawnY}, obj);
+                            if (dist < card.placementRadius + obj.radius) { 
+                                canSpawn = false; 
+                                break; 
+                            }
+                        }
                     }
-                    else if (!card.type.includes('Swarm')) {
+                }
+                
+                if (canSpawn && card.unitClass) {
+                    const newUnit = new card.unitClass(spawnX, spawnY, 'ai', cardLevel);
+                    if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
                         gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
@@ -2120,6 +2663,50 @@
                     aiElixir = Math.min(aiElixir, MAX_ELIXIR);
                 }
             }
+            
+            // NEW: Update function to check tower status
+            function checkTowerStatus() {
+                const aiLeft = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x < WIDTH / 2);
+                const aiRight = gameObjects.find(t => t.team === 'ai' && !t.isKing && t.x > WIDTH / 2);
+                
+                if (aiLeft && aiLeft.health <= 0 && !aiLeftTowerDestroyed) {
+                    aiLeftTowerDestroyed = true;
+                    if(selectedSpawningUnit) updatePlacementOverlay(); // Update overlay if card is selected
+                }
+                if (aiRight && aiRight.health <= 0 && !aiRightTowerDestroyed) {
+                    aiRightTowerDestroyed = true;
+                    if(selectedSpawningUnit) updatePlacementOverlay(); // Update overlay if card is selected
+                }
+                
+                // Can check player towers here too if AI gets spawn zones
+            }
+            
+            // NEW: Update the clip-path of the red overlay
+            function updatePlacementOverlay() {
+                // Define the zones. 50% is the river. 30% is the new "far end" line.
+                const farY = (PLAYER_NEW_SPAWN_LIMIT_Y / HEIGHT) * 100; // 30%
+                const riverY = (RIVER_Y / HEIGHT) * 100; // 50%
+
+                const leftDestroyed = aiLeftTowerDestroyed;
+                const rightDestroyed = aiRightTowerDestroyed;
+
+                let clipPathStr = '';
+                if (!leftDestroyed && !rightDestroyed) {
+                    // Block entire top half
+                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${riverY}%, 0% ${riverY}%)`;
+                } else if (leftDestroyed && rightDestroyed) {
+                    // Block only the far end
+                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${farY}%, 0% ${farY}%)`;
+                } else if (leftDestroyed && !rightDestroyed) {
+                    // Block full right half + far left half
+                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${riverY}%, 50% ${riverY}%, 50% ${farY}%, 0% ${farY}%)`;
+                } else if (!leftDestroyed && rightDestroyed) {
+                    // Block full left half + far right half
+                    clipPathStr = `polygon(0% 0%, 100% 0%, 100% ${farY}%, 50% ${farY}%, 50% ${riverY}%, 0% ${riverY}%)`;
+                }
+                placementOverlay.style.clipPath = clipPathStr;
+            }
+
 
             function checkGameOver() {
                 const playerKing = gameObjects.find(t => t.team === 'player' && t.isKing);
@@ -2146,13 +2733,7 @@
 
             function startTieBreaker() {
                 if (!gameRunning) return;
-                gameRunning = true; isTieBreaker = true; 
-                // Clear all non-towers
-                gameObjects = gameObjects.filter(obj => {
-                    if (obj instanceof Tower) return true;
-                    obj.removeLevelText(); // Remove text for units
-                    return false;
-                });
+                gameRunning = true; isTieBreaker = true; gameObjects = gameObjects.filter(obj => (obj instanceof Tower));
                 messageText.textContent = 'TIEBREAKER!';
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
@@ -2203,7 +2784,7 @@
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
-                await saveUserData();
+                // await saveUserData(); // Guest mode doesn't auto-save
             }
 
             async function showLoseScreen(message = 'You Lose!') {
@@ -2218,7 +2799,7 @@
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
-                await saveUserData();
+                // await saveUserData(); // Guest mode doesn't auto-save
             }
 
             function gameLoop(timestamp) {
@@ -2239,12 +2820,25 @@
                     runAI();
                     aiThinkTimer = 30 + Math.random() * 30; // Think every 0.5-1s
                 }
+                
+                // Update objects
                 gameObjects.forEach(obj => obj.update());
+                
+                // Check tower status for spawn zones
+                checkTowerStatus();
+                
+                // Filter dead objects
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
-                    // Object is dead, remove its level text
-                    obj.removeLevelText();
-                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { return false; }
+                    // Handle units/projectiles/spells
+                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { 
+                        // Special case: Battle Ram needs to spawn barbs
+                        if (obj instanceof BattleRam && !obj.didHit) {
+                            obj.spawnBarbs();
+                        }
+                        return false; 
+                    }
+                    // Handle towers/buildings
                     if (obj instanceof Tower || obj instanceof Building) {
                         if (obj.isKing) { checkGameOver(); return true; }
                         if (obj.dyingAnimationTimer === 0) { obj.dyingAnimationTimer = 30; }
@@ -2253,6 +2847,7 @@
                     }
                     return false;
                 });
+                
                 updateCardUI();
                 if (gameTimer <= 0) {
                     if (isOvertime) { startTieBreaker(); }
@@ -2270,27 +2865,140 @@
             
             function getCanvasClickPos(e) {
                 const rect = canvas.getBoundingClientRect();
-                let clickX, clickY;
-                if (e.touches && e.touches.length > 0) { clickX = e.touches[0].clientX; clickY = e.touches[0].clientY; }
-                else if (e.changedTouches && e.changedTouches.length > 0) { clickX = e.changedTouches[0].clientX; clickY = e.changedTouches[0].clientY; }
-                else { clickX = e.clientX; clickY = e.clientY; }
-                const x = clickX - rect.left;
-                const y = clickY - rect.top;
+                let clientX, clientY;
+                if (e.touches && e.touches.length > 0) { 
+                    clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; 
+                } else if (e.changedTouches && e.changedTouches.length > 0) { 
+                    clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; 
+                } else { 
+                    clientX = e.clientX; clientY = e.clientY; 
+                }
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
                 return { x, y };
             }
 
-            function checkPlacement(x, y, radius) {
-                if (y < RIVER_Y || y > HEIGHT - 10) { return false; }
-                for (const obj of gameObjects) {
-                    const dist = getDistance({x: x, y: y}, obj);
-                    if (dist < radius + obj.radius) { return false; }
+            function checkPlacement(x, y, radius, cardType) {
+                // Check if in allowed zone
+                let inAllowedZone = false;
+                if (y > RIVER_Y) {
+                    inAllowedZone = true; // Always allowed in player's base
+                } else if (y > PLAYER_NEW_SPAWN_LIMIT_Y) { // Between river and "far end"
+                    // Check enemy territory
+                    if (aiLeftTowerDestroyed && x < WIDTH / 2) inAllowedZone = true;
+                    if (aiRightTowerDestroyed && x > WIDTH / 2) inAllowedZone = true;
                 }
+                if (!inAllowedZone) return false;
+
+                // Check for collision
+                for (const obj of gameObjects) {
+                    // NEW: Allow placing on troops, not buildings
+                    if (obj instanceof Tower || obj instanceof Building) {
+                        const dist = getDistance({x: x, y: y}, obj);
+                        if (dist < radius + obj.radius) { return false; }
+                    }
+                }
+                
                 return true;
+            }
+
+            // --- NEW: Card Click/Drag Logic ---
+
+            function handleCardSelect(e, cardEl, cardId) {
+                e.preventDefault(); // Prevent scrolling/other actions
+                if (!gameRunning) return;
+                const card = allCards[cardId];
+                if (card.cost > playerElixir) { console.log("Not enough elixir!"); return; }
+                
+                // Deselect if already selected
+                if (selectedSpawningUnit && selectedSpawningUnit.id === cardId) {
+                    cancelPlacement();
+                    return;
+                }
+
+                // Start tracking for drag
+                isDragging = false; // Not dragging *yet*
+                let pos = (e.touches && e.touches[0]) ? e.touches[0] : e;
+                startDragPos = { x: pos.clientX, y: pos.clientY };
+
+                // Select the card
+                document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
+                placementOverlay.style.display = 'block'; // Show red overlay
+                placementIndicator.innerHTML = '';
+                
+                selectedSpawningUnit = {
+                    id: cardId, cost: card.cost, type: card.type, radius: card.radius || 0, placementRadius: card.placementRadius,
+                    emoji: card.emoji, isFlying: card.isFlying, handIndex: cardEl.dataset.handIndex
+                };
+                
+                if (card.type === 'Spell') {
+                    isSpawningSpell = true;
+                    spellRadius = card.radius;
+                    placementIndicator.className = 'spell';
+                    placementIndicator.style.width = `${card.radius * 2}px`;
+                    placementIndicator.style.height = `${card.radius * 2}px`;
+                } else {
+                    isSpawningSpell = false;
+                    placementRadius = card.placementRadius;
+                    placementIndicator.className = '';
+                    placementIndicator.style.width = `${placementRadius * 2}px`;
+                    placementIndicator.style.height = `${placementRadius * 2}px`;
+                    placementIndicator.innerHTML = card.emoji;
+                }
+                cardEl.classList.add('selected');
+                
+                // Update placement overlay based on destroyed towers
+                updatePlacementOverlay();
+                
+                // Move indicator to initial touch/mouse position
+                let initialPos = (e.touches && e.touches[0]) ? e.touches[0] : e;
+                movePlacementIndicator(initialPos);
+                // Show indicator, but hide if off-canvas
+                const { x, y } = getCanvasClickPos(initialPos);
+                if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
+                     placementIndicator.style.display = 'none';
+                } else {
+                     placementIndicator.style.display = 'block';
+                }
+            }
+            
+            function handleDragMove(e) {
+                if (!selectedSpawningUnit) return;
+                e.preventDefault();
+                
+                let pos = (e.touches && e.touches[0]) ? e.touches[0] : e;
+                
+                // Check if we've moved enough to be "dragging"
+                const dx = pos.clientX - startDragPos.x;
+                const dy = pos.clientY - startDragPos.y;
+                if (!isDragging && (dx*dx + dy*dy) > (DRAG_SENSITIVITY * DRAG_SENSITIVITY)) {
+                    isDragging = true;
+                }
+
+                //if (isDragging) { // OLD logic: only move if dragging
+                // NEW logic: always move indicator if a card is selected
+                movePlacementIndicator(pos);
+                //}
             }
 
             function movePlacementIndicator(e) {
                 if (!selectedSpawningUnit) return;
+                
                 const { x, y } = getCanvasClickPos(e);
+                
+                // NEW: Hide indicator if off-canvas
+                // Check raw clientX/Y against rect
+                const rect = canvas.getBoundingClientRect();
+                const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+
+                if (isDragging && (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom)) {
+                    placementIndicator.style.display = 'none';
+                    canPlace = false; // Can't place off-canvas
+                    return;
+                }
+                
+                placementIndicator.style.display = 'block';
                 const clampedX = Math.max(0, Math.min(WIDTH, x));
                 const clampedY = Math.max(0, Math.min(HEIGHT, y));
                 let radius = isSpawningSpell ? spellRadius : placementRadius;
@@ -2300,85 +3008,87 @@
                 placementIndicator.style.top = `${clampedY}px`;
                 
                 if (isSpawningSpell) {
-                    canPlace = true;
+                    canPlace = true; // Spells can be placed anywhere
                 } else {
-                    canPlace = checkPlacement(clampedX, clampedY, placementRadius);
+                    canPlace = checkPlacement(clampedX, clampedY, placementRadius, selectedSpawningUnit.type);
                 }
                 placementIndicator.classList.toggle('cant-place', !canPlace);
             }
             
-            canvas.addEventListener('mousemove', movePlacementIndicator);
-            canvas.addEventListener('touchmove', (e) => {
-                if (!selectedSpawningUnit) return;
-                e.preventDefault();
-                movePlacementIndicator(e);
-            }, { passive: false });
+            // Re-bind mouse/touch move to window to allow dragging off canvas
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
 
 
-            const spawnOnCanvas = (e) => {
-                if (!selectedSpawningUnit || !gameRunning || !canPlace) {
-                    if(!canPlace && selectedSpawningUnit) console.log("Cannot spawn there!");
-                    isSpawningSpell = false;
-                    placementIndicator.style.display = 'none';
-                    selectedSpawningUnit = null;
-                    document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
-                    updateCardUI();
+            function handlePlacement(e) {
+                if (!selectedSpawningUnit || !gameRunning) {
+                    cancelPlacement();
                     return;
                 };
                 
-                const { x, y } = getCanvasClickPos(e);
-                const clampedX = Math.max(0, Math.min(WIDTH, x));
-                const clampedY = Math.max(0, Math.min(HEIGHT, y));
-                
-                const card = allCards[selectedSpawningUnit.id];
-                const level = cardCollection[selectedSpawningUnit.id].level;
-                
-                if (card.type === 'Spell') {
-                    const damage = card.stats[level].damage;
-                    gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
-                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
-                } else {
-                    const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                    // --- BUILDING SPAWN FIX ---
-                    if (card.type === 'Building') {
-                        gameObjects.push(newUnit);
-                    }
-                    else if (!card.type.includes('Swarm')) {
-                        gameObjects.push(newUnit);
-                    }
-                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
-                }
+                // If we were dragging, or if it's a click-to-place on the canvas
+                // NEW: Check if the event target is the canvas itself
+                const isCanvasClick = e.target === canvas;
 
-                isSpawningSpell = false;
-                placementIndicator.style.display = 'none';
-                selectedSpawningUnit = null;
-                document.querySelectorAll('#cardHand .card-ui.selected').forEach(c => c.classList.remove('selected'));
-                updateCardUI();
+                if (isDragging || isCanvasClick) {
+                    if (!canPlace) {
+                        console.log("Cannot spawn there!");
+                        cancelPlacement();
+                        return;
+                    }
+                
+                    const { x, y } = getCanvasClickPos(e);
+                    const clampedX = Math.max(0, Math.min(WIDTH, x));
+                    const clampedY = Math.max(0, Math.min(HEIGHT, y));
+                    
+                    const card = allCards[selectedSpawningUnit.id];
+                    const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
+                    
+                    if (card.type === 'Spell') {
+                        const damage = card.stats[level].damage;
+                        gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
+                    } else {
+                        const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
+                        if (!card.type.includes('Swarm') && !card.type.includes('Building')) {
+                            gameObjects.push(newUnit);
+                        }
+                    }
+                    
+                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
+                    cancelPlacement();
+                } else if (!isDragging && e.target.closest('.card-ui')) {
+                    // This was a "click" on a card, but not a drag.
+                    // We already selected the card, so just wait for the canvas click.
+                    // Do nothing here.
+                } else {
+                    // This was a click somewhere else (like the elixir bar)
+                    cancelPlacement();
+                }
             }
+
+            // Use mouseup/touchend on the *window* to catch drags released off-canvas
+            window.addEventListener('mouseup', handlePlacement);
+            window.addEventListener('touchend', handlePlacement, { passive: false });
             
-            canvas.addEventListener('click', spawnOnCanvas);
-            canvas.addEventListener('touchend', (e) => {
-                if (!selectedSpawningUnit) return;
-                e.preventDefault();
-                spawnOnCanvas(e);
-            }, { passive: false });
+            // NEW: Add a click listener to the canvas for "click-to-place"
+            canvas.addEventListener('click', (e) => {
+                if (selectedSpawningUnit && !isDragging) {
+                    handlePlacement(e);
+                }
+            });
 
             cardInfoCloseBtn.addEventListener('click', closeModal);
             
             // --- Init App ---
             initCardSystem(); // Define all cards
+            // Use guest login by default
+            // initGuestSession();
+            // showScreen('menu');
+            // onAuthStateChanged(auth, handleAuth); // Wait for user login
             
-            // --- LOGIN FIX ---
-            // This now *only* runs when a user state CHANGES (i.e., you click login)
-            // It no longer runs on page load, which was the auto-login bug
-            onAuthStateChanged(auth, (user) => {
-                if (isInitialAuthCheck) {
-                    isInitialAuthCheck = false; // Stop the first auto-login check
-                    return; // Do nothing, stay on login screen
-                }
-                // If it runs again, it's because the user *clicked* a login button
-                handleAuth(user);
-            }); 
+            // --- FIX: Only show login screen, let user choose ---
+            showScreen('login');
+
         };
 
     </script>
