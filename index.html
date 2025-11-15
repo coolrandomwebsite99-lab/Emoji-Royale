@@ -33,6 +33,7 @@
                 linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
         }
+        /* NEW ARENA 4 STYLE */
         canvas.arena-4 { 
             background-color: #ca8a04; /* yellow-600 */
             background-image: 
@@ -66,7 +67,7 @@
             padding: 1rem;
         }
         #messageOverlay button, #chestOpenOverlay button, .login-btn, .debug-btn, #debugPasswordOverlay button,
-        #saveDataOverlay button, #loadDataOverlay button, .menu-btn { /* Added menu-btn */
+        #saveDataOverlay button, #loadDataOverlay button, .arena-btn { /* Added arena-btn */
             font-size: 1rem;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
@@ -84,7 +85,7 @@
             max-width: 300px;
         }
         #messageOverlay button:hover, #chestOpenOverlay button:hover, .login-btn:hover, .debug-btn:hover, #debugPasswordOverlay button:hover,
-        #saveDataOverlay button:hover, #loadDataOverlay button:hover, .menu-btn:hover { /* Added menu-btn */
+        #saveDataOverlay button:hover, #loadDataOverlay button:hover, .arena-btn:hover { /* Added arena-btn */
             background-color: #4338ca;
         }
         .login-btn.google {
@@ -432,21 +433,6 @@
             /* NEW: Switched to path() for multi-area clipping */
             clip-path: path("M0 0 L400 0 L400 250 L0 250 Z");
         }
-        /* NEW: Arena Screen */
-        .arena-list-item {
-            background-color: #374151; /* gray-700 */
-            border-radius: 12px;
-            padding: 1.5rem;
-            width: 100%;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            border: 4px solid #4b5563;
-        }
-        .arena-list-item.locked {
-            filter: grayscale(80%);
-            opacity: 0.7;
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-2">
@@ -519,11 +505,11 @@
                 BATTLE!
             </button>
             
-            <!-- NEW: Arenas Button -->
-            <button id="arenasButton" class="menu-btn bg-blue-600 hover:bg-blue-700 text-white w-3/4 py-3 text-xl font-bold">
-                Arenas 🗺️
+            <!-- NEW: Arena Button -->
+            <button id="arenaButton" class="arena-btn bg-blue-600 hover:bg-blue-700 mt-4 w-3/4 py-3 text-xl font-bold">
+                Arenas
             </button>
-
+            
             <!-- Chest Slots -->
             <div class="mt-8 w-full">
                 <h3 class="text-xl font-bold text-center mb-2">Your Chests</h3>
@@ -557,11 +543,7 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <!-- NEW: Arenas Nav Button (optional, but good for consistency) -->
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="arena">
-                    <span class="text-4xl">🗺️</span>
-                    <span class="text-xs">Arenas</span>
-                </button>
+                <!-- NEW: Debug Button -->
                 <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
                     <span class="text-4xl">🧪</span>
                     <span class="text-xs">Debug</span>
@@ -612,10 +594,6 @@
                 <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="tower">
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="arena">
-                    <span class="text-4xl">🗺️</span>
-                    <span class="text-xs">Arenas</span>
                 </button>
                 <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
                     <span class="text-4xl">🧪</span>
@@ -672,10 +650,6 @@
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
                 </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="arena">
-                    <span class="text-4xl">🗺️</span>
-                    <span class="text-xs">Arenas</span>
-                </button>
                 <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
                     <span class="text-4xl">🧪</span>
                     <span class="text-xs">Debug</span>
@@ -693,35 +667,53 @@
         <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
             <h1 class="text-3xl font-bold mb-8">Arenas</h1>
             
-            <div id="arenaList" class="w-full">
-                <!-- Arenas will be injected by JS -->
+            <div class="space-y-4 w-full">
+                <!-- Arena 1 -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">🏞️</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 1: Emoji Valley</h2>
+                        <p class="text-yellow-400">0+ Trophies 🏆</p>
+                    </div>
+                </div>
+                <!-- Arena 2 -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">🏘️</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 2: Laughing Village</h2>
+                        <p class="text-yellow-400">250+ Trophies 🏆</p>
+                    </div>
+                </div>
+                <!-- Arena 3 -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">🌋</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 3: Lava Town</h2>
+                        <p class="text-yellow-400">500+ Trophies 🏆</p>
+                    </div>
+                </div>
+                <!-- Arena 4 -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">🚜</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 4: The Farm</h2>
+                        <p class="text-yellow-400">750+ Trophies 🏆</p>
+                    </div>
+                </div>
             </div>
-
+            
+            <button id="arenaBackButton" class="arena-btn bg-gray-600 hover:bg-gray-700 mt-8 w-3/4">
+                Back to Menu
+            </button>
         </div>
         
-        <!-- Bottom Nav Bar -->
-        <div id="bottomNav" class="bg-gray-800 w-full rounded-t-lg shadow-inner p-2">
+        <!-- Bottom Nav (Hidden, but keeps layout consistent) -->
+        <div id="bottomNav" class="bg-gray-800 w-full rounded-t-lg shadow-inner p-2 invisible">
             <div class="flex justify-around">
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="menu">
-                    <span class="text-4xl">⚔️</span>
-                    <span class="text-xs">Battle</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="deck">
-                    <span class="text-4xl">🃏</span>
-                    <span class="text-xs">Deck</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="tower">
-                    <span class="text-4xl">👑</span>
-                    <span class="text-xs">Tower</span>
-                </button>
-                <button class="nav-btn active flex flex-col items-center text-yellow-400" data-screen="arena">
-                    <span class="text-4xl">🗺️</span>
-                    <span class="text-xs">Arenas</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="debug">
-                    <span class="text-4xl">🧪</span>
-                    <span class="text-xs">Debug</span>
-                </button>
+                <button class="nav-btn flex flex-col items-center"><span class="text-4xl">⚔️</span><span class="text-xs">Battle</span></button>
+                <button class="nav-btn flex flex-col items-center"><span class="text-4xl">🃏</span><span class="text-xs">Deck</span></button>
+                <button class="nav-btn flex flex-col items-center"><span class="text-4xl">👑</span><span class="text-xs">Tower</span></button>
+                <button class="nav-btn flex flex-col items-center"><span class="text-4xl">🧪</span><span class="text-xs">Debug</span></button>
             </div>
         </div>
     </div>
@@ -761,10 +753,6 @@
                 <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="tower">
                     <span class="text-4xl">👑</span>
                     <span class="text-xs">Tower</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center text-gray-400" data-screen="arena">
-                    <span class="text-4xl">🗺️</span>
-                    <span class="text-xs">Arenas</span>
                 </button>
                 <button class="nav-btn active flex flex-col items-center text-yellow-400" data-screen="debug">
                     <span class="text-4xl">🧪</span>
@@ -984,7 +972,7 @@
         let spellRadius = 0;
         let placementRadius = 0;
         let canPlace = false;
-        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm" };
+        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm" }; // NEW
         let currentArenaFloor = 0;
         let currentArenaTheme = 'arena-1'; // For canvas styling
 
@@ -1001,10 +989,6 @@
         let loadTimeout; // Timer for stuck loads
         let isLoading = false; // Flag to prevent double-loads
         let generateKeyTimeout; // NEW: Timer for save key generation
-        
-        // BUG FIX: List of spawner classes
-        const spawnerClasses = ['Goblins', 'Skeletons', 'SkeletonArmy', 'GoblinGang', 'Barbarians', 'Pigs'];
-
 
         // --- Start Game ---
         window.onload = () => {
@@ -1067,8 +1051,8 @@
             const arenaScreen = document.getElementById('arenaScreen'); // NEW
             const debugScreen = document.getElementById('debugScreen'); // NEW
             const battleButton = document.getElementById('battleButton');
-            const arenasButton = document.getElementById('arenasButton'); // NEW
-            const arenaList = document.getElementById('arenaList'); // NEW
+            const arenaButton = document.getElementById('arenaButton'); // NEW
+            const arenaBackButton = document.getElementById('arenaBackButton'); // NEW
             const trophyDisplay = document.getElementById('trophyDisplay');
             const goldDisplay = document.getElementById('goldDisplay');
             const chestSlots = document.getElementById('chestSlots');
@@ -1420,37 +1404,14 @@
                 currentScreen = screenId;
                 screens.forEach(s => { s.id === screenId + 'Screen' ? s.classList.add('active') : s.classList.remove('active'); });
                 
-                // Updated to include 'arena'
-                if (['menu', 'deck', 'tower', 'debug', 'arena'].includes(screenId)) {
+                if (screenId === 'menu' || screenId === 'deck' || screenId === 'tower' || screenId === 'debug') {
                     navButtons.forEach(btn => { if (btn.dataset.screen === screenId) { btn.classList.add('text-yellow-400'); btn.classList.remove('text-gray-400'); } else { btn.classList.remove('text-yellow-400'); btn.classList.add('text-gray-400'); } });
                 }
                 
                 if (screenId === 'deck') { renderDeckScreen(); }
                 if (screenId === 'tower') { renderTowerScreen(); }
-                if (screenId === 'arena') { renderArenaScreen(); } // NEW
                 if (screenId === 'menu') { updateArena(); trophyDisplay.textContent = `🏆 ${trophies}`; goldDisplay.textContent = `💰 ${gold}`; renderChests(); updateBattleButtonState(); }
             }
-
-            // NEW: Render Arena Screen
-            function renderArenaScreen() {
-                arenaList.innerHTML = '';
-                const arenaEmojis = { 0: "🏞️", 250: "🏘️", 500: "🌋", 750: "🚜" };
-                for (const floor in arenaFloors) {
-                    const isLocked = trophies < floor;
-                    const item = document.createElement('div');
-                    item.className = `arena-list-item ${isLocked ? 'locked' : ''}`;
-                    item.innerHTML = `
-                        <div class="text-6xl mr-4">${arenaEmojis[floor]}</div>
-                        <div>
-                            <h3 class="text-2xl font-bold">${arenaFloors[floor]}</h3>
-                            <p class="text-lg text-yellow-400">Unlocks at 🏆 ${floor}</p>
-                        </div>
-                    `;
-                    arenaList.appendChild(item);
-                }
-            }
-            arenasButton.addEventListener('click', () => showScreen('arena')); // NEW
-
 
             // NEW: Handle Debug password
             function showDebugPassword() {
@@ -1487,9 +1448,9 @@
                 } else if (arenaDisplayName.includes("Lava Town")) {
                     emoji = "🌋";
                     currentArenaTheme = 'arena-3';
-                } else if (arenaDisplayName.includes("The Farm")) { // UPDATED
-                    emoji = "🚜"; 
-                    currentArenaTheme = 'arena-4'; 
+                } else if (arenaDisplayName.includes("The Farm")) { // NEW
+                    emoji = "🚜"; // NEW
+                    currentArenaTheme = 'arena-4'; // NEW
                 }
                 arenaName.textContent = arenaDisplayName;
                 arenaEmoji.textContent = emoji;
@@ -1580,6 +1541,13 @@
                         gameLoopId = requestAnimationFrame(gameLoop);
                     }, 1500);
                 }, 2000);
+            });
+            // NEW: Arena screen buttons
+            arenaButton.addEventListener('click', () => {
+                showScreen('arena');
+            });
+            arenaBackButton.addEventListener('click', () => {
+                showScreen('menu');
             });
             menuButton.addEventListener('click', () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); });
 
@@ -1851,11 +1819,13 @@
                                 stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'axeSwinger': { name: 'Axe Swinger', cost: 4, emoji: '🪓', type: 'Melee', unitClass: AxeSwinger, placementRadius: 12, isFlying: false, arena: 3, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 40 } } },
-                    // NEW: Arena 4
+                    // Arena 4 (NEW CARDS)
                     'pigs': { name: 'Pigs', cost: 4, emoji: '🐷', type: 'WinCon', unitClass: Pigs, placementRadius: 10, isFlying: false, arena: 4, targets: 'Buildings', aggroRange: 100,
-                                stats: { 1: { count: 4, health: 150, damage: 40, hitSpeed: 1, speed: 1.8 } } },
+                                stats: { 1: { count: 4, health: 300, damage: 50, hitSpeed: 1.1, speed: 1.8 } } },
                     'farmer': { name: 'Farmer', cost: 3, emoji: '👨‍🌾', type: 'Melee', unitClass: Farmer, placementRadius: 12, isFlying: false, arena: 4, targets: 'Ground', aggroRange: 100,
-                                stats: { 1: { health: 450, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackLength: 50 } } },
+                                stats: { 1: { health: 600, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackHeight: 40 } } },
+                    'poison': { name: 'Poison', cost: 4, emoji: '🤢', type: 'Spell', radius: 60, placementRadius: 60, arena: 4, targets: 'Air & Ground',
+                                stats: { 1: { damagePerSecond: 40, duration: 5 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
                 
@@ -1870,6 +1840,7 @@
                             // Increase health and damage by ~10% per level
                             if (newStats.health) newStats.health = Math.round(newStats.health * 1.1);
                             if (newStats.damage) newStats.damage = Math.round(newStats.damage * 1.1);
+                            if (newStats.damagePerSecond) newStats.damagePerSecond = Math.round(newStats.damagePerSecond * 1.1); // For Poison
                             // Handle sub-unit stats
                             if (newStats.spear_health) newStats.spear_health = Math.round(newStats.spear_health * 1.1);
                             if (newStats.spear_damage) newStats.spear_damage = Math.round(newStats.spear_damage * 1.1);
@@ -2093,6 +2064,10 @@
                     placementIndicator.className = 'spell';
                     placementIndicator.style.width = `${card.radius * 2}px`;
                     placementIndicator.style.height = `${card.radius * 2}px`;
+                    if (cardId === 'poison') { // NEW: Poison color
+                        placementIndicator.style.background = 'rgba(234, 179, 8, 0.2)';
+                        placementIndicator.style.borderColor = '#eab308';
+                    }
                 } else {
                     isSpawningSpell = false;
                     placementRadius = card.placementRadius;
@@ -2113,6 +2088,8 @@
             function cancelPlacement() {
                 isSpawningSpell = false;
                 placementIndicator.style.display = 'none';
+                placementIndicator.style.background = 'rgba(255, 255, 255, 0.2)'; // NEW: Reset poison color
+                placementIndicator.style.borderColor = 'white';
                 placementOverlay.style.display = 'none'; // Hide red overlay
                 selectedSpawningUnit = null;
                 isDragging = false; // NEW
@@ -2726,43 +2703,25 @@
                 }
             }
 
-            // NEW: Farmer
+            // --- FARMER (NEW) ---
             class Farmer extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['farmer'].stats[level];
-                    super(x, y, 12, team, s.health, 1.2, 0, s.damage, s.hitSpeed, '👨‍🌾', false, false, level, allCards['farmer'].aggroRange);
+                    super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '👨‍🌾', false, false, level, allCards['farmer'].aggroRange);
                     this.attackWidth = s.attackWidth;
-                    this.attackLength = s.attackLength;
+                    this.attackHeight = s.attackHeight;
                     this.attackAnimationTimer = 0;
-                    this.targetAngle = 0; // Angle to face target
+                    this.attackAngle = 0;
                 }
                 attack() { 
                     if (this.cooldownTimer <= 0) { 
                         this.attackAnimationTimer = 20; // Start animation
-                        
-                        // Calculate attack rectangle coordinates
-                        const angle = this.targetAngle;
-                        const w = this.attackWidth / 2;
-                        const l = this.attackLength;
+                        this.attackAngle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
 
-                        // Define the 4 corners of the rectangle relative to the farmer
-                        const corners = [
-                            { x: -w, y: 0 },
-                            { x: w, y: 0 },
-                            { x: w, y: (this.team === 'player' ? -l : l) },
-                            { x: -w, y: (this.team === 'player' ? -l : l) }
-                        ];
-
-                        // Rotate and translate corners
-                        const attackPoly = corners.map(p => {
-                            const rotatedX = p.x * Math.cos(angle) - p.y * Math.sin(angle);
-                            const rotatedY = p.x * Math.sin(angle) + p.y * Math.cos(angle);
-                            return { x: this.x + rotatedX, y: this.y + rotatedY };
-                        });
-
+                        // Check for hits in a rectangle
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && !obj.isFlying && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
-                                if (isPointInPolygon(obj.x, obj.y, attackPoly)) {
+                                if (isInside(obj, this.x, this.y, this.attackWidth, this.attackHeight, this.attackAngle)) {
                                     obj.health -= this.attackDamage;
                                 }
                             }
@@ -2771,20 +2730,13 @@
                     } 
                 }
                 update() {
+                    // Standard unit update logic
                     if (this.health <= 0) return;
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
                     if (this.attackAnimationTimer > 0) { this.attackAnimationTimer--; }
-
-                    this.findTarget(); 
-
+                    this.findTarget();
                     if (this.target && this.target.health > 0) {
-                        this.targetAngle = Math.atan2(this.target.y - this.y, this.target.x - this.x) + Math.PI/2; // Point towards target
-                        
-                        // Check if ANY enemy is in attack range
-                        const l = this.attackLength;
-                        const enemyInRange = (getDistance(this, this.target) < l);
-
-                        if (enemyInRange) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
                             this.attack();
                         } else {
                             this.move();
@@ -2792,39 +2744,33 @@
                     }
                 }
                 draw() {
-                    super.draw(); // Draw the unit first
+                    super.draw(); // Draw the unit
                     if (this.attackAnimationTimer > 0) {
                         const progress = this.attackAnimationTimer / 20;
                         ctx.save();
-                        ctx.beginPath();
-                        
-                        // Draw the rake rectangle
-                        const angle = this.targetAngle;
-                        const w = this.attackWidth / 2;
-                        const l = this.attackLength;
-                        
                         ctx.translate(this.x, this.y);
-                        ctx.rotate(angle);
-                        
-                        ctx.fillStyle = `rgba(220, 38, 38, ${0.5 * (1 - progress)})`; // Fade out
-                        ctx.fillRect(-w, (this.team === 'player' ? -l : 0), w*2, (this.team === 'player' ? l : l));
-
+                        ctx.rotate(this.attackAngle);
+                        ctx.fillStyle = `rgba(220, 38, 38, ${0.5 * (1 - progress)})`;
+                        // Draw rectangle in front of the unit
+                        ctx.fillRect(this.radius, -this.attackWidth / 2, this.attackHeight, this.attackWidth);
                         ctx.restore();
                     }
                 }
             }
 
-            // NEW: Pig
+            // --- PIG (NEW) ---
             class Pig extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['pigs'].stats[level];
                     super(x, y, 10, team, s.health, s.speed, 25, s.damage, s.hitSpeed, '🐷', false, false, level, allCards['pigs'].aggroRange);
                     this.targetLocked = false;
                 }
+                // Use building-only targeting
                 findTarget() {
                     if (this.targetLocked && this.target && this.target.health > 0) return;
                     let closestDist = Infinity;
                     let newTarget = null;
+                    // Find closest Princess Tower in lane
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
                             if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
@@ -2833,6 +2779,7 @@
                             }
                         }
                     }
+                    // If no lane tower, find King
                     if (!newTarget) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
@@ -2841,6 +2788,7 @@
                             }
                         }
                     }
+                    // If no tower, find Building
                     if (!newTarget) {
                          for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Building)) {
@@ -2852,10 +2800,10 @@
                     this.target = newTarget;
                     this.targetLocked = (this.target != null);
                 }
-                update() {
+                update() { // Custom update to use building-only AI
                     if (this.health <= 0) return;
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
-                    this.findTarget(); 
+                    this.findTarget();
                     if (this.target && this.target.health > 0) {
                         if (getDistance(this, this.target) <= this.attackRange) {
                             this.attack();
@@ -2865,7 +2813,7 @@
                     }
                 }
             }
-            class Pigs { constructor(x, y, team, level = 1) { const s = allCards['pigs'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Pig(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } } }
+            class Pigs { constructor(x, y, team, level = 1) { const s = allCards['pigs'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Pig(x + Math.random()*20-10, y + Math.random()*20-10, team, level)); } } }
 
 
             class Projectile extends GameObject {
@@ -2975,6 +2923,43 @@
                     }
                 }
             }
+            
+            // NEW: Poison Spell Class
+            class PoisonSpell extends GameObject {
+                constructor(x, y, team, damagePerSecond, radius, duration) {
+                    super(x, y, radius, team, 1);
+                    this.damagePerSecond = damagePerSecond;
+                    this.duration = duration * 60; // 5 seconds
+                    this.lifetime = this.duration;
+                    this.damageTick = 60; // Damage every 1 second
+                    this.tickTimer = this.damageTick;
+                }
+                update() {
+                    this.lifetime--;
+                    if (this.lifetime <= 0) {
+                        this.health = 0;
+                        return;
+                    }
+                    this.tickTimer--;
+                    if (this.tickTimer <= 0) {
+                        this.tickTimer = this.damageTick;
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                if (getDistance(this, obj) < this.radius) {
+                                    obj.health -= this.damagePerSecond;
+                                }
+                            }
+                        }
+                    }
+                }
+                draw() {
+                    const alpha = Math.sin((this.lifetime / this.duration) * Math.PI) * 0.3; // Fades in and out
+                    ctx.fillStyle = `rgba(234, 179, 8, ${alpha})`; // yellow-500
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
 
 
             // ==============================================
@@ -2984,17 +2969,15 @@
             function getDistance(obj1, obj2) {
                 const dx = obj1.x - obj2.x; const dy = obj1.y - obj2.y; return Math.sqrt(dx * dx + dy * dy);
             }
-            
-            // NEW: Helper for Farmer attack
-            function isPointInPolygon(x, y, polygon) {
-                let isInside = false;
-                for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-                    const xi = polygon[i].x, yi = polygon[i].y;
-                    const xj = polygon[j].x, yj = polygon[j].y;
-                    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                    if (intersect) isInside = !isInside;
-                }
-                return isInside;
+
+            // Helper for Farmer attack
+            function isInside(point, cx, cy, width, height, angle) {
+                const dx = point.x - cx;
+                const dy = point.y - cy;
+                const rotatedX = dx * Math.cos(-angle) - dy * Math.sin(-angle);
+                const rotatedY = dx * Math.sin(-angle) + dy * Math.cos(-angle);
+                // Check if point is inside the rectangle defined in front of the farmer
+                return rotatedX > 0 && rotatedX < height && Math.abs(rotatedY) < width / 2;
             }
 
             function drawArena() {
@@ -3050,7 +3033,6 @@
                 menuButton.style.display = 'inline-block';
 
                 const aiArenaLevel = getAILevel();
-                
                 // UPDATED AI STAT LEVEL LOGIC
                 if (aiArenaLevel === 1) { // Arena 1: 1-2
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 1; // 1 or 2
@@ -3077,16 +3059,18 @@
                 const playerUnits = gameObjects.filter(o => o.team === 'player' && o instanceof Unit && o.y < RIVER_Y + 50);
                 if (playerUnits.length > 0) {
                     let bestCardId = null;
-                    // NEW: Check for Farmer
-                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('farmer') && aiElixir >= allCards['farmer'].cost) {
-                        bestCardId = 'farmer';
+                    // --- NEW AI LOGIC ---
+                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('poison') && aiElixir >= allCards['poison'].cost) {
+                        bestCardId = 'poison';
                     } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('axeSwinger') && aiElixir >= allCards['axeSwinger'].cost) {
                         bestCardId = 'axeSwinger';
                     } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
-                    } else if (playerUnits.some(u => u instanceof Giant || u instanceof Pigs) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
+                    } else if (playerUnits.some(u => u instanceof Giant || u instanceof Pigs) && aiHand.includes('farmer') && aiElixir >= allCards['farmer'].cost) {
+                        bestCardId = 'farmer';
+                    } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) {
                         bestCardId = 'tinyBot';
-                    } else if (playerUnits.some(u => u instanceof Giant || u instanceof Pigs) && aiHand.includes('barbarians') && aiElixir >= allCards['barbarians'].cost) {
+                    } else if (playerUnits.some(u => u instanceof Giant) && aiHand.includes('barbarians') && aiElixir >= allCards['barbarians'].cost) {
                         bestCardId = 'barbarians';
                     } else if (playerUnits.some(u => u instanceof FireDragon) && aiHand.includes('archer') && aiElixir >= allCards['archer'].cost) {
                         bestCardId = 'archer';
@@ -3099,8 +3083,8 @@
                 // Fallback: If elixir is high, play a card
                 if (aiElixir > 7) {
                     let bestCardId = null;
-                    if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
-                    else if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; } // NEW
+                    if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; } // NEW
+                    else if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
                     else {
@@ -3113,9 +3097,15 @@
                     if (bestCardId) { spawnAIUnit(bestCardId, currentAiStatLevel, false); return; } // Use global
                 }
 
-                if (aiElixir === MAX_ELIXIR && aiHand.includes('fireball') && Math.random() < 0.2) {
-                    spawnAIUnit('fireball', currentAiStatLevel, false); // Use global
-                    return;
+                // Use spell on tower
+                if (aiElixir === MAX_ELIXIR && Math.random() < 0.2) {
+                    let spellToUse = null;
+                    if (aiHand.includes('poison')) spellToUse = 'poison';
+                    else if (aiHand.includes('fireball')) spellToUse = 'fireball';
+                    if (spellToUse) {
+                        spawnAIUnit(spellToUse, currentAiStatLevel, false); // Use global
+                        return;
+                    }
                 }
             }
 
@@ -3134,9 +3124,22 @@
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarian);
                     } else if (cardId === 'arrows') {
                         target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang));
+                    } else if (cardId === 'poison') { // NEW
+                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Tower) && o.health > 0);
+                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Unit && o.y > RIVER_Y - 50);
                     }
                     if (target) {
-                        gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
+                        // -----------------------------------------------------------------
+                        // --- POISON FIX 1 OF 2 ---
+                        // The bug was here. It was checking 'card.id' which is undefined.
+                        // It should check the 'cardId' variable that was passed into the function.
+                        // -----------------------------------------------------------------
+                        if (cardId === 'poison') { // NEW (WAS card.id)
+                            const s = card.stats[cardLevel];
+                            gameObjects.push(new PoisonSpell(target.x, target.y, 'ai', s.damagePerSecond, card.radius, s.duration));
+                        } else {
+                            gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
+                        }
                         aiPlayCard(cardId);
                     }
                     return;
@@ -3171,9 +3174,11 @@
                 
                 if (canSpawn && card.unitClass) {
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', cardLevel);
-                    // BUG FIX: Use spawnerClasses list
-                    if (!spawnerClasses.includes(card.unitClass.name)) {
-                        gameObjects.push(newUnit);
+                    // --- TYPEERROR FIX ---
+                    // This was the bug. It was too complex.
+                    // This new logic is simpler and correct.
+                    if (newUnit instanceof Unit || newUnit instanceof Building) {
+                         gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
                 }
@@ -3399,7 +3404,7 @@
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
                     // Handle units/projectiles/spells
-                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell) { 
+                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell) { 
                         // Special case: Battle Ram needs to spawn barbs
                         if (obj instanceof BattleRam && !obj.didHit) {
                             obj.spawnBarbs();
@@ -3487,7 +3492,7 @@
                 // NEW: Only move indicator if mouse is over canvas
                 const rect = canvas.getBoundingClientRect();
                 const isOverCanvas = (pos.clientX >= rect.left && pos.clientX <= rect.right &&
-                                      pos.clientY >= rect.top && pos.clientY <= rect.bottom);
+                                        pos.clientY >= rect.top && pos.clientY <= rect.bottom);
                 
                 if (isOverCanvas) {
                     placementIndicator.style.display = 'block';
@@ -3522,32 +3527,49 @@
 
 
             function handleDragEnd(e) {
-                // BUG FIX: Only run this logic if we were actually dragging
-                if (!isDragging || !selectedSpawningUnit || !gameRunning) {
-                    // If it wasn't a drag, don't do anything here.
-                    // The 'click' listener on the canvas will handle it.
-                    // If it wasn't a drag AND it wasn't on the canvas (e.g. mouseup on card), this does nothing, which is correct.
-                    if (!selectedSpawningUnit) cancelPlacement();
-                    return;
-                }
-
-                // --- From here on, we know it was a DRAG ---
-
-                // NEW: Cancel if mouse is off-canvas
-                const rect = canvas.getBoundingClientRect();
-                let clientX, clientY;
-                if (e.changedTouches && e.changedTouches.length > 0) { 
-                    clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; 
-                } else { 
-                    clientX = e.clientX; clientY = e.clientY; 
-                }
-                const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
-                                      clientY >= rect.top && clientY <= rect.bottom);
-                
-                if (!isOverCanvas) {
+                if (!selectedSpawningUnit || !gameRunning) {
                     cancelPlacement();
                     return;
                 }
+
+                // Check if mouse is over canvas
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.changedTouches && e.changedTouches.length > 0) {
+                    clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY;
+                } else {
+                    clientX = e.clientX; clientY = e.clientY;
+                }
+                const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
+                                        clientY >= rect.top && clientY <= rect.bottom);
+                
+                // --- CLICK-TO-PLACE FIX ---
+                if (!isDragging) {
+                    // This was a "click"
+                    if (isOverCanvas) {
+                        // This is a "click-to-place"
+                        // canPlace is already set by the last handleDragMove
+                    } else {
+                        // This was a click off-canvas, or just releasing the mouse from the card
+                        // Check if the click-up was on a card
+                        if (e.target && e.target.closest('.card-ui')) {
+                            // This was the initial click-up on the card. Do nothing.
+                            return; 
+                        }
+                        // Otherwise, it was a click off-canvas to cancel.
+                        cancelPlacement();
+                        return;
+                    }
+                } else {
+                    // This was a "drag-and-drop"
+                    if (!isOverCanvas) {
+                        // Dragged off-canvas to cancel
+                        cancelPlacement();
+                        return;
+                    }
+                    // canPlace is already set
+                }
+                // --- END FIX ---
                 
                 if (!canPlace) {
                     console.log("Cannot spawn there!");
@@ -3563,13 +3585,25 @@
                 const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
                 
                 if (card.type === 'Spell') {
-                    const damage = card.stats[level].damage;
-                    gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
+                    // -----------------------------------------------------------------
+                    // --- POISON FIX 2 OF 2 ---
+                    // The bug was here. It was checking 'card.id' which is undefined.
+                    // It should check 'selectedSpawningUnit.id'.
+                    // -----------------------------------------------------------------
+                    if (selectedSpawningUnit.id === 'poison') { // NEW (WAS card.id)
+                        const s = card.stats[level];
+                        gameObjects.push(new PoisonSpell(clampedX, clampedY, 'player', s.damagePerSecond, card.radius, s.duration));
+                    } else {
+                        const damage = card.stats[level].damage;
+                        gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
+                    }
                 } else {
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                    // BUG FIX: Use spawnerClasses list
-                    if (!spawnerClasses.includes(card.unitClass.name)) {
-                        gameObjects.push(newUnit);
+                    // --- TYPEERROR FIX ---
+                    // This was the bug. It was too complex.
+                    // This new logic is simpler and correct.
+                    if (newUnit instanceof Unit || newUnit instanceof Building) {
+                         gameObjects.push(newUnit);
                     }
                 }
                 
@@ -3581,38 +3615,12 @@
             window.addEventListener('mouseup', handleDragEnd);
             window.addEventListener('touchend', handleDragEnd, { passive: false });
 
-            // NEW: Add a click listener to the canvas for "click-to-place"
-            canvas.addEventListener('click', (e) => {
-                // Only run if a card is selected AND we are NOT dragging
-                if (selectedSpawningUnit && !isDragging) {
-                    if (!canPlace) {
-                        console.log("Cannot spawn there!");
-                        cancelPlacement();
-                        return;
-                    }
-                    
-                    const { x, y } = getCanvasClickPos(e);
-                    const clampedX = Math.max(0, Math.min(WIDTH, x));
-                    const clampedY = Math.max(0, Math.min(HEIGHT, y));
-                    
-                    const card = allCards[selectedSpawningUnit.id];
-                    const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
-                    
-                    if (card.type === 'Spell') {
-                        const damage = card.stats[level].damage;
-                        gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
-                    } else {
-                        const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                        // BUG FIX: Use spawnerClasses list
-                        if (!spawnerClasses.includes(card.unitClass.name)) {
-                            gameObjects.push(newUnit);
-                        }
-                    }
-                    
-                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
-                    cancelPlacement();
-                }
-            });
+            // --- CLICK-TO-PLACE FIX: This listener is now removed ---
+            // canvas.addEventListener('click', (e) => {
+            //     if (selectedSpawningUnit && !isDragging) {
+            //         handleDragEnd(e);
+            //     }
+            // });
 
             cardInfoCloseBtn.addEventListener('click', closeModal);
             
