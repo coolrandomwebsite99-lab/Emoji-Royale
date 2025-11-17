@@ -40,6 +40,13 @@
                 linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
         }
+        /* NEW ARENA 5 STYLE */
+        canvas.arena-5 { 
+            background-color: #311b92; /* deep-purple-900 */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
         
         #gameContainer {
             position: relative;
@@ -700,6 +707,14 @@
                         <p class="text-yellow-400">750+ Trophies 🏆</p>
                     </div>
                 </div>
+                <!-- Arena 5 -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">💀</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 5: Skull Kingdom</h2>
+                        <p class="text-yellow-400">1000+ Trophies 🏆</p>
+                    </div>
+                </div>
             </div>
             
             <button id="arenaBackButton" class="arena-btn bg-gray-600 hover:bg-gray-700 mt-8 w-3/4">
@@ -730,7 +745,8 @@
             
             <button id="debugArena2" class="debug-btn bg-green-600 hover:bg-green-700">Jump to Arena 2 (250 🏆)</button>
             <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
-            <button id="debugArena4" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Jump to Arena 4 (750 🏆)</button> <!-- NEW -->
+            <button id="debugArena4" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Jump to Arena 4 (750 🏆)</button>
+            <button id="debugArena5" class="debug-btn bg-purple-600 hover:bg-purple-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
             <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
             <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
             <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
@@ -903,13 +919,13 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-          apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
-          authDomain: "emoji-royale-8fb68.firebaseapp.com",
-          projectId: "emoji-royale-8fb68",
-          storageBucket: "emoji-royale-8fb68.firebasestorage.app",
-          messagingSenderId: "1021589049311",
-          appId: "1:1021589049311:web:61ce6353950831e298be6a",
-          measurementId: "G-FDQ9L0MQGM"
+            apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
+            authDomain: "emoji-royale-8fb68.firebaseapp.com",
+            projectId: "emoji-royale-8fb68",
+            storageBucket: "emoji-royale-8fb68.firebasestorage.app",
+            messagingSenderId: "1021589049311",
+            appId: "1:1021589049311:web:61ce6353950831e298be6a",
+            measurementId: "G-FDQ9L0MQGM"
         };
 
         // Initialize Firebase
@@ -972,7 +988,7 @@
         let spellRadius = 0;
         let placementRadius = 0;
         let canPlace = false;
-        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm" }; // NEW
+        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm", 1000: "Arena 5: Skull Kingdom" }; // NEW
         let currentArenaFloor = 0;
         let currentArenaTheme = 'arena-1'; // For canvas styling
 
@@ -1092,6 +1108,7 @@
             const debugArena2 = document.getElementById('debugArena2');
             const debugArena3 = document.getElementById('debugArena3');
             const debugArena4 = document.getElementById('debugArena4'); // NEW
+            const debugArena5 = document.getElementById('debugArena5'); // NEW
             const debugUnlockAll = document.getElementById('debugUnlockAll');
             const debugUpgradeAll = document.getElementById('debugUpgradeAll');
             const debugGetChest = document.getElementById('debugGetChest');
@@ -1451,6 +1468,9 @@
                 } else if (arenaDisplayName.includes("The Farm")) { // NEW
                     emoji = "🚜"; // NEW
                     currentArenaTheme = 'arena-4'; // NEW
+                } else if (arenaDisplayName.includes("Skull Kingdom")) { // NEW
+                    emoji = "💀"; // NEW
+                    currentArenaTheme = 'arena-5'; // NEW
                 }
                 arenaName.textContent = arenaDisplayName;
                 arenaEmoji.textContent = emoji;
@@ -1566,9 +1586,14 @@
                 saveUserData();
                 showScreen('menu');
             });
-            // NEW
             debugArena4.addEventListener('click', () => {
                 trophies = 750;
+                updateArena();
+                saveUserData();
+                showScreen('menu');
+            });
+            debugArena5.addEventListener('click', () => {
+                trophies = 1000;
                 updateArena();
                 saveUserData();
                 showScreen('menu');
@@ -1679,7 +1704,7 @@
             function getUnlockedCards(includeTower = false, aiLevel = 0) {
                 const unlocked = [];
                 // Use AI level if provided, otherwise use player's trophies
-                const arenaNum = aiLevel > 0 ? aiLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : (currentArenaFloor === 500 ? 3 : 4))); // UPDATED
+                const arenaNum = aiLevel > 0 ? aiLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : (currentArenaFloor === 500 ? 3 : (currentArenaFloor === 750 ? 4 : 5)))); // UPDATED
                 
                 for (const cardId in allCards) {
                     if (cardId === 'tower') continue; // FIX: Never include tower in this list
@@ -1819,13 +1844,21 @@
                                 stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'axeSwinger': { name: 'Axe Swinger', cost: 4, emoji: '🪓', type: 'Melee', unitClass: AxeSwinger, placementRadius: 12, isFlying: false, arena: 3, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 40 } } },
-                    // Arena 4 (NEW CARDS)
+                    // Arena 4
                     'pigs': { name: 'Pigs', cost: 4, emoji: '🐷', type: 'WinCon', unitClass: Pigs, placementRadius: 10, isFlying: false, arena: 4, targets: 'Buildings', aggroRange: 100,
                                 stats: { 1: { count: 4, health: 300, damage: 50, hitSpeed: 1.1, speed: 1.8 } } },
                     'farmer': { name: 'Farmer', cost: 3, emoji: '👨‍🌾', type: 'Melee', unitClass: Farmer, placementRadius: 12, isFlying: false, arena: 4, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 600, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackHeight: 40 } } },
                     'poison': { name: 'Poison', cost: 4, emoji: '🤢', type: 'Spell', radius: 60, placementRadius: 60, arena: 4, targets: 'Air & Ground',
                                 stats: { 1: { damagePerSecond: 40, duration: 5 } } },
+                    // Arena 5 (NEW)
+                    'flyingSkeletons': { name: 'Flying Skeletons', cost: 3, emoji: '🦇', type: 'Swarm', unitClass: FlyingSkeletons, placementRadius: 10, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
+                                stats: { 1: { count: 3, health: 20, damage: 20, hitSpeed: 1, speed: 1.8 } } },
+                    'megaFlyingSkeleton': { name: 'Mega Flying Skeleton', cost: 4, emoji: '👻', type: 'Air', unitClass: MegaFlyingSkeleton, placementRadius: 14, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 110,
+                                stats: { 1: { health: 600, damage: 80, hitSpeed: 1.3, speed: 1.2 } } },
+                    'flyingGroup': { name: 'Flying Skeleton Group', cost: 5, emoji: '🦇🦇', type: 'Swarm', unitClass: FlyingSkeletonGroup, placementRadius: 10, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
+                                stats: { 1: { count: 6, health: 20, damage: 20, hitSpeed: 1, speed: 1.8 } } },
+                                
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
                 
@@ -1981,7 +2014,7 @@
                 renderHand();
                 
                 // AI
-                const aiArenaLevel = getAILevel(); // This is 1, 2, 3 or 4
+                const aiArenaLevel = getAILevel(); // This is 1, 2, 3, 4 or 5
                 
                 // AI gets cards from its arena level, NO tower card
                 const aiArenaCards = getUnlockedCards(false, aiArenaLevel);
@@ -2815,6 +2848,12 @@
             }
             class Pigs { constructor(x, y, team, level = 1) { const s = allCards['pigs'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Pig(x + Math.random()*20-10, y + Math.random()*20-10, team, level)); } } }
 
+            // --- SKULL KINGDOM (NEW) ---
+            class FlyingSkeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletons'].stats[level]; super(x, y, 8, team, s.health, s.speed, 20, s.damage, s.hitSpeed, '🦇', true, true, level, allCards['flyingSkeletons'].aggroRange); } }
+            class FlyingSkeletons { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletons'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new FlyingSkeleton(x + Math.random()*20-10, y + Math.random()*20-10, team, level)); } } }
+            class MegaFlyingSkeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['megaFlyingSkeleton'].stats[level]; super(x, y, 14, team, s.health, s.speed, 25, s.damage, s.hitSpeed, '👻', true, true, level, allCards['megaFlyingSkeleton'].aggroRange); } }
+            class FlyingSkeletonGroup { constructor(x, y, team, level = 1) { const s = allCards['flyingGroup'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new FlyingSkeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
+
 
             class Projectile extends GameObject {
                 constructor(x, y, target, team, damage, splashRadius = 0) { 
@@ -2988,6 +3027,8 @@
                     ctx.fillStyle = '#4a90e2'; // Lighter blue
                 } else if (currentArenaTheme === 'arena-4') {
                     ctx.fillStyle = '#65a30d'; // Farm river
+                } else if (currentArenaTheme === 'arena-5') {
+                    ctx.fillStyle = '#4a148c'; // Skull river
                 } else {
                     ctx.fillStyle = '#3b82f6'; // Default blue
                 }
@@ -3000,7 +3041,8 @@
             }
 
             function getAILevel() {
-                if (trophies >= 750) return 4; // NEW
+                if (trophies >= 1000) return 5; // NEW
+                if (trophies >= 750) return 4;
                 if (trophies >= 500) return 3; 
                 if (trophies >= 250) return 2; 
                 return 1;
@@ -3040,8 +3082,10 @@
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 2; // 2 or 3
                 } else if (aiArenaLevel === 3) { // Arena 3: 3-4
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 3; // 3 or 4
-                } else { // Arena 4: 4-5
+                } else if (aiArenaLevel === 4) { // Arena 4: 4-5
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 4; // 4 or 5
+                } else { // Arena 5: 5-7
+                    currentAiStatLevel = Math.floor(Math.random() * 3) + 5; // 5, 6, or 7
                 }
                 
                 gameObjects.push(new Tower(LANE_LEFT_X, HEIGHT - 100, 'player', false, towerLevel));
@@ -3060,7 +3104,11 @@
                 if (playerUnits.length > 0) {
                     let bestCardId = null;
                     // --- NEW AI LOGIC ---
-                    if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('poison') && aiElixir >= allCards['poison'].cost) {
+                    if (playerUnits.some(u => u.isFlying) && aiHand.includes('fireDragon') && aiElixir >= allCards['fireDragon'].cost) {
+                        bestCardId = 'fireDragon';
+                    } else if (playerUnits.some(u => u.isFlying) && aiHand.includes('archer') && aiElixir >= allCards['archer'].cost) {
+                        bestCardId = 'archer';
+                    } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('poison') && aiElixir >= allCards['poison'].cost) {
                         bestCardId = 'poison';
                     } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('axeSwinger') && aiElixir >= allCards['axeSwinger'].cost) {
                         bestCardId = 'axeSwinger';
@@ -3083,7 +3131,8 @@
                 // Fallback: If elixir is high, play a card
                 if (aiElixir > 7) {
                     let bestCardId = null;
-                    if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; } // NEW
+                    if(aiHand.includes('megaFlyingSkeleton') && aiElixir >= allCards['megaFlyingSkeleton'].cost) { bestCardId = 'megaFlyingSkeleton'; }
+                    else if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; }
                     else if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
@@ -3118,28 +3167,25 @@
                 
                 if (card.type === 'Spell') {
                     let target = null;
-                    const damage = card.stats[cardLevel].damage;
+                    
                     if (cardId === 'fireball') {
+                        const damage = card.stats[cardLevel].damage;
                         target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0 && o.health < 600);
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarian);
+                         if (target) gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
                     } else if (cardId === 'arrows') {
-                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang));
+                        const damage = card.stats[cardLevel].damage;
+                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang || o instanceof FlyingSkeletons || o instanceof FlyingSkeletonGroup));
+                         if (target) gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
                     } else if (cardId === 'poison') { // NEW
                         target = gameObjects.find(o => o.team === 'player' && (o instanceof Tower) && o.health > 0);
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Unit && o.y > RIVER_Y - 50);
+                        if (target) {
+                             const s = card.stats[cardLevel];
+                            gameObjects.push(new PoisonSpell(target.x, target.y, 'ai', s.damagePerSecond, card.radius, s.duration));
+                        }
                     }
                     if (target) {
-                        // -----------------------------------------------------------------
-                        // --- POISON FIX 1 OF 2 ---
-                        // The bug was here. It was checking 'card.id' which is undefined.
-                        // It should check the 'cardId' variable that was passed into the function.
-                        // -----------------------------------------------------------------
-                        if (cardId === 'poison') { // NEW (WAS card.id)
-                            const s = card.stats[cardLevel];
-                            gameObjects.push(new PoisonSpell(target.x, target.y, 'ai', s.damagePerSecond, card.radius, s.duration));
-                        } else {
-                            gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
-                        }
                         aiPlayCard(cardId);
                     }
                     return;
@@ -3175,10 +3221,9 @@
                 if (canSpawn && card.unitClass) {
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', cardLevel);
                     // --- TYPEERROR FIX ---
-                    // This was the bug. It was too complex.
-                    // This new logic is simpler and correct.
+                    // Check if the constructor *itself* is a single unit/building, not a spawner
                     if (newUnit instanceof Unit || newUnit instanceof Building) {
-                         gameObjects.push(newUnit);
+                        gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
                 }
@@ -3526,11 +3571,40 @@
             window.addEventListener('touchmove', handleDragMove, { passive: false });
 
 
+            // --- CLICK-TO-PLACE FIX ---
             function handleDragEnd(e) {
-                if (!selectedSpawningUnit || !gameRunning) {
-                    cancelPlacement();
-                    return;
+                // If no card is selected, or game isn't running, or we were NOT dragging, do nothing here.
+                if (!selectedSpawningUnit || !gameRunning || !isDragging) {
+                    // If we mouse-up and it wasn't a drag, it's either a click-to-place (handled by canvas listener)
+                    // or a click-to-select (handled here).
+                    if (selectedSpawningUnit && !isDragging) {
+                        // Check if the click-up was on the card itself. If so, do nothing.
+                        if (e.target && e.target.closest('.card-ui')) {
+                            return; // This was the initial click on the card, keep it selected
+                        }
+                        
+                        // Check if mouse is off-canvas (to cancel selection)
+                        const rect = canvas.getBoundingClientRect();
+                        let clientX, clientY;
+                        if (e.changedTouches && e.changedTouches.length > 0) {
+                            clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY;
+                        } else {
+                            clientX = e.clientX; clientY = e.clientY;
+                        }
+                        const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
+                                              clientY >= rect.top && clientY <= rect.bottom);
+                        
+                        // If we mouse-up off-canvas and it wasn't a drag, cancel selection.
+                        if (!isOverCanvas) {
+                            cancelPlacement();
+                        }
+                    }
+                    isDragging = false; // Reset drag state
+                    return; // Let the 'click' listener handle placement
                 }
+                
+                // --- This point is reached ONLY if it was a DRAG & DROP ---
+                isDragging = false; // Reset dragging state
 
                 // Check if mouse is over canvas
                 const rect = canvas.getBoundingClientRect();
@@ -3541,42 +3615,20 @@
                     clientX = e.clientX; clientY = e.clientY;
                 }
                 const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
-                                        clientY >= rect.top && clientY <= rect.bottom);
-                
-                // --- CLICK-TO-PLACE FIX ---
-                if (!isDragging) {
-                    // This was a "click"
-                    if (isOverCanvas) {
-                        // This is a "click-to-place"
-                        // canPlace is already set by the last handleDragMove
-                    } else {
-                        // This was a click off-canvas, or just releasing the mouse from the card
-                        // Check if the click-up was on a card
-                        if (e.target && e.target.closest('.card-ui')) {
-                            // This was the initial click-up on the card. Do nothing.
-                            return; 
-                        }
-                        // Otherwise, it was a click off-canvas to cancel.
-                        cancelPlacement();
-                        return;
-                    }
-                } else {
-                    // This was a "drag-and-drop"
-                    if (!isOverCanvas) {
-                        // Dragged off-canvas to cancel
-                        cancelPlacement();
-                        return;
-                    }
-                    // canPlace is already set
+                                      clientY >= rect.top && clientY <= rect.bottom);
+
+                if (!isOverCanvas) {
+                    cancelPlacement();
+                    return;
                 }
-                // --- END FIX ---
-                
+
                 if (!canPlace) {
                     console.log("Cannot spawn there!");
                     cancelPlacement();
                     return;
                 }
-                
+
+                // --- Spawn Logic (for DRAG) ---
                 const { x, y } = getCanvasClickPos(e);
                 const clampedX = Math.max(0, Math.min(WIDTH, x));
                 const clampedY = Math.max(0, Math.min(HEIGHT, y));
@@ -3585,12 +3637,7 @@
                 const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
                 
                 if (card.type === 'Spell') {
-                    // -----------------------------------------------------------------
-                    // --- POISON FIX 2 OF 2 ---
-                    // The bug was here. It was checking 'card.id' which is undefined.
-                    // It should check 'selectedSpawningUnit.id'.
-                    // -----------------------------------------------------------------
-                    if (selectedSpawningUnit.id === 'poison') { // NEW (WAS card.id)
+                     if (selectedSpawningUnit.id === 'poison') { 
                         const s = card.stats[level];
                         gameObjects.push(new PoisonSpell(clampedX, clampedY, 'player', s.damagePerSecond, card.radius, s.duration));
                     } else {
@@ -3600,10 +3647,9 @@
                 } else {
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
                     // --- TYPEERROR FIX ---
-                    // This was the bug. It was too complex.
-                    // This new logic is simpler and correct.
+                    // Check if the constructor *itself* is a single unit/building, not a spawner
                     if (newUnit instanceof Unit || newUnit instanceof Building) {
-                         gameObjects.push(newUnit);
+                        gameObjects.push(newUnit);
                     }
                 }
                 
@@ -3615,12 +3661,47 @@
             window.addEventListener('mouseup', handleDragEnd);
             window.addEventListener('touchend', handleDragEnd, { passive: false });
 
-            // --- CLICK-TO-PLACE FIX: This listener is now removed ---
-            // canvas.addEventListener('click', (e) => {
-            //     if (selectedSpawningUnit && !isDragging) {
-            //         handleDragEnd(e);
-            //     }
-            // });
+            // --- CLICK-TO-PLACE FIX: This listener is now for click-to-place ONLY ---
+            canvas.addEventListener('click', (e) => {
+                // Only handle if a card is selected AND we were NOT dragging
+                if (selectedSpawningUnit && !isDragging) {
+                    if (!canPlace) {
+                        console.log("Cannot spawn there!");
+                        cancelPlacement();
+                        return;
+                    }
+
+                    const { x, y } = getCanvasClickPos(e);
+                    const clampedX = Math.max(0, Math.min(WIDTH, x));
+                    const clampedY = Math.max(0, Math.min(HEIGHT, y));
+                    
+                    const card = allCards[selectedSpawningUnit.id];
+                    const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
+                    
+                    if (card.type === 'Spell') {
+                        if (selectedSpawningUnit.id === 'poison') { 
+                            const s = card.stats[level];
+                            gameObjects.push(new PoisonSpell(clampedX, clampedY, 'player', s.damagePerSecond, card.radius, s.duration));
+                        } else {
+                            const damage = card.stats[level].damage;
+                            gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
+                        }
+                    } else {
+                        const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
+                        // --- TYPEERROR FIX ---
+                        // Check if the constructor *itself* is a single unit/building, not a spawner
+                        if (newUnit instanceof Unit || newUnit instanceof Building) {
+                            gameObjects.push(newUnit);
+                        }
+                    }
+                    
+                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
+                    cancelPlacement();
+                }
+                
+                // Reset dragging state just in case
+                isDragging = false;
+            });
 
             cardInfoCloseBtn.addEventListener('click', closeModal);
             
