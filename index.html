@@ -42,7 +42,7 @@
         }
         /* NEW ARENA 5 STYLE */
         canvas.arena-5 { 
-            background-color: #311b92; /* deep-purple-900 */
+            background-color: #3730a3; /* indigo-800 */
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -707,7 +707,7 @@
                         <p class="text-yellow-400">750+ Trophies 🏆</p>
                     </div>
                 </div>
-                <!-- Arena 5 -->
+                <!-- Arena 5 (NEW) -->
                 <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
                     <span class="text-6xl">💀</span>
                     <div>
@@ -746,7 +746,7 @@
             <button id="debugArena2" class="debug-btn bg-green-600 hover:bg-green-700">Jump to Arena 2 (250 🏆)</button>
             <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
             <button id="debugArena4" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Jump to Arena 4 (750 🏆)</button>
-            <button id="debugArena5" class="debug-btn bg-purple-600 hover:bg-purple-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
+            <button id="debugArena5" class="debug-btn bg-indigo-600 hover:bg-indigo-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
             <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
             <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
             <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
@@ -919,13 +919,13 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
-            authDomain: "emoji-royale-8fb68.firebaseapp.com",
-            projectId: "emoji-royale-8fb68",
-            storageBucket: "emoji-royale-8fb68.firebasestorage.app",
-            messagingSenderId: "1021589049311",
-            appId: "1:1021589049311:web:61ce6353950831e298be6a",
-            measurementId: "G-FDQ9L0MQGM"
+          apiKey: "AIzaSyCnaXKjDvPDXP2tF5ZmtB7naYjCuLGUsd4",
+          authDomain: "emoji-royale-8fb68.firebaseapp.com",
+          projectId: "emoji-royale-8fb68",
+          storageBucket: "emoji-royale-8fb68.firebasestorage.app",
+          messagingSenderId: "1021589049311",
+          appId: "1:1021589049311:web:61ce6353950831e298be6a",
+          measurementId: "G-FDQ9L0MQGM"
         };
 
         // Initialize Firebase
@@ -1586,12 +1586,14 @@
                 saveUserData();
                 showScreen('menu');
             });
+            // NEW
             debugArena4.addEventListener('click', () => {
                 trophies = 750;
                 updateArena();
                 saveUserData();
                 showScreen('menu');
             });
+            // NEW
             debugArena5.addEventListener('click', () => {
                 trophies = 1000;
                 updateArena();
@@ -1844,21 +1846,20 @@
                                 stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'axeSwinger': { name: 'Axe Swinger', cost: 4, emoji: '🪓', type: 'Melee', unitClass: AxeSwinger, placementRadius: 12, isFlying: false, arena: 3, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 40 } } },
-                    // Arena 4
+                    // Arena 4 (NEW CARDS)
                     'pigs': { name: 'Pigs', cost: 4, emoji: '🐷', type: 'WinCon', unitClass: Pigs, placementRadius: 10, isFlying: false, arena: 4, targets: 'Buildings', aggroRange: 100,
                                 stats: { 1: { count: 4, health: 300, damage: 50, hitSpeed: 1.1, speed: 1.8 } } },
                     'farmer': { name: 'Farmer', cost: 3, emoji: '👨‍🌾', type: 'Melee', unitClass: Farmer, placementRadius: 12, isFlying: false, arena: 4, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 600, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackHeight: 40 } } },
                     'poison': { name: 'Poison', cost: 4, emoji: '🤢', type: 'Spell', radius: 60, placementRadius: 60, arena: 4, targets: 'Air & Ground',
                                 stats: { 1: { damagePerSecond: 40, duration: 5 } } },
-                    // Arena 5 (NEW)
+                    // Arena 5 (NEW CARDS)
                     'flyingSkeletons': { name: 'Flying Skeletons', cost: 3, emoji: '🦇', type: 'Swarm', unitClass: FlyingSkeletons, placementRadius: 10, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
-                                stats: { 1: { count: 3, health: 20, damage: 20, hitSpeed: 1, speed: 1.8 } } },
-                    'megaFlyingSkeleton': { name: 'Mega Flying Skeleton', cost: 4, emoji: '👻', type: 'Air', unitClass: MegaFlyingSkeleton, placementRadius: 14, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 110,
-                                stats: { 1: { health: 600, damage: 80, hitSpeed: 1.3, speed: 1.2 } } },
-                    'flyingGroup': { name: 'Flying Skeleton Group', cost: 5, emoji: '🦇🦇', type: 'Swarm', unitClass: FlyingSkeletonGroup, placementRadius: 10, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
-                                stats: { 1: { count: 6, health: 20, damage: 20, hitSpeed: 1, speed: 1.8 } } },
-                                
+                                stats: { 1: { count: 3, health: 40, damage: 40, hitSpeed: 1, speed: 1.8 } } },
+                    'megaFlyingSkeleton': { name: 'Mega Flying Skeleton', cost: 4, emoji: '👻', type: 'Air', unitClass: MegaFlyingSkeleton, placementRadius: 12, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
+                                stats: { 1: { health: 600, damage: 100, hitSpeed: 1.3, speed: 1.5 } } },
+                    'flyingSkeletonGroup': { name: 'Flying Skeleton Group', cost: 5, emoji: '🦇', type: 'Swarm', unitClass: FlyingSkeletonGroup, placementRadius: 10, isFlying: true, arena: 5, targets: 'Air & Ground', aggroRange: 100,
+                                stats: { 1: { count: 6, health: 40, damage: 40, hitSpeed: 1, speed: 1.8 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
                 
@@ -1904,7 +1905,8 @@
                 cardInfoLevel.textContent = isLocked ? "Not Unlocked" : `Level ${displayLevel}`;
                 
                 cardInfoStats.innerHTML = `<div>Targets: <span>${card.targets || '-'}</span></div>`;
-                if (card.isFlying) cardInfoStats.innerHTML += `<div>Placement: <span>Air & Ground</span></div>`;
+                if (card.isFlying) cardInfoStats.innerHTML += `<div>Placement: <span>Air</span></div>`;
+                else if (card.type !== 'Spell' && card.type !== 'Building') cardInfoStats.innerHTML += `<div>Placement: <span>Ground</span></div>`;
                 
                 // --- FIX: Only loop stats if stats is not null ---
                 if (stats) {
@@ -2304,8 +2306,18 @@
                 update() { 
                     if (this.health <= 0) return; 
                     this.lifetime--; 
-                    this.health = this.maxHealth * (this.lifetime / this.maxLifetime); 
-                    if (this.lifetime <= 0) { this.health = 0; return; } 
+                    
+                    // --- BUILDING HEALTH DECAY FIX ---
+                    // Calculate health decay per frame and subtract it
+                    const decayPerFrame = this.maxHealth / this.maxLifetime;
+                    this.health -= decayPerFrame;
+                    // --- END FIX ---
+                    
+                    if (this.lifetime <= 0 || this.health <= 0) { // Check both
+                        this.health = 0; 
+                        return; 
+                    } 
+                    
                     this.spawnTimer--; 
                     if (this.spawnTimer <= 0) {
                         let unitToSpawn = null;
@@ -2393,11 +2405,13 @@
                         }
                     }
 
-                    // 3. Check for troops in aggro range
+                    // 3. Check for troops or buildings in aggro range
                     let closestTroopDist = this.aggroRange;
                     let troopTarget = null;
                     for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Unit)) {
+                        // --- AGGRO FIX ---
+                        // Check for Units OR Buildings
+                        if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building)) {
                             if (!this.targetsAir && obj.isFlying) continue; // Can't target air
                             
                             const dist = getDistance(this, obj);
@@ -2488,56 +2502,64 @@
                     this.targetLocked = false;
                 }
                 findTarget() {
-                    // FIX: Only find a new target if not locked or target is dead
-                    if (this.targetLocked && this.target && this.target.health > 0) {
-                        return; // Keep locked target
-                    }
-
-                    let closestDist = Infinity;
-                    let newTarget = null;
-                    
-                    // 1. Find closest Princess Tower in its lane
+                    // --- BUILDING-TARGETING AI FIX ---
+        
+                    // 1. Find the default tower target (closest tower in lane, or king)
+                    let closestTowerDist = Infinity;
+                    let towerTarget = null;
+        
+                    // Find closest Princess Tower in its lane
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
-                            // If I'm on left (x < 200) and tower is on left
                             if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
                                 }
                             }
                         }
                     }
-                    
-                    // 2. If no lane tower, find closest King Tower
-                    if (!newTarget) {
+                    // If no lane tower, find King
+                    if (!towerTarget) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
                                 }
                             }
                         }
                     }
-                    
-                    // 3. If still no tower, check for buildings (like Huts)
-                    if (!newTarget) {
-                         for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Building)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
-                                }
+        
+                    // 2. Find the closest building (as a potential distraction)
+                    let closestBuildingDist = Infinity;
+                    let buildingTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Building)) {
+                            const dist = getDistance(this, obj);
+                            if (dist < closestBuildingDist) { 
+                                closestBuildingDist = dist; 
+                                buildingTarget = obj; 
                             }
                         }
                     }
+        
+                    // 3. Decide: Is the building a valid, closer distraction?
+                    // Use Infinity if no tower target exists
+                    const towerDist = towerTarget ? closestTowerDist : Infinity;
                     
-                    this.target = newTarget;
+                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
+                        // Attack the building
+                        this.target = buildingTarget;
+                    } else {
+                        // No valid distraction, attack the tower
+                        this.target = towerTarget;
+                    }
+                    
                     this.targetLocked = (this.target != null);
+                    // --- END AI FIX ---
                 }
                 // FIX: Add custom update to ONLY use building-find logic
                 update() {
@@ -2580,55 +2602,64 @@
                 }
                 
                 findTarget() {
-                    // FIX: Only find a new target if not locked or target is dead
-                    if (this.targetLocked && this.target && this.target.health > 0) {
-                        return; // Keep locked target
-                    }
-
-                    let closestDist = Infinity;
-                    let newTarget = null;
-                    
-                    // 1. Find closest Princess Tower in its lane
+                    // --- BUILDING-TARGETING AI FIX ---
+        
+                    // 1. Find the default tower target (closest tower in lane, or king)
+                    let closestTowerDist = Infinity;
+                    let towerTarget = null;
+        
+                    // Find closest Princess Tower in its lane
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
                             if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
                                 }
                             }
                         }
                     }
-                    
-                    // 2. If no lane tower, find closest King Tower
-                    if (!newTarget) {
+                    // If no lane tower, find King
+                    if (!towerTarget) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
                                 }
                             }
                         }
                     }
-                    
-                    // 3. If still no tower, check for buildings (like Huts)
-                    if (!newTarget) {
-                         for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Building)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestDist) { 
-                                    closestDist = dist; 
-                                    newTarget = obj; 
-                                }
+        
+                    // 2. Find the closest building (as a potential distraction)
+                    let closestBuildingDist = Infinity;
+                    let buildingTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Building)) {
+                            const dist = getDistance(this, obj);
+                            if (dist < closestBuildingDist) { 
+                                closestBuildingDist = dist; 
+                                buildingTarget = obj; 
                             }
                         }
                     }
+        
+                    // 3. Decide: Is the building a valid, closer distraction?
+                    // Use Infinity if no tower target exists
+                    const towerDist = towerTarget ? closestTowerDist : Infinity;
                     
-                    this.target = newTarget;
+                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
+                        // Attack the building
+                        this.target = buildingTarget;
+                    } else {
+                        // No valid distraction, attack the tower
+                        this.target = towerTarget;
+                    }
+                    
                     this.targetLocked = (this.target != null);
+                    // --- END AI FIX ---
                 }
                 
                 spawnBarbs() {
@@ -2800,38 +2831,64 @@
                 }
                 // Use building-only targeting
                 findTarget() {
-                    if (this.targetLocked && this.target && this.target.health > 0) return;
-                    let closestDist = Infinity;
-                    let newTarget = null;
-                    // Find closest Princess Tower in lane
+                    // --- BUILDING-TARGETING AI FIX ---
+        
+                    // 1. Find the default tower target (closest tower in lane, or king)
+                    let closestTowerDist = Infinity;
+                    let towerTarget = null;
+        
+                    // Find closest Princess Tower in its lane
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
                             if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { closestDist = dist; newTarget = obj; }
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
                             }
                         }
                     }
                     // If no lane tower, find King
-                    if (!newTarget) {
+                    if (!towerTarget) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
                                 const dist = getDistance(this, obj);
-                                if (dist < closestDist) { closestDist = dist; newTarget = obj; }
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
                             }
                         }
                     }
-                    // If no tower, find Building
-                    if (!newTarget) {
-                         for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Building)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestDist) { closestDist = dist; newTarget = obj; }
+        
+                    // 2. Find the closest building (as a potential distraction)
+                    let closestBuildingDist = Infinity;
+                    let buildingTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Building)) {
+                            const dist = getDistance(this, obj);
+                            if (dist < closestBuildingDist) { 
+                                closestBuildingDist = dist; 
+                                buildingTarget = obj; 
                             }
                         }
                     }
-                    this.target = newTarget;
+        
+                    // 3. Decide: Is the building a valid, closer distraction?
+                    // Use Infinity if no tower target exists
+                    const towerDist = towerTarget ? closestTowerDist : Infinity;
+
+                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
+                        // Attack the building
+                        this.target = buildingTarget;
+                    } else {
+                        // No valid distraction, attack the tower
+                        this.target = towerTarget;
+                    }
+                    
                     this.targetLocked = (this.target != null);
+                    // --- END AI FIX ---
                 }
                 update() { // Custom update to use building-only AI
                     if (this.health <= 0) return;
@@ -2847,12 +2904,16 @@
                 }
             }
             class Pigs { constructor(x, y, team, level = 1) { const s = allCards['pigs'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new Pig(x + Math.random()*20-10, y + Math.random()*20-10, team, level)); } } }
-
-            // --- SKULL KINGDOM (NEW) ---
-            class FlyingSkeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletons'].stats[level]; super(x, y, 8, team, s.health, s.speed, 20, s.damage, s.hitSpeed, '🦇', true, true, level, allCards['flyingSkeletons'].aggroRange); } }
+            
+            // --- FLYING SKELETON (NEW) ---
+            class FlyingSkeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletons'].stats[level]; super(x, y, 9, team, s.health, s.speed, 25, s.damage, s.hitSpeed, '🦇', true, true, level, allCards['flyingSkeletons'].aggroRange); } }
             class FlyingSkeletons { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletons'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new FlyingSkeleton(x + Math.random()*20-10, y + Math.random()*20-10, team, level)); } } }
+            
+            // --- MEGA FLYING SKELETON (NEW) ---
             class MegaFlyingSkeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['megaFlyingSkeleton'].stats[level]; super(x, y, 14, team, s.health, s.speed, 25, s.damage, s.hitSpeed, '👻', true, true, level, allCards['megaFlyingSkeleton'].aggroRange); } }
-            class FlyingSkeletonGroup { constructor(x, y, team, level = 1) { const s = allCards['flyingGroup'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new FlyingSkeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
+            
+            // --- FLYING SKELETON GROUP (NEW) ---
+            class FlyingSkeletonGroup { constructor(x, y, team, level = 1) { const s = allCards['flyingSkeletonGroup'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new FlyingSkeleton(x + Math.random()*30-15, y + Math.random()*30-15, team, level)); } } }
 
 
             class Projectile extends GameObject {
@@ -3028,7 +3089,7 @@
                 } else if (currentArenaTheme === 'arena-4') {
                     ctx.fillStyle = '#65a30d'; // Farm river
                 } else if (currentArenaTheme === 'arena-5') {
-                    ctx.fillStyle = '#4a148c'; // Skull river
+                    ctx.fillStyle = '#4338ca'; // Indigo-700
                 } else {
                     ctx.fillStyle = '#3b82f6'; // Default blue
                 }
@@ -3104,15 +3165,15 @@
                 if (playerUnits.length > 0) {
                     let bestCardId = null;
                     // --- NEW AI LOGIC ---
-                    if (playerUnits.some(u => u.isFlying) && aiHand.includes('fireDragon') && aiElixir >= allCards['fireDragon'].cost) {
-                        bestCardId = 'fireDragon';
-                    } else if (playerUnits.some(u => u.isFlying) && aiHand.includes('archer') && aiElixir >= allCards['archer'].cost) {
-                        bestCardId = 'archer';
-                    } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('poison') && aiElixir >= allCards['poison'].cost) {
+                    if (playerUnits.some(u => u instanceof FlyingSkeleton || u instanceof FlyingSkeletonGroup) && aiHand.includes('fireDragon') && aiElixir >= allCards['fireDragon'].cost) {
+                         bestCardId = 'fireDragon';
+                    } else if (playerUnits.some(u => u instanceof FlyingSkeleton || u instanceof FlyingSkeletonGroup || u instanceof MegaFlyingSkeleton) && aiHand.includes('archer') && aiElixir >= allCards['archer'].cost) {
+                         bestCardId = 'archer';
+                    } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians || u instanceof GoblinGang) && aiHand.includes('poison') && aiElixir >= allCards['poison'].cost) {
                         bestCardId = 'poison';
                     } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof Barbarians) && aiHand.includes('axeSwinger') && aiElixir >= allCards['axeSwinger'].cost) {
                         bestCardId = 'axeSwinger';
-                    } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
+                    } else if (playerUnits.some(u => u instanceof Skeleton || u instanceof SkeletonArmy || u instanceof FlyingSkeleton || u instanceof FlyingSkeletonGroup) && aiHand.includes('arrows') && aiElixir >= allCards['arrows'].cost) {
                         bestCardId = 'arrows';
                     } else if (playerUnits.some(u => u instanceof Giant || u instanceof Pigs) && aiHand.includes('farmer') && aiElixir >= allCards['farmer'].cost) {
                         bestCardId = 'farmer';
@@ -3131,11 +3192,11 @@
                 // Fallback: If elixir is high, play a card
                 if (aiElixir > 7) {
                     let bestCardId = null;
-                    if(aiHand.includes('megaFlyingSkeleton') && aiElixir >= allCards['megaFlyingSkeleton'].cost) { bestCardId = 'megaFlyingSkeleton'; }
-                    else if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; }
+                    if(aiHand.includes('pigs') && aiElixir >= allCards['pigs'].cost) { bestCardId = 'pigs'; } // NEW
                     else if(aiHand.includes('giant') && aiElixir >= allCards['giant'].cost) { bestCardId = 'giant'; }
                     else if(aiHand.includes('barbarianHut') && aiElixir >= allCards['barbarianHut'].cost) { bestCardId = 'barbarianHut'; }
                     else if (aiHand.includes('tinyBot') && aiElixir >= allCards['tinyBot'].cost) { bestCardId = 'tinyBot'; }
+                    else if (aiHand.includes('megaFlyingSkeleton') && aiElixir >= allCards['megaFlyingSkeleton'].cost) { bestCardId = 'megaFlyingSkeleton'; }
                     else {
                         // Play any random affordable unit
                         let affordableCards = aiHand.filter(id => allCards[id] && allCards[id].cost <= aiElixir && allCards[id].type !== 'Spell');
@@ -3167,25 +3228,23 @@
                 
                 if (card.type === 'Spell') {
                     let target = null;
-                    
                     if (cardId === 'fireball') {
-                        const damage = card.stats[cardLevel].damage;
                         target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0 && o.health < 600);
-                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Barbarian);
-                         if (target) gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
+                        if (!target) target = gameObjects.find(o => o.team === 'player' && (o instanceof Barbarian || o instanceof Farmer));
                     } else if (cardId === 'arrows') {
-                        const damage = card.stats[cardLevel].damage;
-                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang || o instanceof FlyingSkeletons || o instanceof FlyingSkeletonGroup));
-                         if (target) gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
+                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Skeleton || o instanceof SkeletonArmy || o instanceof GoblinGang || o instanceof FlyingSkeleton || o instanceof FlyingSkeletonGroup));
                     } else if (cardId === 'poison') { // NEW
                         target = gameObjects.find(o => o.team === 'player' && (o instanceof Tower) && o.health > 0);
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Unit && o.y > RIVER_Y - 50);
-                        if (target) {
-                             const s = card.stats[cardLevel];
-                            gameObjects.push(new PoisonSpell(target.x, target.y, 'ai', s.damagePerSecond, card.radius, s.duration));
-                        }
                     }
                     if (target) {
+                        if (cardId === 'poison') { // NEW
+                            const s = card.stats[cardLevel];
+                            gameObjects.push(new PoisonSpell(target.x, target.y, 'ai', s.damagePerSecond, card.radius, s.duration));
+                        } else {
+                            const damage = card.stats[cardLevel].damage;
+                            gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
+                        }
                         aiPlayCard(cardId);
                     }
                     return;
@@ -3221,9 +3280,10 @@
                 if (canSpawn && card.unitClass) {
                     const newUnit = new card.unitClass(spawnX, spawnY, 'ai', cardLevel);
                     // --- TYPEERROR FIX ---
-                    // Check if the constructor *itself* is a single unit/building, not a spawner
-                    if (newUnit instanceof Unit || newUnit instanceof Building) {
-                        gameObjects.push(newUnit);
+                    // This is the bug. 'newUnit' is just the spawner (e.g. Pigs), not an actual Unit (e.g. Pig)
+                    // We must check if the *class* is a single unit/building
+                    if (newUnit instanceof GameObject) {
+                         gameObjects.push(newUnit);
                     }
                     aiPlayCard(cardId);
                 }
@@ -3537,7 +3597,7 @@
                 // NEW: Only move indicator if mouse is over canvas
                 const rect = canvas.getBoundingClientRect();
                 const isOverCanvas = (pos.clientX >= rect.left && pos.clientX <= rect.right &&
-                                        pos.clientY >= rect.top && pos.clientY <= rect.bottom);
+                                         pos.clientY >= rect.top && pos.clientY <= rect.bottom);
                 
                 if (isOverCanvas) {
                     placementIndicator.style.display = 'block';
@@ -3571,40 +3631,11 @@
             window.addEventListener('touchmove', handleDragMove, { passive: false });
 
 
-            // --- CLICK-TO-PLACE FIX ---
             function handleDragEnd(e) {
-                // If no card is selected, or game isn't running, or we were NOT dragging, do nothing here.
-                if (!selectedSpawningUnit || !gameRunning || !isDragging) {
-                    // If we mouse-up and it wasn't a drag, it's either a click-to-place (handled by canvas listener)
-                    // or a click-to-select (handled here).
-                    if (selectedSpawningUnit && !isDragging) {
-                        // Check if the click-up was on the card itself. If so, do nothing.
-                        if (e.target && e.target.closest('.card-ui')) {
-                            return; // This was the initial click on the card, keep it selected
-                        }
-                        
-                        // Check if mouse is off-canvas (to cancel selection)
-                        const rect = canvas.getBoundingClientRect();
-                        let clientX, clientY;
-                        if (e.changedTouches && e.changedTouches.length > 0) {
-                            clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY;
-                        } else {
-                            clientX = e.clientX; clientY = e.clientY;
-                        }
-                        const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
-                                              clientY >= rect.top && clientY <= rect.bottom);
-                        
-                        // If we mouse-up off-canvas and it wasn't a drag, cancel selection.
-                        if (!isOverCanvas) {
-                            cancelPlacement();
-                        }
-                    }
-                    isDragging = false; // Reset drag state
-                    return; // Let the 'click' listener handle placement
+                if (!selectedSpawningUnit || !gameRunning) {
+                    cancelPlacement();
+                    return;
                 }
-                
-                // --- This point is reached ONLY if it was a DRAG & DROP ---
-                isDragging = false; // Reset dragging state
 
                 // Check if mouse is over canvas
                 const rect = canvas.getBoundingClientRect();
@@ -3615,20 +3646,42 @@
                     clientX = e.clientX; clientY = e.clientY;
                 }
                 const isOverCanvas = (clientX >= rect.left && clientX <= rect.right &&
-                                      clientY >= rect.top && clientY <= rect.bottom);
-
-                if (!isOverCanvas) {
-                    cancelPlacement();
-                    return;
+                                         clientY >= rect.top && clientY <= rect.bottom);
+                
+                // --- CLICK-TO-PLACE FIX ---
+                if (!isDragging) {
+                    // This was a "click"
+                    if (isOverCanvas) {
+                        // This is a "click-to-place"
+                        // canPlace is already set by the last handleDragMove
+                    } else {
+                        // This was a click off-canvas, or just releasing the mouse from the card
+                        // Check if the click-up was on a card
+                        if (e.target && e.target.closest('.card-ui')) {
+                            // This was the initial click-up on the card. Do nothing.
+                            return; 
+                        }
+                        // Otherwise, it was a click off-canvas to cancel.
+                        cancelPlacement();
+                        return;
+                    }
+                } else {
+                    // This was a "drag-and-drop"
+                    if (!isOverCanvas) {
+                        // Dragged off-canvas to cancel
+                        cancelPlacement();
+                        return;
+                    }
+                    // canPlace is already set
                 }
-
+                // --- END FIX ---
+                
                 if (!canPlace) {
                     console.log("Cannot spawn there!");
                     cancelPlacement();
                     return;
                 }
-
-                // --- Spawn Logic (for DRAG) ---
+                
                 const { x, y } = getCanvasClickPos(e);
                 const clampedX = Math.max(0, Math.min(WIDTH, x));
                 const clampedY = Math.max(0, Math.min(HEIGHT, y));
@@ -3637,7 +3690,7 @@
                 const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
                 
                 if (card.type === 'Spell') {
-                     if (selectedSpawningUnit.id === 'poison') { 
+                    if (selectedSpawningUnit.id === 'poison') { // NEW
                         const s = card.stats[level];
                         gameObjects.push(new PoisonSpell(clampedX, clampedY, 'player', s.damagePerSecond, card.radius, s.duration));
                     } else {
@@ -3647,8 +3700,9 @@
                 } else {
                     const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
                     // --- TYPEERROR FIX ---
-                    // Check if the constructor *itself* is a single unit/building, not a spawner
-                    if (newUnit instanceof Unit || newUnit instanceof Building) {
+                    // Check if the returned object is an actual game object (for single units/buildings)
+                    // If it's a spawner, it's not a GameObject and shouldn't be pushed.
+                    if (newUnit instanceof GameObject) {
                         gameObjects.push(newUnit);
                     }
                 }
@@ -3661,47 +3715,12 @@
             window.addEventListener('mouseup', handleDragEnd);
             window.addEventListener('touchend', handleDragEnd, { passive: false });
 
-            // --- CLICK-TO-PLACE FIX: This listener is now for click-to-place ONLY ---
-            canvas.addEventListener('click', (e) => {
-                // Only handle if a card is selected AND we were NOT dragging
-                if (selectedSpawningUnit && !isDragging) {
-                    if (!canPlace) {
-                        console.log("Cannot spawn there!");
-                        cancelPlacement();
-                        return;
-                    }
-
-                    const { x, y } = getCanvasClickPos(e);
-                    const clampedX = Math.max(0, Math.min(WIDTH, x));
-                    const clampedY = Math.max(0, Math.min(HEIGHT, y));
-                    
-                    const card = allCards[selectedSpawningUnit.id];
-                    const level = cardCollection[selectedSpawningUnit.id] ? cardCollection[selectedSpawningUnit.id].level : 1;
-                    
-                    if (card.type === 'Spell') {
-                        if (selectedSpawningUnit.id === 'poison') { 
-                            const s = card.stats[level];
-                            gameObjects.push(new PoisonSpell(clampedX, clampedY, 'player', s.damagePerSecond, card.radius, s.duration));
-                        } else {
-                            const damage = card.stats[level].damage;
-                            gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
-                        }
-                    } else {
-                        const newUnit = new card.unitClass(clampedX, clampedY, 'player', level);
-                        // --- TYPEERROR FIX ---
-                        // Check if the constructor *itself* is a single unit/building, not a spawner
-                        if (newUnit instanceof Unit || newUnit instanceof Building) {
-                            gameObjects.push(newUnit);
-                        }
-                    }
-                    
-                    playCard(selectedSpawningUnit.id, selectedSpawningUnit.handIndex);
-                    cancelPlacement();
-                }
-                
-                // Reset dragging state just in case
-                isDragging = false;
-            });
+            // --- CLICK-TO-PLACE FIX: This listener is now removed ---
+            // canvas.addEventListener('click', (e) => {
+            //     if (selectedSpawningUnit && !isDragging) {
+            //         handleDragEnd(e);
+            //     }
+            // });
 
             cardInfoCloseBtn.addEventListener('click', closeModal);
             
