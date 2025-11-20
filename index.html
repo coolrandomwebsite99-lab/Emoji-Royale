@@ -1009,6 +1009,34 @@
         // --- Start Game ---
         window.onload = () => {
 
+            // --- NEW: Domain Lock Security ---
+            const allowedHosts = [
+                'coolrandomwebsite99-lab.github.io', // User's GitHub Pages
+                'scf.usercontent.goog' // This platform's sandbox
+            ];
+            const currentHost = window.location.hostname;
+            const isLocal = currentHost === "localhost" || currentHost === ""; // Allow local testing
+            const isAllowed = allowedHosts.some(host => currentHost.endsWith(host)) || isLocal;
+
+            if (!isAllowed) {
+                console.error("Game running on unauthorized domain:", currentHost);
+                // Show game screen and error overlay
+                document.getElementById('loginScreen').style.display = 'none';
+                const gameScreen = document.getElementById('gameScreen');
+                if (gameScreen) gameScreen.style.display = 'flex';
+                const overlay = document.getElementById('messageOverlay');
+                if (overlay) overlay.style.display = 'flex';
+                const messageText = document.getElementById('messageText');
+                if (messageText) messageText.textContent = 'Error: This game is not authorized to run on this website.';
+                const startButton = document.getElementById('startButton');
+                if (startButton) startButton.style.display = 'none';
+                const menuButton = document.getElementById('menuButton');
+                if (menuButton) menuButton.style.display = 'none';
+                return; // Stop loading the game
+            }
+            // --- END: Domain Lock Security ---
+
+
             // --- Game Constants ---
             const WIDTH = 400; // Define constants first
             const HEIGHT = 500;
