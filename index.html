@@ -72,6 +72,22 @@
             justify-content: center;
             align-items: center;
             background-color: rgba(0, 0, 0, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: none;
+            /* Update Log Modal Card Frame */
+            #updateLogOverlay > div {
+                background: #374151;
+                border-radius: 16px;
+                border: 4px solid #fde047;
+                box-shadow: 0 4px 24px 0 rgba(0,0,0,0.4);
+                padding: 2rem 1.5rem;
+                max-width: 400px;
+                width: 100%;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
             color: white;
             font-size: 2.5rem;
             font-weight: bold;
@@ -813,6 +829,7 @@
             <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
             <button id="debugArena4" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Jump to Arena 4 (750 🏆)</button>
             <button id="debugArena5" class="debug-btn bg-indigo-600 hover:bg-indigo-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
+                        <button id="debugArena6" class="debug-btn bg-orange-900 hover:bg-orange-800">Jump to Arena 6 (1250 🏆)</button>
             <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
             <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
             <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
@@ -1752,7 +1769,8 @@
                         'Added Life Spirit - Jumps and creates healing circle for friendly units (3 seconds)',
                         'Added Bomb Spirit - Jumps and explodes damaging enemies in area',
                         'Added Spear Goblins card - Spawns 3 spear goblins (unlocks Arena 2)',
-                        'Added Anger spell - Purple pool that gives 2x damage and 1.5x attack speed (5 seconds, persists 3s after leaving)'
+                        'Added Anger spell - Purple pool that gives 2x damage and 1.5x attack speed (5 seconds, persists 3s after leaving)',
+                        'Buffed Skeletons and Skeleton Group: damage increased from 2 to 5'
                     ]},
                     { date: 'Previous Updates', title: 'Previous Features', items: [
                         'Arena system with 5 arenas',
@@ -3269,172 +3287,217 @@
                 }
             }
 
-            // --- SPIRITS (NEW) ---
-            class Spirit extends Unit {
-                constructor(x, y, team, level = 1, emoji, jumpRadius, effectRadius, effectDuration, cardId) {
-                    const s = allCards[cardId].stats[level];
-                    super(x, y, 8, team, s.health, 2.0, 0, 0, 1, emoji, false, false, level, 200);
-                    this.jumpRadius = jumpRadius;
-                    this.effectRadius = effectRadius;
-                    this.effectDuration = effectDuration * 60;
-                    this.hasJumped = false;
-                    this.targetToJump = null;
-                    this.cardId = cardId;
+// --- SPIRIT CLASSES (NEW, FROM SCRATCH) ---
+class ColdSpirit extends Unit {
+    constructor(x, y, team, level = 1) {
+        const s = allCards['coldSpirit'].stats[level];
+        super(x, y, 9, team, s.health, 1.5, 20, 10, 1, '❄️', false, false, level, allCards['coldSpirit'].aggroRange);
+        this.jumpRadius = s.jumpRadius;
+        this.effectRadius = s.effectRadius;
+        this.freezeDuration = s.freezeDuration;
+        this.hasJumped = false;
+    }
+    update() {
+        if (this.health <= 0 || this.hasJumped) return;
+        // Use standard land troop AI to find target in aggro range
+        let target = null;
+        // Find closest enemy unit (including flying), building, or tower in aggro range
+        let closestDist = this.jumpRadius;
+        for (const obj of gameObjects) {
+            if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                const dist = getDistance(this, obj);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    target = obj;
                 }
-                findJumpTarget() {
-                    let closestDist = this.jumpRadius;
-                    let bestTarget = null;
+            }
+        }
+        if (target) {
+            // Jump onto target and trigger freeze
+            this.x = target.x;
+            this.y = target.y;
+            gameObjects.push(new FreezeEffect(this.x, this.y, this.team, this.effectRadius, this.freezeDuration * 60));
+            this.hasJumped = true;
+            this.health = 0;
+        } else {
+            // Move like a normal troop
+            if (!this.target || this.target.health <= 0) {
+                this.target = this.findTarget(true);
+            }
+            if (this.target && this.target.health > 0) {
+                this.move();
+            }
+        }
+    }
+}
+
+        class BombSpirit extends Unit {
+            constructor(x, y, team, level = 1) {
+                const s = allCards['bombSpirit'].stats[level];
+                super(x, y, 9, team, s.health, 1.5, 20, 10, 1, '💣', false, false, level, allCards['bombSpirit'].aggroRange);
+                this.jumpRadius = s.jumpRadius;
+                this.effectRadius = s.effectRadius;
+                this.damage = s.damage;
+                this.hasJumped = false;
+            }
+            update() {
+                if (this.health <= 0 || this.hasJumped) return;
+                let target = null;
+                let closestDist = this.jumpRadius;
+                for (const obj of gameObjects) {
+                    if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        const dist = getDistance(this, obj);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            target = obj;
+                        }
+                    }
+                }
+                if (target) {
+                    // Jump onto target and trigger explosion
+                    this.x = target.x;
+                    this.y = target.y;
+                    // Damage all enemy things in effect radius
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
-                            const dist = getDistance(this, obj);
-                            if (dist < closestDist) {
-                                closestDist = dist;
-                                bestTarget = obj;
+                            if (getDistance(this, obj) < this.effectRadius) {
+                                obj.health -= this.damage;
                             }
                         }
                     }
-                    return bestTarget;
-                }
-                jump() {
-                    if (this.hasJumped) return;
+                    gameObjects.push(new ExplosionEffect(this.x, this.y, this.effectRadius));
                     this.hasJumped = true;
-                    if (this.targetToJump) {
-                        this.x = this.targetToJump.x;
-                        this.y = this.targetToJump.y;
-                        this.activateEffect();
+                    this.health = 0;
+                } else {
+                    if (!this.target || this.target.health <= 0) {
+                        this.target = this.findTarget(true);
                     }
-                }
-                activateEffect() {
-                    // Override in subclasses
-                }
-                update() {
-                    if (this.health <= 0) return;
-                    if (!this.hasJumped) {
-                        this.targetToJump = this.findJumpTarget();
-                        if (this.targetToJump) {
-                            this.jump();
-                        } else {
-                            // Move forward if no target
-                            const angle = this.team === 'player' ? -Math.PI / 2 : Math.PI / 2;
-                            this.x += Math.cos(angle) * this.speed;
-                            this.y += Math.sin(angle) * this.speed;
-                            if (this.y < 0 || this.y > HEIGHT) this.health = 0;
-                        }
-                    } else {
-                        this.health = 0; // Remove after effect
+                    if (this.target && this.target.health > 0) {
+                        this.move();
                     }
                 }
             }
+        }
 
-            class ZapSpirit extends Spirit {
-                constructor(x, y, team, level = 1) {
-                    const s = allCards['zapSpirit'].stats[level];
-                    super(x, y, team, level, '⚡', s.jumpRadius, s.effectRadius, 0, 'zapSpirit');
+        class ZapSpirit extends Unit {
+            constructor(x, y, team, level = 1) {
+                const s = allCards['zapSpirit'].stats[level];
+                super(x, y, 9, team, s.health, 1.5, 20, 10, 1, '⚡', false, false, level, allCards['zapSpirit'].aggroRange);
+                this.jumpRadius = s.jumpRadius;
+                this.effectRadius = s.effectRadius;
+                this.damage = s.damage;
+                this.hasJumped = false;
+                this.zapChain = null; // For drawing
+            }
+            update() {
+                if (this.health <= 0 || this.hasJumped) return;
+                let target = null;
+                let closestDist = this.jumpRadius;
+                for (const obj of gameObjects) {
+                    if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        const dist = getDistance(this, obj);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            target = obj;
+                        }
+                    }
                 }
-                activateEffect() {
-                    const zapped = [];
-                    const startTarget = this.targetToJump;
-                    if (!startTarget) return;
-                    
-                    zapped.push(startTarget);
-                    let currentTarget = startTarget;
-                    
-                    // Chain to up to 10 targets
-                    for (let i = 0; i < 9; i++) {
-                        let nextTarget = null;
-                        let closestDist = this.effectRadius;
-                        
+                if (target) {
+                    // Jump onto target and trigger zap chain
+                    this.x = target.x;
+                    this.y = target.y;
+                    // Chain to up to 10 enemy things in effect radius
+                    let chain = [target];
+                    let visited = new Set([target]);
+                    let current = target;
+                    for (let i = 1; i < 10; i++) {
+                        // Find next closest enemy not already zapped
+                        let next = null;
+                        let minDist = Infinity;
                         for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower) && !zapped.includes(obj)) {
-                                const dist = getDistance(currentTarget, obj);
-                                if (dist < closestDist) {
-                                    closestDist = dist;
-                                    nextTarget = obj;
+                            if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower) && !visited.has(obj) && getDistance(current, obj) < this.effectRadius) {
+                                let d = getDistance(current, obj);
+                                if (d < minDist) {
+                                    minDist = d;
+                                    next = obj;
                                 }
                             }
                         }
-                        
-                        if (nextTarget) {
-                            zapped.push(nextTarget);
-                            currentTarget = nextTarget;
-                            
-                            // NEW: Check for king tower activation (if chain goes through middle between princess and king)
-                            if (nextTarget instanceof Tower && !nextTarget.isKing) {
-                                // Check if there's a king tower that could be activated
-                                const kingTower = gameObjects.find(t => t.team === nextTarget.team && t.isKing && !t.isActive);
-                                if (kingTower) {
-                                    // Check if this princess tower is between the zap and king
-                                    const distToKing = getDistance(nextTarget, kingTower);
-                                    if (distToKing < this.effectRadius * 1.5) {
-                                        // Chain could reach king, activate it
-                                        if (!kingTower.isActive) {
-                                            kingTower.isActive = true;
-                                            kingTower.activationAnimation = 30;
-                                        }
-                                    }
-                                }
-                            }
+                        if (next) {
+                            chain.push(next);
+                            visited.add(next);
+                            current = next;
                         } else {
                             break;
                         }
                     }
-                    
-                    // Damage all zapped targets
-                    const damage = allCards['zapSpirit'].stats[this.level].damage;
-                    zapped.forEach((target, index) => {
-                        target.health -= damage;
-                    });
-                    
-                    // Store chain for drawing
-                    this.zapChain = zapped;
-                }
-                draw() {
-                    super.draw();
-                    // Draw chain effects
-                    if (this.targetToJump && this.hasJumped) {
-                        // Chain drawing handled in gameLoop
-                    }
-                }
-            }
-
-            class ColdSpirit extends Spirit {
-                constructor(x, y, team, level = 1) {
-                    const s = allCards['coldSpirit'].stats[level];
-                    super(x, y, team, level, '❄️', s.jumpRadius, s.effectRadius, s.freezeDuration, 'coldSpirit');
-                }
-                activateEffect() {
-                    gameObjects.push(new FreezeEffect(this.x, this.y, this.team, this.effectRadius, this.effectDuration));
-                }
-            }
-
-            class LifeSpirit extends Spirit {
-                constructor(x, y, team, level = 1) {
-                    const s = allCards['lifeSpirit'].stats[level];
-                    super(x, y, team, level, '💚', s.jumpRadius, s.effectRadius, s.healDuration, 'lifeSpirit');
-                }
-                activateEffect() {
-                    gameObjects.push(new HealEffect(this.x, this.y, this.team, this.effectRadius, this.effectDuration));
-                }
-            }
-
-            class BombSpirit extends Spirit {
-                constructor(x, y, team, level = 1) {
-                    const s = allCards['bombSpirit'].stats[level];
-                    super(x, y, team, level, '💣', s.jumpRadius, s.effectRadius, 0, 'bombSpirit');
-                }
-                activateEffect() {
-                    const damage = allCards['bombSpirit'].stats[this.level].damage;
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
-                            if (getDistance(this, obj) < this.effectRadius) {
-                                obj.health -= damage;
-                            }
+                    // Deal damage to all in chain
+                    for (const obj of chain) {
+                        obj.health -= this.damage;
+                        // Special: If obj is a king tower, activate it
+                        if (obj instanceof Tower && obj.isKing && !obj.isActive) {
+                            obj.isActive = true;
+                            obj.activationAnimation = 30;
                         }
                     }
-                    // Explosion animation
-                    gameObjects.push(new ExplosionEffect(this.x, this.y, this.effectRadius));
+                    this.zapChain = chain;
+                    this.hasJumped = true;
+                    this.health = 0;
+                } else {
+                    if (!this.target || this.target.health <= 0) {
+                        this.target = this.findTarget(true);
+                    }
+                    if (this.target && this.target.health > 0) {
+                        this.move();
+                    }
                 }
             }
+            draw() {
+                super.draw();
+                // Draw zap chain after death (handled in game loop for all ZapSpirits)
+            }
+        }
+
+        class LifeSpirit extends Unit {
+            constructor(x, y, team, level = 1) {
+                const s = allCards['lifeSpirit'].stats[level];
+                super(x, y, 9, team, s.health, 1.5, 20, 10, 1, '💚', false, false, level, allCards['lifeSpirit'].aggroRange);
+                this.jumpRadius = s.jumpRadius;
+                this.effectRadius = s.effectRadius;
+                this.healDuration = s.healDuration;
+                this.hasJumped = false;
+            }
+            update() {
+                if (this.health <= 0 || this.hasJumped) return;
+                let target = null;
+                let closestDist = this.jumpRadius;
+                for (const obj of gameObjects) {
+                    if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        const dist = getDistance(this, obj);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            target = obj;
+                        }
+                    }
+                }
+                if (target) {
+                    // Jump onto target and trigger heal (heal only allies)
+                    this.x = target.x;
+                    this.y = target.y;
+                    gameObjects.push(new HealEffect(this.x, this.y, this.team, this.effectRadius, this.healDuration * 60));
+                    this.hasJumped = true;
+                    this.health = 0;
+                } else {
+                    if (!this.target || this.target.health <= 0) {
+                        this.target = this.findTarget(true);
+                    }
+                    if (this.target && this.target.health > 0) {
+                        this.move();
+                    }
+                }
+            }
+        }
+
 
             // --- SPEAR GOBLINS (NEW) ---
             class SpearGoblins { constructor(x, y, team, level = 1) { const s = allCards['spearGoblins'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new SpearGoblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } } }
@@ -3788,7 +3851,7 @@
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.2 } } }, // Speed 1.5 -> 1.2
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
-                                stats: { 1: { count: 3, health: 10, damage: 2, hitSpeed: 1.2, speed: 1.4 } } }, // Speed 1.6 -> 1.4
+                                stats: { 1: { count: 3, health: 10, damage: 5, hitSpeed: 1.2, speed: 1.4 } } }, // Speed 1.6 -> 1.4, damage buffed to 5
                     'tinyBot': { name: 'Tiny Bot', cost: 4, emoji: '🤖', type: 'Melee', unitClass: TinyBot, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { health: 700, damage: 250, hitSpeed: 1.8, speed: 1.0 } } }, // Speed 1.2 -> 1.0
                     'fireball': { name: 'Fireball', cost: 4, emoji: '🔥', type: 'Spell', radius: 50, placementRadius: 50, arena: 1, targets: 'Air & Ground',
@@ -3799,7 +3862,7 @@
                     'hut': { name: 'Goblin House', cost: 5, emoji: '🏠', type: 'Building', unitClass: GoblinHut, placementRadius: 20, isFlying: false, arena: 2, targets: '-',
                                 stats: { 1: { health: 800, spawn_speed: '5s', lifetime: '30s' } } },
                     'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground', aggroRange: 100,
-                                stats: { 1: { count: 15, health: 10, damage: 2, hitSpeed: 1.2, speed: 1.4 } } }, // Speed 1.6 -> 1.4
+                                stats: { 1: { count: 15, health: 10, damage: 5, hitSpeed: 1.2, speed: 1.4 } } }, // Speed 1.6 -> 1.4, damage buffed to 5
                     'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground', aggroRange: 100,
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.2, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2, spear_speed: 1.2 } } }, // Speed 1.5 -> 1.2
                     'spearGoblins': { name: 'Spear Goblins', cost: 2, emoji: '🎯', type: 'Swarm', unitClass: SpearGoblins, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground', aggroRange: 100,
@@ -3814,7 +3877,7 @@
                     'barbarianHut': { name: 'Barbarian House', cost: 7, emoji: '🏘️', type: 'Building', unitClass: BarbarianHut, placementRadius: 20, isFlying: false, arena: 3, targets: '-',
                                 stats: { 1: { health: 1000, spawn_speed: '10s', lifetime: '40s', barbLevel: 1 } } },
                     'axeSwinger': { name: 'Axe Swinger', cost: 4, emoji: '🪓', type: 'Melee', unitClass: AxeSwinger, placementRadius: 12, isFlying: false, arena: 3, targets: 'Ground', aggroRange: 100,
-                                stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 40, speed: 1.0 } } }, // Speed 1.2 -> 1.0
+                                stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 24, speed: 1.0 } } }, // Speed 1.2 -> 1.0, splashRadius reduced
                     // Arena 4 (NEW CARDS)
                     'pigs': { name: 'Pigs', cost: 4, emoji: '🐷', type: 'WinCon', unitClass: Pigs, placementRadius: 10, isFlying: false, arena: 4, targets: 'Buildings', aggroRange: 100,
                                 stats: { 1: { count: 4, health: 300, damage: 50, hitSpeed: 1.1, speed: 1.4 } } }, // Speed 1.8 -> 1.4
@@ -3863,7 +3926,8 @@
                             // Handle spirit stats
                             if (newStats.jumpRadius) newStats.jumpRadius = Math.round(newStats.jumpRadius * 1.05);
                             if (newStats.effectRadius) newStats.effectRadius = Math.round(newStats.effectRadius * 1.05);
-                            if (newStats.splashRadius) newStats.splashRadius = Math.round(newStats.splashRadius * 1.1);
+                            // Prevent splashRadius upgrade for AxeSwinger
+                            if (cardId !== 'axeSwinger' && newStats.splashRadius) newStats.splashRadius = Math.round(newStats.splashRadius * 1.1);
                             // Update levels for spawner cards
                             if (cardId === 'battleRam' || cardId === 'barbarianHut') newStats.barbLevel = level;
                             card.stats[level] = newStats;
@@ -4421,10 +4485,22 @@
                 isOvertime = false; // NEW: Stop overtime check
                 isTieBreaker = false;
                 cancelAnimationFrame(gameLoopId);
-                trophies = Math.max(0, trophies - 20);
+                // Calculate minimum trophy floor for current arena
+                let minTrophyFloor = 0;
+                for (const floor in arenaFloors) {
+                    if (trophies >= parseInt(floor)) {
+                        minTrophyFloor = parseInt(floor);
+                    }
+                }
+                let lossAmount = 30;
+                if (trophies - lossAmount < minTrophyFloor) {
+                    lossAmount = trophies - minTrophyFloor;
+                }
+                if (lossAmount < 0) lossAmount = 0;
+                trophies = Math.max(minTrophyFloor, trophies - lossAmount);
                 updateArena();
                 trophyDisplay.textContent = `🏆 ${trophies}`;
-                messageText.textContent = `${message} (-20 🏆)`;
+                messageText.textContent = `${message} (-${lossAmount} 🏆)`;
                 messageOverlay.style.display = 'flex';
                 startButton.style.display = 'none';
                 menuButton.style.display = 'inline-block';
