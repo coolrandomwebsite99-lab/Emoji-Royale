@@ -54,6 +54,14 @@
                 linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
         }
+
+        /* NEW ARENA 7 STYLE */
+        canvas.arena-7 {
+            background-color: #3b0764; /* deep purple */
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        }
         
         #gameContainer {
             position: relative;
@@ -797,6 +805,14 @@
                         <p class="text-yellow-400">1250+ Trophies 🏆</p>
                     </div>
                 </div>
+                <!-- Arena 7 (NEW) -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">🪦</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 7: Mages Graveyard</h2>
+                        <p class="text-yellow-400">1500+ Trophies 🏆</p>
+                    </div>
+                </div>
             </div>
             
             <button id="arenaBackButton" class="arena-btn bg-gray-600 hover:bg-gray-700 mt-8 w-3/4">
@@ -829,7 +845,8 @@
             <button id="debugArena3" class="debug-btn bg-red-600 hover:bg-red-700">Jump to Arena 3 (500 🏆)</button>
             <button id="debugArena4" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Jump to Arena 4 (750 🏆)</button>
             <button id="debugArena5" class="debug-btn bg-indigo-600 hover:bg-indigo-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
-                        <button id="debugArena6" class="debug-btn bg-orange-900 hover:bg-orange-800">Jump to Arena 6 (1250 🏆)</button>
+                    <button id="debugArena6" class="debug-btn bg-orange-900 hover:bg-orange-800">Jump to Arena 6 (1250 🏆)</button>
+                    <button id="debugArena7" class="debug-btn bg-gray-900 hover:bg-gray-800">Jump to Arena 7 (1500 🏆)</button>
             <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
             <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
             <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
@@ -1092,7 +1109,7 @@
         let spellRadius = 0;
         let placementRadius = 0;
         let canPlace = false;
-        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm", 1000: "Arena 5: Skull Kingdom", 1250: "Arena 6: Warlock's Workshop" }; // NEW
+        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm", 1000: "Arena 5: Skull Kingdom", 1250: "Arena 6: Warlock's Workshop", 1500: "Arena 7: Mages Graveyard" };
         let currentArenaFloor = 0;
         let currentArenaTheme = 'arena-1'; // For canvas styling
 
@@ -1672,6 +1689,9 @@
                 } else if (arenaDisplayName.includes("Lava Town")) {
                     emoji = "🌋";
                     currentArenaTheme = 'arena-3';
+                } else if (arenaDisplayName.includes("Mages Graveyard")) {
+                    emoji = "🪦";
+                    currentArenaTheme = 'arena-7';
                 } else if (arenaDisplayName.includes("The Farm")) { // NEW
                     emoji = "🚜"; // NEW
                     currentArenaTheme = 'arena-4'; // NEW
@@ -1762,6 +1782,10 @@
             function showUpdateLog() {
                 const updates = [
                     { date: '11/22/2025', title: 'Latest Update', items: [
+                        'Added Arena 7: Mages Graveyard (1500+ trophies)',
+                        'Added Mage card - Ranged unit with splash damage, attacks ground and air. Every 5 seconds, spawns 4 Skeletons in a square around her.',
+                        'Added Phantom Knight card: Spawns invisible and cannot be seen by enemy troops. Only attacks ground units. When attacking, becomes fully visible and can be targeted by enemy troops. Returns to invisible after 3 seconds of not attacking. Spells still hit invisible Phantom Knights. Spirits cannot see invisible Phantom Knights. Visual effect shows semi-transparent ghost when invisible.',
+                        'Added Spirit Lantern card - Spawns a random spirit (Zap, Cold, or Life Spirit) every 6 seconds.',
                         'Added Arena 6: Warlock\'s Workshop (1250+ trophies)',
                         'Added Warlock card - Ranged unit with splash damage, attacks ground and air',
                         'Added Zap Spirit - Jumps on enemies and chains electricity to up to 10 targets',
@@ -1860,6 +1884,16 @@
             if (debugArena6) {
                 debugArena6.addEventListener('click', () => {
                     trophies = 1250;
+                    updateArena();
+                    saveUserData();
+                    showScreen('menu');
+                });
+            }
+            // NEW
+            const debugArena7 = document.getElementById('debugArena7');
+            if (debugArena7) {
+                debugArena7.addEventListener('click', () => {
+                    trophies = 1500;
                     updateArena();
                     saveUserData();
                     showScreen('menu');
@@ -2103,6 +2137,7 @@
                 if (card.isFlying) cardInfoStats.innerHTML += `<div>Placement: <span>Air</span></div>`;
                 else if (card.type !== 'Spell' && card.type !== 'Building') cardInfoStats.innerHTML += `<div>Placement: <span>Ground</span></div>`;
                 
+
                 // --- FIX: Only loop stats if stats is not null ---
                 if (stats) {
                     for (const [key, value] of Object.entries(stats)) { 
@@ -2110,6 +2145,20 @@
                     }
                     if (card.type === 'Spell') { cardInfoStats.innerHTML += `<div>Radius: <span>${card.radius}</span></div>`; }
                     if (stats.damage && stats.hitSpeed) { const dps = (stats.damage / stats.hitSpeed).toFixed(1); cardInfoStats.innerHTML += `<div>DPS: <span>${dps}</span></div>`; }
+                }
+
+                // Show skeleton stats for Mage card
+                if (cardId === 'mage') {
+                    // Skeletons spawned by Mage use the base skeleton stats (level 1)
+                    const skelStats = allCards['skeletons'] && allCards['skeletons'].stats ? allCards['skeletons'].stats[1] : null;
+                    if (skelStats) {
+                        cardInfoStats.innerHTML += `<div class='mt-2 font-bold text-yellow-300'>Spawns 4 Skeletons every 5s:</div>`;
+                        cardInfoStats.innerHTML += `<div>Skeleton HP: <span>${skelStats.health}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Skeleton Damage: <span>${skelStats.damage}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Skeleton Hit Speed: <span>${skelStats.hitSpeed}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Skeleton Speed: <span>${skelStats.speed}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Skeleton Aggro Range: <span>100</span></div>`;
+                    }
                 }
 
                 cardInfoButtons.innerHTML = '';
@@ -2453,7 +2502,8 @@
                     this.target = null; 
                     let closestDist = this.attackRange; 
                     for (const obj of gameObjects) { 
-                        if (obj.team !== this.team && (obj instanceof Unit)) { 
+                        if (obj.team !== this.team && (obj instanceof Unit)) {
+                            if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                             const dist = getDistance(this, obj); 
                             if (dist < closestDist) { 
                                 closestDist = dist; 
@@ -2613,6 +2663,8 @@
                     for (const obj of gameObjects) {
                         // --- THIS IS THE FIX ---
                         if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                            // Skip invisible Phantom Knights
+                            if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                             // --- END FIX ---
                             if (!this.targetsAir && obj.isFlying) continue; 
                             
@@ -2691,6 +2743,9 @@
                 }
                 attack() { 
                     if (this.target && this.cooldownTimer <= 0) { 
+                        if (this.target instanceof PhantomKnight && this.target.isInvisible) {
+                            return;
+                        }
                         if (this.attackRange <= this.radius + this.target.radius + 5) { // Melee
                             this.target.health -= this.attackDamage; 
                         } else { // Ranged
@@ -2988,7 +3043,10 @@
                     }
                 }
                 attack() { // Ram only attacks when it hits
-                    if (this.target && this.cooldownTimer <= 0) { 
+                    if (this.target && this.cooldownTimer <= 0) {
+                        if (this.target instanceof PhantomKnight && this.target.isInvisible) {
+                            return;
+                        }
                         this.target.health -= this.attackDamage;
                         this.spawnBarbs(); // Spawn on hit
                     } 
@@ -3008,6 +3066,8 @@
                         for (const obj of gameObjects) {
                             // Hit all non-flying enemies in range
                             if (obj.team !== this.team && !obj.isFlying && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                // Skip invisible Phantom Knights
+                                if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                                 if (getDistance(this, obj) < this.splashRadius) {
                                     obj.health -= this.attackDamage;
                                 }
@@ -3028,6 +3088,8 @@
                     if (this.target && this.target.health > 0) {
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && !obj.isFlying && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                // Skip invisible Phantom Knights
+                                if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                                 if (getDistance(this, obj) < this.splashRadius) {
                                     inSplashRange = true;
                                     break;
@@ -3100,6 +3162,8 @@
                         // Check for hits in a rectangle
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && !obj.isFlying && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                // Skip invisible Phantom Knights
+                                if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                                 if (isInside(obj, this.x, this.y, this.attackWidth, this.attackHeight, this.attackAngle)) {
                                     obj.health -= this.attackDamage;
                                 }
@@ -3287,6 +3351,165 @@
                 }
             }
 
+            // --- MAGE (ARENA 7) ---
+            class Mage extends Unit {
+                constructor(x, y, team, level = 1) {
+                    const s = allCards['mage'].stats[level];
+                    super(x, y, 12, team, s.health, 1.0, 110, s.damage, s.hitSpeed, '🧙‍♀️', false, true, level, allCards['mage'].aggroRange);
+                    this.splashRadius = s.splashRadius;
+                    this.skeletonSpawnTimer = 0; // Instantly spawn on place
+                    this.hasSpawnedInitial = false;
+                }
+                attack() {
+                    if (this.target && this.cooldownTimer <= 0) {
+                        // Create splash projectile
+                        gameObjects.push(new FireballProjectile(this.x, this.y, this.target, this.team, this.attackDamage, this.splashRadius));
+                        this.cooldownTimer = this.attackCooldown;
+                    }
+                }
+                update() {
+                    super.update();
+                    if (this.health <= 0) return;
+                    if (!this.hasSpawnedInitial) {
+                        // Instantly spawn 4 skeletons on placement
+                        const offset = 18;
+                        const positions = [
+                            { dx: -offset, dy: -offset }, // top left
+                            { dx: -offset, dy: offset },  // bottom left
+                            { dx: offset, dy: -offset },  // top right
+                            { dx: offset, dy: offset }    // bottom right
+                        ];
+                        for (const pos of positions) {
+                            gameObjects.push(new Skeleton(this.x + pos.dx, this.y + pos.dy, this.team, this.level));
+                        }
+                        this.skeletonSpawnTimer = 5 * 60;
+                        this.hasSpawnedInitial = true;
+                    } else {
+                        this.skeletonSpawnTimer--;
+                        if (this.skeletonSpawnTimer <= 0) {
+                            const offset = 18;
+                            const positions = [
+                                { dx: -offset, dy: -offset }, // top left
+                                { dx: -offset, dy: offset },  // bottom left
+                                { dx: offset, dy: -offset },  // top right
+                                { dx: offset, dy: offset }    // bottom right
+                            ];
+                            for (const pos of positions) {
+                                gameObjects.push(new Skeleton(this.x + pos.dx, this.y + pos.dy, this.team, this.level));
+                            }
+                            this.skeletonSpawnTimer = 5 * 60;
+                        }
+                    }
+                }
+
+            }
+
+            // --- PHANTOM KNIGHT (ARENA 7) ---
+            class PhantomKnight extends Unit {
+                constructor(x, y, team, level = 1) {
+                    const s = allCards['phantomKnight'].stats[level];
+                    super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '👻⚔️', false, false, level, allCards['phantomKnight'].aggroRange);
+                    this.isInvisible = true;
+                    this.lastAttackTime = 0;
+                    this.invisibilityDelay = 180;
+                }
+                attack() {
+                    if (this.target && this.cooldownTimer <= 0) {
+                        this.isInvisible = false;
+                        this.lastAttackTime = 0;
+                        if (this.attackRange <= this.radius + this.target.radius + 5) {
+                            this.target.health -= this.attackDamage;
+                        } else {
+                            let projectileType = Projectile;
+                            let damage = this.attackDamage;
+                            let splash = 0;
+                            if (this.emoji === '🐲') {
+                                projectileType = FireballProjectile;
+                                splash = allCards['fireDragon'].stats[this.level].splashRadius;
+                            }
+                            gameObjects.push(new projectileType(this.x, this.y, this.target, this.team, damage, splash));
+                        }
+                        this.cooldownTimer = this.attackCooldown;
+                    }
+                }
+                update() {
+                    if (this.health <= 0) return;
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    
+                    if (this.frozen) return;
+                    
+                    if (!this.isInvisible) {
+                        this.lastAttackTime++;
+                        if (this.lastAttackTime >= this.invisibilityDelay) {
+                            this.isInvisible = true;
+                            this.lastAttackTime = 0;
+                        }
+                    }
+                    
+                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
+                        this.attack();
+                        return;
+                    }
+                    
+                    let distraction = this.findTarget(false);
+                    
+                    if (distraction) {
+                        if (!this.target || this.target.health <= 0 || getDistance(this, distraction) < getDistance(this, this.target)) {
+                            this.target = distraction;
+                        }
+                    } else {
+                        if (!this.target || this.target.health <= 0) {
+                            this.target = this.findTarget(true);
+                        }
+                    }
+
+                    if (this.target && this.target.health > 0) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
+                            this.attack();
+                        } else {
+                            this.move();
+                        }
+                    }
+                }
+                draw() {
+                    if (this.isInvisible) {
+                        ctx.save();
+                        ctx.globalAlpha = 0.2;
+                        const color = this.team === 'player' ? '#60a5fa' : '#f87171';
+                        super.draw(color, this.emoji, this.level);
+                        ctx.globalAlpha = 1;
+                        ctx.restore();
+                    } else {
+                        const color = this.team === 'player' ? '#60a5fa' : '#f87171';
+                        super.draw(color, this.emoji, this.level);
+                    }
+                }
+            }
+
+            // --- SPIRIT LANTERN (ARENA 7) ---
+            class SpiritLantern extends Building {
+                constructor(x, y, team, level = 1) {
+                    super(x, y, team, level, 'spiritLantern');
+                    this.spiritTypes = ['zapSpirit', 'coldSpirit', 'lifeSpirit'];
+                    this.spawnTimer = this.spawnRate;
+                }
+                update() {
+                    if (this.health <= 0) return;
+                    this.lifetime--;
+                    if (this.lifetime <= 0) { this.health = 0; return; }
+                    // Health decay
+                    const decayPerFrame = this.maxHealth / this.maxLifetime;
+                    this.health -= decayPerFrame;
+                    this.spawnTimer--;
+                    if (this.spawnTimer <= 0) {
+                        // Randomly pick a spirit type
+                        const spiritType = this.spiritTypes[Math.floor(Math.random() * this.spiritTypes.length)];
+                        gameObjects.push(new allCards[spiritType].unitClass(this.x + (Math.random()-0.5)*10, this.y + (Math.random()-0.5)*10, this.team, this.level));
+                        this.spawnTimer = this.spawnRate;
+                    }
+                }
+            }
+
 // --- SPIRIT CLASSES (NEW, FROM SCRATCH) ---
 class ColdSpirit extends Unit {
     constructor(x, y, team, level = 1) {
@@ -3305,6 +3528,8 @@ class ColdSpirit extends Unit {
         let closestDist = this.jumpRadius;
         for (const obj of gameObjects) {
             if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                // Skip invisible Phantom Knights
+                if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                 const dist = getDistance(this, obj);
                 if (dist < closestDist) {
                     closestDist = dist;
@@ -3346,6 +3571,8 @@ class ColdSpirit extends Unit {
                 let closestDist = this.jumpRadius;
                 for (const obj of gameObjects) {
                     if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        // Skip invisible Phantom Knights
+                        if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                         const dist = getDistance(this, obj);
                         if (dist < closestDist) {
                             closestDist = dist;
@@ -3360,6 +3587,7 @@ class ColdSpirit extends Unit {
                     // Damage all enemy things in effect radius
                     for (const obj of gameObjects) {
                         if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                            // Don't skip invisible Phantom Knights here - spells/explosions can hit them
                             if (getDistance(this, obj) < this.effectRadius) {
                                 obj.health -= this.damage;
                             }
@@ -3395,6 +3623,8 @@ class ColdSpirit extends Unit {
                 let closestDist = this.jumpRadius;
                 for (const obj of gameObjects) {
                     if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        // Skip invisible Phantom Knights
+                        if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                         const dist = getDistance(this, obj);
                         if (dist < closestDist) {
                             closestDist = dist;
@@ -3416,6 +3646,8 @@ class ColdSpirit extends Unit {
                         let minDist = Infinity;
                         for (const obj of gameObjects) {
                             if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower) && !visited.has(obj) && getDistance(current, obj) < this.effectRadius) {
+                                // Skip invisible Phantom Knights
+                                if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                                 let d = getDistance(current, obj);
                                 if (d < minDist) {
                                     minDist = d;
@@ -3473,6 +3705,8 @@ class ColdSpirit extends Unit {
                 let closestDist = this.jumpRadius;
                 for (const obj of gameObjects) {
                     if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Building || obj instanceof Tower)) {
+                        // Skip invisible Phantom Knights
+                        if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                         const dist = getDistance(this, obj);
                         if (dist < closestDist) {
                             closestDist = dist;
@@ -3696,7 +3930,8 @@ class ColdSpirit extends Unit {
                     this.splashRadius = splashRadius;
                 }
                 update() { 
-                    if (!this.target || this.target.health <= 0) { this.health = 0; return; } 
+                    if (!this.target || this.target.health <= 0) { this.health = 0; return; }
+                    if (this.target instanceof PhantomKnight && this.target.isInvisible) { this.health = 0; return; }
                     const dist = getDistance(this, this.target); 
                     if (dist < this.speed) { 
                         // Hit target
@@ -3706,6 +3941,7 @@ class ColdSpirit extends Unit {
                         if (this.splashRadius > 0) {
                             for (const obj of gameObjects) {
                                 if (obj.team !== this.team && obj !== this.target && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                    if (obj instanceof PhantomKnight && obj.isInvisible) continue;
                                     if (getDistance(this.target, obj) < this.splashRadius) {
                                         obj.health -= this.damage; // Splash does full damage
                                     }
@@ -3895,6 +4131,14 @@ class ColdSpirit extends Unit {
                     // Arena 6 (NEW CARDS)
                     'warlock': { name: 'Warlock', cost: 5, emoji: '🔮', type: 'Ranged', unitClass: Warlock, placementRadius: 12, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 110,
                                 stats: { 1: { health: 600, damage: 140, hitSpeed: 1.5, splashRadius: 30, speed: 1.0 } } },
+                                        // Arena 7 (NEW)
+                    'mage': { name: 'Mage', cost: 5, emoji: '🧙‍♀️', type: 'Ranged', unitClass: Mage, placementRadius: 12, isFlying: false, arena: 7, targets: 'Air & Ground', aggroRange: 110,
+                        stats: { 1: { health: 650, damage: 120, hitSpeed: 1.5, splashRadius: 30, speed: 1.0 } } },
+                    // Arena 7 (NEW CARDS)
+                    'phantomKnight': { name: 'Phantom Knight', cost: 4, emoji: '👻⚔️', type: 'Melee', unitClass: PhantomKnight, placementRadius: 12, isFlying: false, arena: 7, targets: 'Troops', aggroRange: 110,
+                        stats: { 1: { health: 500, damage: 70, hitSpeed: 1.1, speed: 1.6 } } },
+                    'spiritLantern': { name: 'Spirit Lantern', cost: 5, emoji: '🏮', type: 'Building', unitClass: SpiritLantern, placementRadius: 18, isFlying: false, arena: 7, targets: '-',
+                        stats: { 1: { health: 900, spawn_speed: '6s', lifetime: '24s' } } },
                     'zapSpirit': { name: 'Zap Spirit', cost: 1, emoji: '⚡', type: 'Spirit', unitClass: ZapSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 200,
                                 stats: { 1: { health: 50, jumpRadius: 100, effectRadius: 80, damage: 100 } } },
                     'coldSpirit': { name: 'Cold Spirit', cost: 1, emoji: '❄️', type: 'Spirit', unitClass: ColdSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 200,
@@ -3974,11 +4218,12 @@ class ColdSpirit extends Unit {
             }
 
             function getAILevel() {
-                if (trophies >= 1250) return 6; // NEW
-                if (trophies >= 1000) return 5; // NEW
+                if (trophies >= 1500) return 7; // NEW Arena 7
+                if (trophies >= 1250) return 6;
+                if (trophies >= 1000) return 5;
                 if (trophies >= 750) return 4;
-                if (trophies >= 500) return 3; 
-                if (trophies >= 250) return 2; 
+                if (trophies >= 500) return 3;
+                if (trophies >= 250) return 2;
                 return 1;
             }
 
@@ -3986,10 +4231,20 @@ class ColdSpirit extends Unit {
             function getUnlockedCards(includeTower = false, aiLevel = 0) {
                 const unlocked = [];
                 // Use AI level if provided, otherwise use player's trophies
-                const arenaNum = aiLevel > 0 ? aiLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : (currentArenaFloor === 500 ? 3 : (currentArenaFloor === 750 ? 4 : 5)))); // UPDATED
-                
+                let arenaNum = 1;
+                if (aiLevel > 0) {
+                    arenaNum = aiLevel;
+                } else {
+                    if (currentArenaFloor >= 1500) arenaNum = 7;
+                    else if (currentArenaFloor >= 1250) arenaNum = 6;
+                    else if (currentArenaFloor >= 1000) arenaNum = 5;
+                    else if (currentArenaFloor >= 750) arenaNum = 4;
+                    else if (currentArenaFloor >= 500) arenaNum = 3;
+                    else if (currentArenaFloor >= 250) arenaNum = 2;
+                    else arenaNum = 1;
+                }
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; // FIX: Never include tower in this list
+                    if (cardId === 'tower') continue;
                     if (allCards[cardId].arena <= arenaNum) {
                         unlocked.push(cardId);
                     }
