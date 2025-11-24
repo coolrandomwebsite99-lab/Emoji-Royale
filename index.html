@@ -8,8 +8,9 @@
     <!-- Import Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script>
-        if (window.location.protocol !== 'file:') {
-            document.write('<style>[data-screen="debug"] { display: none !important; } #debugScreen { display: none !important; }</style>');
+        window.isLocalFile = window.location.protocol === 'file:';
+        if (!window.isLocalFile) {
+            document.documentElement.setAttribute('data-no-debug', 'true');
         }
     </script>
     <style>
@@ -188,6 +189,12 @@
             opacity: 0.7;
         }
 
+        html[data-no-debug] [data-screen="debug"],
+        html[data-no-debug] #debugScreen {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
 
         /* Hide screens by default */
         .screen {
