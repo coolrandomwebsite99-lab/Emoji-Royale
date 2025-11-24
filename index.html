@@ -1139,30 +1139,25 @@
         // --- Start Game ---
         window.onload = () => {
 
-            // --- NEW: Domain Lock Security ---
+            // --- Domain Lock Security ---
+            const isLocalFile = window.location.protocol === 'file:';
             const allowedHosts = [
-                'coolrandomwebsite99-lab.github.io', // User's GitHub Pages
-                'scf.usercontent.goog' // This platform's sandbox
+                'coolrandomwebsite99-lab.github.io',
+                'scf.usercontent.goog'
             ];
             const currentHost = window.location.hostname;
-            const isLocal = currentHost === "localhost" || currentHost === ""; // Allow local testing
+            const isLocalhost = currentHost === "localhost" || currentHost === "";
             
-            // --- THIS IS THE CHANGE ---
-            // Reverted the change that forced the demo mode
-            // const isAllowed = false; // <-- OLD TEST CODE
-            const isAllowed = allowedHosts.some(host => currentHost.endsWith(host)) || isLocal;
-            // --- END OF CHANGE ---
+            const isAllowed = allowedHosts.some(host => currentHost.endsWith(host)) || isLocalhost;
 
             if (!isAllowed) {
                 console.error("Game running on unauthorized domain:", currentHost);
                 
-                // 1. Hide login/intro, show game screen
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('introScreen').style.display = 'none';
                 const gameScreen = document.getElementById('gameScreen');
                 if (gameScreen) gameScreen.style.display = 'flex';
                 
-                // 2. Show the new overlay
                 const unauthScreen = document.getElementById('unauthorizedScreen');
                 if (unauthScreen) {
                     unauthScreen.style.display = 'flex';
@@ -1170,27 +1165,21 @@
                     unauthScreen.querySelector('#imagineText').textContent = 'Imagine... what could have been.';
                 }
 
-                // 3. Hide all normal game UI
                 document.getElementById('cardHand').style.display = 'none';
                 document.getElementById('nextCardSlot').parentElement.style.display = 'none';
                 document.getElementById('elixirBar').parentElement.parentElement.style.display = 'none';
                 document.getElementById('timerDisplay').style.display = 'none';
                 document.getElementById('menuButton').style.display = 'none';
 
-                // 4. Set demo mode flag
                 isDemoMode = true;
-                
-                // 5. Initialize the game (this is fine, all functions are defined below)
-                // --- BUG FIX: Removed premature calls ---
-                // initCardSystem(); // <-- REMOVED
-                // initGame(); // <-- REMOVED
-                
-                // 6. Start the demo loop
                 lastTime = performance.now();
-                // gameLoopId = requestAnimationFrame(demoGameLoop); // <-- REMOVED
-                
-                // 7. Stop the rest of onload
-                // return; // <-- REMOVED (Let script continue to define classes)
+            }
+
+            if (!isLocalFile) {
+                const debugButtons = document.querySelectorAll('[data-screen="debug"]');
+                debugButtons.forEach(btn => btn.style.display = 'none');
+                const debugScreen = document.getElementById('debugScreen');
+                if (debugScreen) debugScreen.style.display = 'none';
             }
             // --- END: Domain Lock Security ---
 
@@ -1654,13 +1643,14 @@
                 }
             }
 
-            // NEW: Handle Debug password
             function showDebugPassword() {
+                if (!isLocalFile) return;
                 debugPasswordInput.value = '';
                 debugPasswordOverlay.style.display = 'flex';
                 debugPasswordInput.focus();
             }
             debugPasswordSubmit.addEventListener('click', () => {
+                if (!isLocalFile) return;
                 if (debugPasswordInput.value.toUpperCase() === 'GEOMETRIC') {
                     debugPasswordOverlay.style.display = 'none';
                     showScreen('debug');
@@ -1772,7 +1762,9 @@
             navButtons.forEach(btn => { 
                 btn.addEventListener('click', () => { 
                     if (btn.dataset.screen === 'debug') {
-                        showDebugPassword();
+                        if (isLocalFile) {
+                            showDebugPassword();
+                        }
                     } else {
                         showScreen(btn.dataset.screen); 
                     }
@@ -1851,106 +1843,100 @@
             menuButton.addEventListener('click', () => { showScreen('menu'); gameRunning = false; cancelAnimationFrame(gameLoopId); });
 
             // ==============================================
-            // DEBUG MENU LOGIC (NEW)
-            // ==============================================
-            debugArena2.addEventListener('click', () => {
-                trophies = 250;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            debugArena3.addEventListener('click', () => {
-                trophies = 500;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            // NEW
-            debugArena4.addEventListener('click', () => {
-                trophies = 750;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            // NEW
-            debugArena5.addEventListener('click', () => {
-                trophies = 1000;
-                updateArena();
-                saveUserData();
-                showScreen('menu');
-            });
-            // NEW
-            const debugArena6 = document.getElementById('debugArena6');
-            if (debugArena6) {
-                debugArena6.addEventListener('click', () => {
-                    trophies = 1250;
+            if (isLocalFile) {
+                debugArena2.addEventListener('click', () => {
+                    trophies = 250;
                     updateArena();
                     saveUserData();
                     showScreen('menu');
                 });
-            }
-            // NEW
-            const debugArena7 = document.getElementById('debugArena7');
-            if (debugArena7) {
-                debugArena7.addEventListener('click', () => {
-                    trophies = 1500;
+                debugArena3.addEventListener('click', () => {
+                    trophies = 500;
                     updateArena();
                     saveUserData();
                     showScreen('menu');
                 });
-            }
-            debugUnlockAll.addEventListener('click', () => {
-                for (const cardId in allCards) {
-                    if (cardId === 'tower') continue;
-                    if (!cardCollection[cardId]) {
-                        cardCollection[cardId] = { level: 1, count: 1, unlocked: true };
-                    } else {
-                        cardCollection[cardId].unlocked = true; // --- UNLOCKING FIX ---
-                        if (cardCollection[cardId].count === 0) {
-                            cardCollection[cardId].count = 1;
+                debugArena4.addEventListener('click', () => {
+                    trophies = 750;
+                    updateArena();
+                    saveUserData();
+                    showScreen('menu');
+                });
+                debugArena5.addEventListener('click', () => {
+                    trophies = 1000;
+                    updateArena();
+                    saveUserData();
+                    showScreen('menu');
+                });
+                const debugArena6 = document.getElementById('debugArena6');
+                if (debugArena6) {
+                    debugArena6.addEventListener('click', () => {
+                        trophies = 1250;
+                        updateArena();
+                        saveUserData();
+                        showScreen('menu');
+                    });
+                }
+                const debugArena7 = document.getElementById('debugArena7');
+                if (debugArena7) {
+                    debugArena7.addEventListener('click', () => {
+                        trophies = 1500;
+                        updateArena();
+                        saveUserData();
+                        showScreen('menu');
+                    });
+                }
+                debugUnlockAll.addEventListener('click', () => {
+                    for (const cardId in allCards) {
+                        if (cardId === 'tower') continue;
+                        if (!cardCollection[cardId]) {
+                            cardCollection[cardId] = { level: 1, count: 1, unlocked: true };
+                        } else {
+                            cardCollection[cardId].unlocked = true;
+                            if (cardCollection[cardId].count === 0) {
+                                cardCollection[cardId].count = 1;
+                            }
                         }
                     }
-                }
-                saveUserData();
-                // Use a custom modal later, for now, just log
-                console.log('All cards unlocked!');
-            });
-            debugUpgradeAll.addEventListener('click', () => {
-                for (const cardId in cardCollection) {
-                    const cardData = cardCollection[cardId];
-                    if (cardData.unlocked && cardData.level < 15) { // Only upgrade unlocked cards
-                        cardData.level++;
-                    }
-                }
-                if (towerLevel < 15) towerLevel++;
-                saveUserData();
-                console.log('All owned cards and tower upgraded +1 level!');
-            });
-            debugGetChest.addEventListener('click', () => {
-                if (trophyChests.length < 4) {
-                    trophyChests.push({ id: 'wood', openTime: 0 });
-                    renderChests();
                     saveUserData();
-                    console.log('Got a chest!');
-                } else {
-                    console.log('Chest slots are full!');
-                }
-            });
-            debugAddGold.addEventListener('click', () => {
-                gold += 1000;
-                goldDisplay.textContent = `💰 ${gold}`;
-                saveUserData();
-                console.log('+1000 Gold!');
-            });
-            debugReset.addEventListener('click', () => {
-                // Use a custom modal later
-                if (true) { // Replaced confirm()
-                    initNewUser(); // This saves
-                    saveUserData(); // Force save
-                    showScreen('menu');
-                    console.log('Account reset!');
-                }
-            });
+                    console.log('All cards unlocked!');
+                });
+                debugUpgradeAll.addEventListener('click', () => {
+                    for (const cardId in cardCollection) {
+                        const cardData = cardCollection[cardId];
+                        if (cardData.unlocked && cardData.level < 15) {
+                            cardData.level++;
+                        }
+                    }
+                    if (towerLevel < 15) towerLevel++;
+                    saveUserData();
+                    console.log('All owned cards and tower upgraded +1 level!');
+                });
+                debugGetChest.addEventListener('click', () => {
+                    if (trophyChests.length < 4) {
+                        trophyChests.push({ id: 'wood', openTime: 0 });
+                        renderChests();
+                        saveUserData();
+                        console.log('Got a chest!');
+                    } else {
+                        console.log('Chest slots are full!');
+                    }
+                });
+                debugAddGold.addEventListener('click', () => {
+                    gold += 1000;
+                    goldDisplay.textContent = `💰 ${gold}`;
+                    saveUserData();
+                    console.log('+1000 Gold!');
+                });
+                debugReset.addEventListener('click', () => {
+                    if (true) {
+                        initNewUser();
+                        saveUserData();
+                        showScreen('menu');
+                        console.log('Account reset!');
+                    }
+                });
+            }
 
 
             // ==============================================
