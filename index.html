@@ -1514,7 +1514,7 @@
                 
                 if (deckOnly) {
                     // FIX: Filter out 'tower' from starting deck
-                    return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower');
+                    return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower' && id !== 'stoneGiant');
                 }
                 return newCollection;
             }
@@ -3826,164 +3826,199 @@ class ColdSpirit extends Unit {
                     super(x, y, 10, team, s.health, 1.2, 120, s.damage, s.hitSpeed, '👤', false, true, level, allCards['shadowClone'].aggroRange); 
                 } 
             }
-            class StoneGiant extends Unit {
-                constructor(x, y, team, level = 1) {
-                    const s = allCards['stoneGiant'].stats[level];
-                    super(x, y, 18, team, s.health, s.speed * 0.5, 30, s.damage, s.hitSpeed, '🗿', false, false, level, allCards['stoneGiant'].aggroRange);
-                    this.targetLocked = false;
-                    this.hasSpawned = false;
-                    this.level = level;
-                }
-                findTarget() {
-                    let closestTowerDist = Infinity;
-                    let towerTarget = null;
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
-                            if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestTowerDist) { 
-                                    closestTowerDist = dist; 
-                                    towerTarget = obj; 
-                                }
-                            }
-                        }
-                    }
-                    if (!towerTarget) {
-                        for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestTowerDist) { 
-                                    closestTowerDist = dist; 
-                                    towerTarget = obj; 
-                                }
-                            }
-                        }
-                    }
-                    let closestBuildingDist = Infinity;
-                    let buildingTarget = null;
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Building)) {
-                            const dist = getDistance(this, obj);
-                            if (dist < closestBuildingDist) { 
-                                closestBuildingDist = dist; 
-                                buildingTarget = obj; 
-                            }
-                        }
-                    }
-                    const towerDist = towerTarget ? closestTowerDist : Infinity;
-                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
-                        this.target = buildingTarget;
-                    } else {
-                        this.target = towerTarget;
-                    }
-                    this.targetLocked = (this.target != null);
-                }
-                update() {
-                    if (this.health <= 0) {
-                        if (!this.hasSpawned) {
-                            this.hasSpawned = true;
-                            try {
-                                const card = allCards['stoneGiant'];
-                                if (card && card.miniStats) {
-                                    const m = card.miniStats[this.level] || card.miniStats[1];
-                                    if (m) {
-                                        gameObjects.push(new MiniStoneGiant(this.x - 15, this.y, this.team, m.health, m.damage, m.hitSpeed, this.level));
-                                        gameObjects.push(new MiniStoneGiant(this.x + 15, this.y, this.team, m.health, m.damage, m.hitSpeed, this.level));
-                                    }
-                                }
-                            } catch (e) {
-                                console.error('Error spawning mini stone giants:', e);
-                            }
-                        }
-                        return;
-                    }
-                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
-                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
-                        this.attack();
-                        return;
-                    }
-                    if (!this.target || this.target.health <= 0 || (this.target instanceof Tower)) {
-                         this.findTarget();
-                    }
-                    if (this.target && this.target.health > 0) {
-                        if (getDistance(this, this.target) <= this.attackRange) {
-                            this.attack();
-                        } else {
-                            this.move();
-                        }
-                    }
-                }
-            }
+class StoneGiant extends Unit {
+    constructor(x, y, team, level = 1) {
+        const s = allCards['stoneGiant'].stats[level];
+        super(
+            x,
+            y,
+            18,
+            team,
+            s.health,
+            s.speed * 0.5,
+            30,
+            s.damage,
+            s.hitSpeed,
+            '🗿',
+            false,
+            false,
+            level,
+            allCards['stoneGiant'].aggroRange
+        );
+        this.targetLocked = false;
+        this.level = level;
+        this.didSpawnMinis = false; // prevent double‑spawn
+    }
 
-            class MiniStoneGiant extends Unit {
-                constructor(x, y, team, health, damage, hitSpeed = 1.3, level = 1) {
-                    super(x, y, 10, team, health, 0.3, 20, damage, hitSpeed, '🪨', false, false, level, 100);
-                    this.targetLocked = false;
-                    this.level = level;
-                }
-                findTarget() {
-                    let closestTowerDist = Infinity;
-                    let towerTarget = null;
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
-                            if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestTowerDist) { 
-                                    closestTowerDist = dist; 
-                                    towerTarget = obj; 
-                                }
-                            }
-                        }
-                    }
-                    if (!towerTarget) {
-                        for (const obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
-                                const dist = getDistance(this, obj);
-                                if (dist < closestTowerDist) { 
-                                    closestTowerDist = dist; 
-                                    towerTarget = obj; 
-                                }
-                            }
-                        }
-                    }
-                    let closestBuildingDist = Infinity;
-                    let buildingTarget = null;
-                    for (const obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Building)) {
-                            const dist = getDistance(this, obj);
-                            if (dist < closestBuildingDist) { 
-                                closestBuildingDist = dist; 
-                                buildingTarget = obj; 
-                            }
-                        }
-                    }
-                    const towerDist = towerTarget ? closestTowerDist : Infinity;
-                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
-                        this.target = buildingTarget;
-                    } else {
-                        this.target = towerTarget;
-                    }
-                    this.targetLocked = (this.target != null);
-                }
-                update() {
-                    if (this.health <= 0) return;
-                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
-                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
-                        this.attack();
-                        return;
-                    }
-                    if (!this.target || this.target.health <= 0 || (this.target instanceof Tower)) {
-                         this.findTarget();
-                    }
-                    if (this.target && this.target.health > 0) {
-                        if (getDistance(this, this.target) <= this.attackRange) {
-                            this.attack();
-                        } else {
-                            this.move();
-                        }
+    spawnMinis() {
+        if (this.didSpawnMinis) return;
+        this.didSpawnMinis = true;
+
+        try {
+            const card = allCards['miniStoneGiant'];
+            if (card && card.stats) {
+                const stats =
+                    card.stats[this.level] || card.stats[1];
+
+                const leftMini = new MiniStoneGiant(
+                    this.x - 15,
+                    this.y,
+                    this.team,
+                    this.level
+                );
+                const rightMini = new MiniStoneGiant(
+                    this.x + 15,
+                    this.y,
+                    this.team,
+                    this.level
+                );
+
+                gameObjects.push(leftMini, rightMini);
+                console.log(
+                    'StoneGiant spawned minis:',
+                    leftMini,
+                    rightMini
+                );
+            }
+        } catch (e) {
+            console.error('Error spawning mini stone giants:', e);
+        }
+    }
+
+    findTarget() {
+        let closestTowerDist = Infinity;
+        let towerTarget = null;
+        for (const obj of gameObjects) {
+            if (
+                obj.team !== this.team &&
+                obj instanceof Tower &&
+                !obj.isKing
+            ) {
+                if (
+                    (this.x < WIDTH / 2 && obj.x < WIDTH / 2) ||
+                    (this.x > WIDTH / 2 && obj.x > WIDTH / 2)
+                ) {
+                    const dist = getDistance(this, obj);
+                    if (dist < closestTowerDist) {
+                        closestTowerDist = dist;
+                        towerTarget = obj;
                     }
                 }
             }
+        }
+        if (!towerTarget) {
+            for (const obj of gameObjects) {
+                if (
+                    obj.team !== this.team &&
+                    obj instanceof Tower &&
+                    obj.isKing
+                ) {
+                    const dist = getDistance(this, obj);
+                    if (dist < closestTowerDist) {
+                        closestTowerDist = dist;
+                        towerTarget = obj;
+                    }
+                }
+            }
+        }
+        let closestBuildingDist = Infinity;
+        let buildingTarget = null;
+        for (const obj of gameObjects) {
+            if (
+                obj.team !== this.team &&
+                obj instanceof Building
+            ) {
+                const dist = getDistance(this, obj);
+                if (dist < closestBuildingDist) {
+                    closestBuildingDist = dist;
+                    buildingTarget = obj;
+                }
+            }
+        }
+        const towerDist = towerTarget ? closestTowerDist : Infinity;
+        if (
+            buildingTarget &&
+            closestBuildingDist <= this.aggroRange &&
+            closestBuildingDist < towerDist
+        ) {
+            this.target = buildingTarget;
+        } else {
+            this.target = towerTarget;
+        }
+        this.targetLocked = this.target != null;
+    }
+
+    update() {
+        // IMPORTANT: no spawning here, only handled in cleanup
+        if (this.health <= 0) return;
+
+        if (this.cooldownTimer > 0) {
+            this.cooldownTimer--;
+        }
+        if (
+            this.target &&
+            this.target.health > 0 &&
+            getDistance(this, this.target) <= this.attackRange
+        ) {
+            this.attack();
+            return;
+        }
+        if (
+            !this.target ||
+            this.target.health <= 0 ||
+            this.target instanceof Tower
+        ) {
+            this.findTarget();
+        }
+        if (this.target && this.target.health > 0) {
+            if (getDistance(this, this.target) <= this.attackRange) {
+                this.attack();
+            } else {
+                this.move();
+            }
+        }
+    }
+}
+
+ class MiniStoneGiant extends Unit {
+    constructor(x, y, team, level = 1) {
+        const card = allCards['miniStoneGiant'];
+        const baseStats =
+            card && card.stats
+                ? card.stats[level] || card.stats[1]
+                : null;
+        const s =
+            baseStats || {
+                health: 200,
+                damage: 20,
+                hitSpeed: 1.3,
+                speed: 0.7
+            };
+        const emoji = card && card.emoji ? card.emoji : '🪨';
+        const aggro =
+            card && card.aggroRange ? card.aggroRange : 100;
+
+        super(
+            x,
+            y,
+            15,
+            team,
+            s.health,
+            s.speed,
+            25,
+            s.damage,
+            s.hitSpeed,
+            emoji,
+            false,
+            false,
+            level,
+            aggro
+        );
+        this.level = level;
+    }
+
+    // let Unit.update / Unit.draw handle behavior
+}
 
             // --- EFFECT CLASSES (NEW) ---
             class FreezeEffect extends GameObject {
@@ -4491,9 +4526,11 @@ class ColdSpirit extends Unit {
                                 stats: { 1: { health: 320, damage: 55, hitSpeed: 1.2, speed: 1.0 }, 2: { health: 352, damage: 61, hitSpeed: 1.2, speed: 1.0 }, 3: { health: 387, damage: 67, hitSpeed: 1.2, speed: 1.0 }, 4: { health: 426, damage: 73, hitSpeed: 1.2, speed: 1.0 }, 5: { health: 469, damage: 81, hitSpeed: 1.2, speed: 1.0 }, 6: { health: 516, damage: 89, hitSpeed: 1.2, speed: 1.0 } } },
                     'voidTrap': { name: 'Void Trap', cost: 4, emoji: '⚫', type: 'Spell', radius: 70, placementRadius: 70, arena: 8, targets: 'Air & Ground',
                                 stats: { 1: { damage: 180 } } },
-                    'stoneGiant': { name: 'Stone Giant', cost: 6, emoji: '🗿', type: 'Tank', unitClass: StoneGiant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings', aggroRange: 100,
+                    'stoneGiant': { name: 'Stone Giant', cost: 6, emoji: '🗿', type: 'Tank', unitClass: StoneGiant, placementRadius: 18, isFlying: false, arena: 8, targets: 'Buildings', aggroRange: 100,
                                 stats: { 1: { health: 1400, damage: 90, hitSpeed: 1.3, speed: 0.6 }, 2: { health: 1540, damage: 99, hitSpeed: 1.3, speed: 0.6 }, 3: { health: 1694, damage: 109, hitSpeed: 1.3, speed: 0.6 }, 4: { health: 1863, damage: 120, hitSpeed: 1.3, speed: 0.6 }, 5: { health: 2050, damage: 132, hitSpeed: 1.3, speed: 0.6 }, 6: { health: 2255, damage: 145, hitSpeed: 1.3, speed: 0.6 } },
-                                miniStats: { 1: { health: 560, damage: 36, hitSpeed: 1.3 }, 2: { health: 616, damage: 40, hitSpeed: 1.3 }, 3: { health: 678, damage: 44, hitSpeed: 1.3 }, 4: { health: 745, damage: 48, hitSpeed: 1.3 }, 5: { health: 820, damage: 53, hitSpeed: 1.3 }, 6: { health: 902, damage: 58, hitSpeed: 1.3 } } },
+                                miniStats: { 1: { health: 560, damage: 36, hitSpeed: 1.3, speed: 0.7 }, 2: { health: 616, damage: 40, hitSpeed: 1.3, speed: 0.7 }, 3: { health: 678, damage: 44, hitSpeed: 1.3, speed: 0.7 }, 4: { health: 745, damage: 48, hitSpeed: 1.3, speed: 0.7 }, 5: { health: 820, damage: 53, hitSpeed: 1.3, speed: 0.7 }, 6: { health: 902, damage: 58, hitSpeed: 1.3, speed: 0.7 } } },
+                    'miniStoneGiant': { name: 'Mini Stone Giant', cost: 0, emoji: '🪨', type: 'Troop', unitClass: MiniStoneGiant, placementRadius: 12, isFlying: false, hidden: true, targets: 'Ground', aggroRange: 80,
+                            stats: { 1: { health: 560, damage: 36, hitSpeed: 1.3, speed: 0.7 }, 2: { health: 616, damage: 40, hitSpeed: 1.3, speed: 0.7 }, 3: { health: 678, damage: 44, hitSpeed: 1.3, speed: 0.7 }, 4: { health: 745, damage: 48, hitSpeed: 1.3, speed: 0.7 }, 5: { health: 820, damage: 53, hitSpeed: 1.3, speed: 0.7 }, 6: { health: 902, damage: 58, hitSpeed: 1.3, speed: 0.7 } } },
                     'chaosOrb': { name: 'Chaos Orb', cost: 3, emoji: '🌀', type: 'Spell', radius: 50, placementRadius: 50, arena: 8, targets: 'Air & Ground',
                                 stats: { 1: { damage: 200 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
@@ -5170,26 +5207,45 @@ class ColdSpirit extends Unit {
                 // Check tower status for spawn zones
                 checkTowerStatus();
                 
-                // Filter dead objects
-                gameObjects = gameObjects.filter(obj => {
-                    if (obj.health > 0) return true;
+                // Filter dead objects (and handle special death behavior)
+                const newGameObjects = [];
+                for (const obj of gameObjects) {
+                    if (obj.health > 0) {
+                        newGameObjects.push(obj);
+                        continue;
+                    }
+
                     // Handle units/projectiles/spells
-                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof AngerSpell || obj instanceof FreezeEffect || obj instanceof HealEffect || obj instanceof ExplosionEffect || obj instanceof VoidTrapEffect || obj instanceof ChaosOrbEffect) { 
+                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof AngerSpell || obj instanceof FreezeEffect || obj instanceof HealEffect || obj instanceof ExplosionEffect || obj instanceof VoidTrapEffect || obj instanceof ChaosOrbEffect) {
                         // Special case: Battle Ram needs to spawn barbs
                         if (obj instanceof BattleRam && !obj.didHit) {
                             obj.spawnBarbs();
                         }
-                        return false; 
+                        // Special case: Stone Giant splits into minis on death
+                        if (obj instanceof StoneGiant && !obj.didSpawnMinis) {
+                            console.log('Cleanup: StoneGiant died at', obj.x, obj.y, 'spawning minis');
+                            obj.spawnMinis();
+                        }
+                        continue; // Dead units/effects are not kept
                     }
+
                     // Handle towers/buildings
                     if (obj instanceof Tower || obj instanceof Building) {
-                        if (obj.isKing) { checkGameOver(); return true; }
+                        if (obj.isKing) {
+                            checkGameOver();
+                            newGameObjects.push(obj);
+                            continue;
+                        }
                         if (obj.dyingAnimationTimer === 0) { obj.dyingAnimationTimer = 30; }
                         obj.dyingAnimationTimer--;
-                        return obj.dyingAnimationTimer > 0;
+                        if (obj.dyingAnimationTimer > 0) {
+                            newGameObjects.push(obj);
+                        }
+                        continue;
                     }
-                    return false;
-                });
+                    // Everything else dead is dropped
+                }
+                gameObjects = newGameObjects;
                 
                 updateCardUI();
                 if (gameTimer <= 0) {
