@@ -68,6 +68,13 @@
                 linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
         }
+        /* NEW ARENA 8 STYLE */
+        canvas.arena-8 {
+            background-color: #1f1f3d; /* dark navy/chaos */
+            background-image:
+                linear-gradient(rgba(147, 51, 234, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(147, 51, 234, 0.08) 1px, transparent 1px);
+        }
         
         #gameContainer {
             position: relative;
@@ -825,6 +832,14 @@
                         <p class="text-yellow-400">1500+ Trophies 🏆</p>
                     </div>
                 </div>
+                <!-- Arena 8 (NEW) -->
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center space-x-4">
+                    <span class="text-6xl">⚡</span>
+                    <div>
+                        <h2 class="text-xl font-bold">Arena 8: Chaos Canyon</h2>
+                        <p class="text-yellow-400">1750+ Trophies 🏆</p>
+                    </div>
+                </div>
             </div>
             
             <button id="arenaBackButton" class="arena-btn bg-gray-600 hover:bg-gray-700 mt-8 w-3/4">
@@ -859,6 +874,7 @@
             <button id="debugArena5" class="debug-btn bg-indigo-600 hover:bg-indigo-700">Jump to Arena 5 (1000 🏆)</button> <!-- NEW -->
                     <button id="debugArena6" class="debug-btn bg-orange-900 hover:bg-orange-800">Jump to Arena 6 (1250 🏆)</button>
                     <button id="debugArena7" class="debug-btn bg-gray-900 hover:bg-gray-800">Jump to Arena 7 (1500 🏆)</button>
+                    <button id="debugArena8" class="debug-btn bg-purple-900 hover:bg-purple-800">Jump to Arena 8 (1750 🏆)</button>
             <button id="debugUnlockAll" class="debug-btn bg-blue-600 hover:bg-blue-700">Unlock All Cards</button>
             <button id="debugUpgradeAll" class="debug-btn bg-purple-600 hover:bg-purple-700">Upgrade All Cards +1 Lvl</button>
             <button id="debugGetChest" class="debug-btn bg-yellow-600 hover:bg-yellow-700">Get a Free Chest 📦</button>
@@ -1121,7 +1137,7 @@
         let spellRadius = 0;
         let placementRadius = 0;
         let canPlace = false;
-        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm", 1000: "Arena 5: Skull Kingdom", 1250: "Arena 6: Warlock's Workshop", 1500: "Arena 7: Mages Graveyard" };
+        const arenaFloors = { 0: "Arena 1: Emoji Valley", 250: "Arena 2: Laughing Village", 500: "Arena 3: Lava Town", 750: "Arena 4: The Farm", 1000: "Arena 5: Skull Kingdom", 1250: "Arena 6: Warlock's Workshop", 1500: "Arena 7: Mages Graveyard", 1750: "Arena 8: Chaos Canyon" };
         let currentArenaFloor = 0;
         let currentArenaTheme = 'arena-1'; // For canvas styling
 
@@ -1703,6 +1719,9 @@
                 } else if (arenaDisplayName.includes("Warlock's Workshop")) { // NEW
                     emoji = "🔮"; // NEW
                     currentArenaTheme = 'arena-6'; // NEW
+                } else if (arenaDisplayName.includes("Chaos Canyon")) { // NEW
+                    emoji = "⚡"; // NEW
+                    currentArenaTheme = 'arena-8'; // NEW
                 }
                 arenaName.textContent = arenaDisplayName;
                 arenaEmoji.textContent = emoji;
@@ -1727,31 +1746,45 @@
                 });
             }
             
+            function getChestRewardMultiplier() {
+                const arenaLevel = getAILevel();
+                const multipliers = {
+                    1: 1.0,
+                    2: 1.2,
+                    3: 1.4,
+                    4: 1.6,
+                    5: 1.8,
+                    6: 2.0,
+                    7: 2.3,
+                    8: 2.6
+                };
+                return multipliers[arenaLevel] || 1.0;
+            }
+            
             function openChest(index) {
                 const chest = trophyChests[index];
                 if (!chest) return;
                 trophyChests.splice(index, 1);
                 
-                const rewardGold = 50 + Math.floor(Math.random() * 50);
+                const multiplier = getChestRewardMultiplier();
+                const rewardGold = Math.floor((50 + Math.floor(Math.random() * 50)) * multiplier);
                 gold += rewardGold;
                 let rewardsHTML = `<div><span class="text-3xl">💰</span> <span class="text-yellow-400">${rewardGold} Gold</span></div>`;
                 
-                const unlockedCards = getUnlockedCards(true); // Get list of cards this player *can* win
-                const numCardStacks = 2 + Math.floor(Math.random() * 2);
+                const unlockedCards = getUnlockedCards(true);
+                const numCardStacks = Math.floor((2 + Math.floor(Math.random() * 2)) * multiplier);
                 
                 for(let i = 0; i < numCardStacks; i++) {
                     const cardId = unlockedCards[Math.floor(Math.random() * unlockedCards.length)];
-                    const cardCount = 3 + Math.floor(Math.random() * 5);
+                    const cardCount = Math.floor((3 + Math.floor(Math.random() * 5)) * multiplier);
                     
                     if (cardId === 'tower') {
                         towerCardCount += cardCount;
                         rewardsHTML += `<div><span class="text-3xl">👑</span> ${cardCount}x Tower Cards</div>`;
                     } else {
-                        // FIX: Ensure card exists in collection
                         if (!cardCollection[cardId]) {
                             cardCollection[cardId] = { level: 1, count: 0, unlocked: false };
                         }
-                        // --- UNLOCKING FIX ---
                         if (!cardCollection[cardId].unlocked) {
                             cardCollection[cardId].unlocked = true;
                         }
@@ -1785,7 +1818,18 @@
             // NEW: Show update log function
             function showUpdateLog() {
                 const updates = [
-                    { date: '11/22/2025', title: 'Latest Update', items: [
+                    { date: '11/24/2025', title: 'Latest Update', items: [
+                        'Added Arena 8: Chaos Canyon (1750+ trophies) with custom card classes',
+                        'Added Chaos Elemental card - Melee unit with high damage and speed (👹)',
+                        'Added Shadow Clone card - Ranged unit with moderate damage (👤)',
+                        'Added Void Trap spell - Area damage spell for area control (⚫)',
+                        'Added Stone Giant card - Tank unit with high health (🗿)',
+                        'Added Chaos Orb spell - Damage spell for offense (🌀)',
+                        'Buffed all Spirits: health increased from 50 to 150 (now takes 3 tower hits to kill)',
+                        'Updated AI difficulty scaling per arena: Arena 1 lvl 1, Arena 2 lvl 1-2, Arena 3 lvl 2-3, Arena 4 lvl 2-3, Arena 5 lvl 4-5, Arena 6 lvl 4-5, Arena 7 lvl 5-6, Arena 8 lvl 5-6',
+                        'Chests now give more money and cards in higher arenas'
+                    ]},
+                    { date: '11/22/2025', title: 'Previous Update', items: [
                         'Added Arena 7: Mages Graveyard (1500+ trophies)',
                         'Added Mage card - Ranged unit with splash damage, attacks ground and air. Every 5 seconds, spawns 4 Skeletons in a square around her.',
                         'Added Phantom Knight card: Spawns invisible and cannot be seen by enemy troops. Only attacks ground units. When attacking, becomes fully visible and can be targeted by enemy troops. Returns to invisible after 3 seconds of not attacking. Spells still hit invisible Phantom Knights. Spirits cannot see invisible Phantom Knights. Visual effect shows semi-transparent ghost when invisible.',
@@ -1893,6 +1937,15 @@
                 if (debugArena7) {
                     debugArena7.addEventListener('click', () => {
                         trophies = 1500;
+                        updateArena();
+                        saveUserData();
+                        showScreen('menu');
+                    });
+                }
+                const debugArena8 = document.getElementById('debugArena8');
+                if (debugArena8) {
+                    debugArena8.addEventListener('click', () => {
+                        trophies = 1750;
                         updateArena();
                         saveUserData();
                         showScreen('menu');
@@ -2156,6 +2209,16 @@
                         cardInfoStats.innerHTML += `<div>Skeleton Hit Speed: <span>${skelStats.hitSpeed}</span></div>`;
                         cardInfoStats.innerHTML += `<div>Skeleton Speed: <span>${skelStats.speed}</span></div>`;
                         cardInfoStats.innerHTML += `<div>Skeleton Aggro Range: <span>100</span></div>`;
+                    }
+                }
+
+                if (cardId === 'stoneGiant') {
+                    const miniStats = allCards['stoneGiant'] && allCards['stoneGiant'].miniStats ? allCards['stoneGiant'].miniStats[1] : null;
+                    if (miniStats) {
+                        cardInfoStats.innerHTML += `<div class='mt-2 font-bold text-yellow-300'>Splits into 2 Mini Stone Giants:</div>`;
+                        cardInfoStats.innerHTML += `<div>Mini HP: <span>${miniStats.health}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Mini Damage: <span>${miniStats.damage}</span></div>`;
+                        cardInfoStats.innerHTML += `<div>Mini Hit Speed: <span>${miniStats.hitSpeed}</span></div>`;
                     }
                 }
 
@@ -2762,6 +2825,22 @@
                 update() {
                     if (this.health <= 0) return;
                     if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    
+                    // Handle anger timer countdown (persists after spell ends)
+                    if (this.angeredTimer !== undefined && this.angeredTimer !== null && this.angeredTimer > 0) {
+                        this.angeredTimer--;
+                        if (this.angeredTimer <= 0) {
+                            if (this.isAngered) {
+                                if (this.originalDamage !== undefined) {
+                                    this.attackDamage = this.originalDamage;
+                                }
+                                if (this.originalCooldown !== undefined) {
+                                    this.attackCooldown = this.originalCooldown;
+                                }
+                                this.isAngered = false;
+                            }
+                        }
+                    }
                     
                     // NEW: Don't update if frozen
                     if (this.frozen) return;
@@ -3734,6 +3813,178 @@ class ColdSpirit extends Unit {
             // --- SPEAR GOBLINS (NEW) ---
             class SpearGoblins { constructor(x, y, team, level = 1) { const s = allCards['spearGoblins'].stats[level]; for (let i = 0; i < s.count; i++) { gameObjects.push(new SpearGoblin(x + Math.random()*15-7, y + Math.random()*15-7, team, level)); } } }
 
+            // --- ARENA 8 CARD CLASSES (NEW) ---
+            class ChaosElemental extends Unit { 
+                constructor(x, y, team, level = 1) { 
+                    const s = allCards['chaosElemental'].stats[level]; 
+                    super(x, y, 12, team, s.health, 1.2, 25, s.damage, s.hitSpeed, '👹', false, false, level, allCards['chaosElemental'].aggroRange); 
+                } 
+            }
+            class ShadowClone extends Unit { 
+                constructor(x, y, team, level = 1) { 
+                    const s = allCards['shadowClone'].stats[level]; 
+                    super(x, y, 10, team, s.health, 1.2, 120, s.damage, s.hitSpeed, '👤', false, true, level, allCards['shadowClone'].aggroRange); 
+                } 
+            }
+            class StoneGiant extends Unit {
+                constructor(x, y, team, level = 1) {
+                    const s = allCards['stoneGiant'].stats[level];
+                    super(x, y, 18, team, s.health, s.speed * 0.5, 30, s.damage, s.hitSpeed, '🗿', false, false, level, allCards['stoneGiant'].aggroRange);
+                    this.targetLocked = false;
+                    this.hasSpawned = false;
+                    this.level = level;
+                }
+                findTarget() {
+                    let closestTowerDist = Infinity;
+                    let towerTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
+                            if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
+                                const dist = getDistance(this, obj);
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
+                            }
+                        }
+                    }
+                    if (!towerTarget) {
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
+                                const dist = getDistance(this, obj);
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
+                            }
+                        }
+                    }
+                    let closestBuildingDist = Infinity;
+                    let buildingTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Building)) {
+                            const dist = getDistance(this, obj);
+                            if (dist < closestBuildingDist) { 
+                                closestBuildingDist = dist; 
+                                buildingTarget = obj; 
+                            }
+                        }
+                    }
+                    const towerDist = towerTarget ? closestTowerDist : Infinity;
+                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
+                        this.target = buildingTarget;
+                    } else {
+                        this.target = towerTarget;
+                    }
+                    this.targetLocked = (this.target != null);
+                }
+                update() {
+                    if (this.health <= 0) {
+                        if (!this.hasSpawned) {
+                            this.hasSpawned = true;
+                            try {
+                                const card = allCards['stoneGiant'];
+                                if (card && card.miniStats) {
+                                    const m = card.miniStats[this.level] || card.miniStats[1];
+                                    if (m) {
+                                        gameObjects.push(new MiniStoneGiant(this.x - 15, this.y, this.team, m.health, m.damage, m.hitSpeed, this.level));
+                                        gameObjects.push(new MiniStoneGiant(this.x + 15, this.y, this.team, m.health, m.damage, m.hitSpeed, this.level));
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Error spawning mini stone giants:', e);
+                            }
+                        }
+                        return;
+                    }
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
+                        this.attack();
+                        return;
+                    }
+                    if (!this.target || this.target.health <= 0 || (this.target instanceof Tower)) {
+                         this.findTarget();
+                    }
+                    if (this.target && this.target.health > 0) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
+                            this.attack();
+                        } else {
+                            this.move();
+                        }
+                    }
+                }
+            }
+
+            class MiniStoneGiant extends Unit {
+                constructor(x, y, team, health, damage, hitSpeed = 1.3, level = 1) {
+                    super(x, y, 10, team, health, 0.3, 20, damage, hitSpeed, '🪨', false, false, level, 100);
+                    this.targetLocked = false;
+                    this.level = level;
+                }
+                findTarget() {
+                    let closestTowerDist = Infinity;
+                    let towerTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Tower) && !obj.isKing) {
+                            if ((this.x < WIDTH / 2 && obj.x < WIDTH / 2) || (this.x > WIDTH / 2 && obj.x > WIDTH / 2)) {
+                                const dist = getDistance(this, obj);
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
+                            }
+                        }
+                    }
+                    if (!towerTarget) {
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && (obj instanceof Tower) && obj.isKing) {
+                                const dist = getDistance(this, obj);
+                                if (dist < closestTowerDist) { 
+                                    closestTowerDist = dist; 
+                                    towerTarget = obj; 
+                                }
+                            }
+                        }
+                    }
+                    let closestBuildingDist = Infinity;
+                    let buildingTarget = null;
+                    for (const obj of gameObjects) {
+                        if (obj.team !== this.team && (obj instanceof Building)) {
+                            const dist = getDistance(this, obj);
+                            if (dist < closestBuildingDist) { 
+                                closestBuildingDist = dist; 
+                                buildingTarget = obj; 
+                            }
+                        }
+                    }
+                    const towerDist = towerTarget ? closestTowerDist : Infinity;
+                    if (buildingTarget && closestBuildingDist <= this.aggroRange && closestBuildingDist < towerDist) {
+                        this.target = buildingTarget;
+                    } else {
+                        this.target = towerTarget;
+                    }
+                    this.targetLocked = (this.target != null);
+                }
+                update() {
+                    if (this.health <= 0) return;
+                    if (this.cooldownTimer > 0) { this.cooldownTimer--; }
+                    if (this.target && this.target.health > 0 && getDistance(this, this.target) <= this.attackRange) {
+                        this.attack();
+                        return;
+                    }
+                    if (!this.target || this.target.health <= 0 || (this.target instanceof Tower)) {
+                         this.findTarget();
+                    }
+                    if (this.target && this.target.health > 0) {
+                        if (getDistance(this, this.target) <= this.attackRange) {
+                            this.attack();
+                        } else {
+                            this.move();
+                        }
+                    }
+                }
+            }
+
             // --- EFFECT CLASSES (NEW) ---
             class FreezeEffect extends GameObject {
                 constructor(x, y, team, radius, duration) {
@@ -3918,6 +4169,92 @@ class ColdSpirit extends Unit {
                 }
             }
 
+            class VoidTrapEffect extends GameObject {
+                constructor(x, y, team, radius, damage) {
+                    super(x, y, radius, team, 1);
+                    this.damage = damage;
+                    this.animationTimer = 30;
+                    this.maxAnimationTimer = 30;
+                    this.hit = false;
+                    this.hitObjects = new Set();
+                }
+                update() {
+                    if (!this.hit) {
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && !this.hitObjects.has(obj) && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                if (getDistance(this, obj) < this.radius) {
+                                    obj.health -= this.damage;
+                                    this.hitObjects.add(obj);
+                                }
+                            }
+                        }
+                        this.hit = true;
+                    }
+                    this.animationTimer--;
+                    if (this.animationTimer <= 0) {
+                        this.health = 0;
+                    }
+                }
+                draw() {
+                    const progress = this.animationTimer / this.maxAnimationTimer;
+                    const alpha = (0.5 - Math.abs(progress - 0.5)) * 2;
+                    ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.6})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * (1 - progress * 0.3), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.font = `${this.radius * 0.8}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = alpha;
+                    ctx.fillText('⚫', this.x, this.y);
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            class ChaosOrbEffect extends GameObject {
+                constructor(x, y, team, radius, damage) {
+                    super(x, y, radius, team, 1);
+                    this.damage = damage;
+                    this.animationTimer = 30;
+                    this.maxAnimationTimer = 30;
+                    this.hit = false;
+                    this.hitObjects = new Set();
+                }
+                update() {
+                    if (!this.hit) {
+                        for (const obj of gameObjects) {
+                            if (obj.team !== this.team && !this.hitObjects.has(obj) && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                                if (getDistance(this, obj) < this.radius) {
+                                    obj.health -= this.damage;
+                                    this.hitObjects.add(obj);
+                                }
+                            }
+                        }
+                        this.hit = true;
+                    }
+                    this.animationTimer--;
+                    if (this.animationTimer <= 0) {
+                        this.health = 0;
+                    }
+                }
+                draw() {
+                    const progress = this.animationTimer / this.maxAnimationTimer;
+                    const alpha = (0.5 - Math.abs(progress - 0.5)) * 2;
+                    ctx.fillStyle = `rgba(200, 100, 255, ${alpha * 0.5})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * (1 + progress * 0.2), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.font = `${this.radius}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = alpha;
+                    ctx.fillText('🌀', this.x, this.y);
+                    ctx.globalAlpha = 1;
+                }
+            }
 
             class Projectile extends GameObject {
                 constructor(x, y, target, team, damage, splashRadius = 0) { 
@@ -4138,15 +4475,27 @@ class ColdSpirit extends Unit {
                     'spiritLantern': { name: 'Spirit Lantern', cost: 5, emoji: '🏮', type: 'Building', unitClass: SpiritLantern, placementRadius: 18, isFlying: false, arena: 7, targets: '-',
                         stats: { 1: { health: 900, spawn_speed: '6s', lifetime: '24s' } } },
                     'zapSpirit': { name: 'Zap Spirit', cost: 1, emoji: '⚡', type: 'Spirit', unitClass: ZapSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 200,
-                                stats: { 1: { health: 50, jumpRadius: 100, effectRadius: 80, damage: 100 } } },
+                                stats: { 1: { health: 150, jumpRadius: 100, effectRadius: 80, damage: 100 } } },
                     'coldSpirit': { name: 'Cold Spirit', cost: 1, emoji: '❄️', type: 'Spirit', unitClass: ColdSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 200,
-                                stats: { 1: { health: 50, jumpRadius: 100, effectRadius: 60, freezeDuration: 3 } } },
+                                stats: { 1: { health: 150, jumpRadius: 100, effectRadius: 60, freezeDuration: 3 } } },
                     'lifeSpirit': { name: 'Life Spirit', cost: 1, emoji: '💚', type: 'Spirit', unitClass: LifeSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: '-', aggroRange: 200,
-                                stats: { 1: { health: 50, jumpRadius: 100, effectRadius: 60, healDuration: 3 } } },
+                                stats: { 1: { health: 150, jumpRadius: 100, effectRadius: 60, healDuration: 3 } } },
                     'bombSpirit': { name: 'Bomb Spirit', cost: 2, emoji: '💣', type: 'Spirit', unitClass: BombSpirit, placementRadius: 8, isFlying: false, arena: 6, targets: 'Air & Ground', aggroRange: 200,
-                                stats: { 1: { health: 50, jumpRadius: 100, effectRadius: 50, damage: 200 } } },
+                                stats: { 1: { health: 150, jumpRadius: 100, effectRadius: 50, damage: 200 } } },
                     'anger': { name: 'Anger', cost: 3, emoji: '😡', type: 'Spell', radius: 60, placementRadius: 60, arena: 6, targets: '-',
                                 stats: { 1: { duration: 5 } } },
+                    // Arena 8 (NEW CARDS)
+                    'chaosElemental': { name: 'Chaos Elemental', cost: 5, emoji: '👹', type: 'Melee', unitClass: ChaosElemental, placementRadius: 12, isFlying: false, arena: 8, targets: 'Ground', aggroRange: 100,
+                                stats: { 1: { health: 750, damage: 110, hitSpeed: 1.1, speed: 1.0 }, 2: { health: 825, damage: 121, hitSpeed: 1.1, speed: 1.0 }, 3: { health: 908, damage: 133, hitSpeed: 1.1, speed: 1.0 }, 4: { health: 998, damage: 146, hitSpeed: 1.1, speed: 1.0 }, 5: { health: 1098, damage: 161, hitSpeed: 1.1, speed: 1.0 }, 6: { health: 1208, damage: 177, hitSpeed: 1.1, speed: 1.0 } } },
+                    'shadowClone': { name: 'Shadow Clone', cost: 4, emoji: '👤', type: 'Ranged', unitClass: ShadowClone, placementRadius: 10, isFlying: false, arena: 8, targets: 'Air & Ground', aggroRange: 120,
+                                stats: { 1: { health: 320, damage: 55, hitSpeed: 1.2, speed: 1.0 }, 2: { health: 352, damage: 61, hitSpeed: 1.2, speed: 1.0 }, 3: { health: 387, damage: 67, hitSpeed: 1.2, speed: 1.0 }, 4: { health: 426, damage: 73, hitSpeed: 1.2, speed: 1.0 }, 5: { health: 469, damage: 81, hitSpeed: 1.2, speed: 1.0 }, 6: { health: 516, damage: 89, hitSpeed: 1.2, speed: 1.0 } } },
+                    'voidTrap': { name: 'Void Trap', cost: 4, emoji: '⚫', type: 'Spell', radius: 70, placementRadius: 70, arena: 8, targets: 'Air & Ground',
+                                stats: { 1: { damage: 180 } } },
+                    'stoneGiant': { name: 'Stone Giant', cost: 6, emoji: '🗿', type: 'Tank', unitClass: StoneGiant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings', aggroRange: 100,
+                                stats: { 1: { health: 1400, damage: 90, hitSpeed: 1.3, speed: 0.6 }, 2: { health: 1540, damage: 99, hitSpeed: 1.3, speed: 0.6 }, 3: { health: 1694, damage: 109, hitSpeed: 1.3, speed: 0.6 }, 4: { health: 1863, damage: 120, hitSpeed: 1.3, speed: 0.6 }, 5: { health: 2050, damage: 132, hitSpeed: 1.3, speed: 0.6 }, 6: { health: 2255, damage: 145, hitSpeed: 1.3, speed: 0.6 } },
+                                miniStats: { 1: { health: 560, damage: 36, hitSpeed: 1.3 }, 2: { health: 616, damage: 40, hitSpeed: 1.3 }, 3: { health: 678, damage: 44, hitSpeed: 1.3 }, 4: { health: 745, damage: 48, hitSpeed: 1.3 }, 5: { health: 820, damage: 53, hitSpeed: 1.3 }, 6: { health: 902, damage: 58, hitSpeed: 1.3 } } },
+                    'chaosOrb': { name: 'Chaos Orb', cost: 3, emoji: '🌀', type: 'Spell', radius: 50, placementRadius: 50, arena: 8, targets: 'Air & Ground',
+                                stats: { 1: { damage: 200 } } },
                     'tower': { name: 'Tower Upgrade', emoji: '👑' }
                 };
                 
@@ -4204,6 +4553,8 @@ class ColdSpirit extends Unit {
                     ctx.fillStyle = '#4338ca'; // Indigo-700
                 } else if (currentArenaTheme === 'arena-6') {
                     ctx.fillStyle = '#92400e'; // Brown-700
+                } else if (currentArenaTheme === 'arena-8') {
+                    ctx.fillStyle = '#9333ea'; // Purple-600 for chaos
                 } else {
                     ctx.fillStyle = '#3b82f6'; // Default blue
                 }
@@ -4216,6 +4567,7 @@ class ColdSpirit extends Unit {
             }
 
             function getAILevel() {
+                if (trophies >= 1750) return 8; // NEW Arena 8
                 if (trophies >= 1500) return 7; // NEW Arena 7
                 if (trophies >= 1250) return 6;
                 if (trophies >= 1000) return 5;
@@ -4233,7 +4585,8 @@ class ColdSpirit extends Unit {
                 if (aiLevel > 0) {
                     arenaNum = aiLevel;
                 } else {
-                    if (currentArenaFloor >= 1500) arenaNum = 7;
+                    if (currentArenaFloor >= 1750) arenaNum = 8;
+                    else if (currentArenaFloor >= 1500) arenaNum = 7;
                     else if (currentArenaFloor >= 1250) arenaNum = 6;
                     else if (currentArenaFloor >= 1000) arenaNum = 5;
                     else if (currentArenaFloor >= 750) arenaNum = 4;
@@ -4413,16 +4766,22 @@ class ColdSpirit extends Unit {
 
                 const aiArenaLevel = getAILevel();
                 // UPDATED AI STAT LEVEL LOGIC
-                if (aiArenaLevel === 1) { // Arena 1: 1-2
+                if (aiArenaLevel === 1) { // Arena 1: 1
+                    currentAiStatLevel = 1;
+                } else if (aiArenaLevel === 2) { // Arena 2: 1-2
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 1; // 1 or 2
-                } else if (aiArenaLevel === 2) { // Arena 2: 2-3
+                } else if (aiArenaLevel === 3) { // Arena 3: 2-3
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 2; // 2 or 3
-                } else if (aiArenaLevel === 3) { // Arena 3: 3-4
-                    currentAiStatLevel = Math.floor(Math.random() * 2) + 3; // 3 or 4
-                } else if (aiArenaLevel === 4) { // Arena 4: 4-5
+                } else if (aiArenaLevel === 4) { // Arena 4: 2-3
+                    currentAiStatLevel = Math.floor(Math.random() * 2) + 2; // 2 or 3
+                } else if (aiArenaLevel === 5) { // Arena 5: 4-5
                     currentAiStatLevel = Math.floor(Math.random() * 2) + 4; // 4 or 5
-                } else { // Arena 5: 5-7
-                    currentAiStatLevel = Math.floor(Math.random() * 3) + 5; // 5, 6, or 7
+                } else if (aiArenaLevel === 6) { // Arena 6: 4-5
+                    currentAiStatLevel = Math.floor(Math.random() * 2) + 4; // 4 or 5
+                } else if (aiArenaLevel === 7) { // Arena 7: 5-6
+                    currentAiStatLevel = Math.floor(Math.random() * 2) + 5; // 5 or 6
+                } else { // Arena 8: 5-6
+                    currentAiStatLevel = Math.floor(Math.random() * 2) + 5; // 5 or 6
                 }
                 
                 gameObjects.push(new Tower(LANE_LEFT_X, HEIGHT - 100, 'player', false, towerLevel));
@@ -4514,6 +4873,12 @@ class ColdSpirit extends Unit {
                         if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Unit && o.y > RIVER_Y - 50);
                     } else if (cardId === 'anger') { // NEW
                         target = gameObjects.find(o => o.team === 'ai' && (o instanceof Unit || o instanceof Tower || o instanceof Building) && o.health > 0);
+                    } else if (cardId === 'voidTrap') { // NEW
+                        target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0);
+                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Unit && o.health > 0);
+                    } else if (cardId === 'chaosOrb') { // NEW
+                        target = gameObjects.find(o => o.team === 'player' && (o instanceof Unit || o instanceof Building) && o.health > 0);
+                        if (!target) target = gameObjects.find(o => o.team === 'player' && o instanceof Tower && o.health > 0);
                     }
                     if (target) {
                         if (cardId === 'poison') { // NEW
@@ -4522,6 +4887,12 @@ class ColdSpirit extends Unit {
                         } else if (cardId === 'anger') { // NEW
                             const s = card.stats[cardLevel];
                             gameObjects.push(new AngerSpell(target.x, target.y, 'ai', card.radius, s.duration));
+                        } else if (cardId === 'voidTrap') { // NEW
+                            const damage = card.stats[cardLevel].damage;
+                            gameObjects.push(new VoidTrapEffect(target.x, target.y, 'ai', card.radius, damage));
+                        } else if (cardId === 'chaosOrb') { // NEW
+                            const damage = card.stats[cardLevel].damage;
+                            gameObjects.push(new ChaosOrbEffect(target.x, target.y, 'ai', card.radius, damage));
                         } else {
                             const damage = card.stats[cardLevel].damage;
                             gameObjects.push(new Spell(target.x, target.y, 'ai', damage, card.radius, card.emoji));
@@ -4803,7 +5174,7 @@ class ColdSpirit extends Unit {
                 gameObjects = gameObjects.filter(obj => {
                     if (obj.health > 0) return true;
                     // Handle units/projectiles/spells
-                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof AngerSpell || obj instanceof FreezeEffect || obj instanceof HealEffect || obj instanceof ExplosionEffect) { 
+                    if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof AngerSpell || obj instanceof FreezeEffect || obj instanceof HealEffect || obj instanceof ExplosionEffect || obj instanceof VoidTrapEffect || obj instanceof ChaosOrbEffect) { 
                         // Special case: Battle Ram needs to spawn barbs
                         if (obj instanceof BattleRam && !obj.didHit) {
                             obj.spawnBarbs();
@@ -4884,7 +5255,7 @@ class ColdSpirit extends Unit {
                     // Filter dead objects (simplified, no win/lose)
                     gameObjects = gameObjects.filter(obj => {
                         if (obj.health > 0) return true;
-                        if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell) { 
+                        if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof VoidTrapEffect || obj instanceof ChaosOrbEffect) { 
                             if (obj instanceof BattleRam && !obj.didHit) obj.spawnBarbs();
                             return false; 
                         }
@@ -5104,6 +5475,12 @@ class ColdSpirit extends Unit {
                     } else if (selectedSpawningUnit.id === 'anger') { // NEW
                         const s = card.stats[level];
                         gameObjects.push(new AngerSpell(clampedX, clampedY, 'player', card.radius, s.duration));
+                    } else if (selectedSpawningUnit.id === 'voidTrap') { // NEW
+                        const damage = card.stats[level].damage;
+                        gameObjects.push(new VoidTrapEffect(clampedX, clampedY, 'player', card.radius, damage));
+                    } else if (selectedSpawningUnit.id === 'chaosOrb') { // NEW
+                        const damage = card.stats[level].damage;
+                        gameObjects.push(new ChaosOrbEffect(clampedX, clampedY, 'player', card.radius, damage));
                     } else {
                         const damage = card.stats[level].damage;
                         gameObjects.push(new Spell(clampedX, clampedY, 'player', damage, card.radius, card.emoji));
