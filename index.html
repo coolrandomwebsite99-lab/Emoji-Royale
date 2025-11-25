@@ -1500,13 +1500,13 @@
                 
                 // Add all cards to collection with count 0 (except Arena 1)
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; // FIX: Don't add 'tower' to collection
+                    if (cardId === 'tower' || cardId === 'miniStoneGiant') continue; // Don't add tower or internal mini to collection
                     newCollection[cardId] = { level: 1, count: 0, unlocked: false }; // ADDED unlocked
                 }
                 
                 // Add Arena 1 cards with count 1
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; // FIX: Don't add 'tower' to collection
+                    if (cardId === 'tower' || cardId === 'miniStoneGiant') continue; // Don't add tower or internal mini to collection
                     if (allCards[cardId].arena === 1) {
                         newCollection[cardId] = { level: 1, count: 1, unlocked: true }; // ADDED unlocked
                     }
@@ -1514,7 +1514,7 @@
                 
                 if (deckOnly) {
                     // FIX: Filter out 'tower' from starting deck
-                    return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower' && id !== 'stoneGiant');
+                    return Object.keys(allCards).filter(id => allCards[id].arena === 1 && id !== 'tower' && id !== 'stoneGiant' && id !== 'miniStoneGiant');
                 }
                 return newCollection;
             }
@@ -1953,7 +1953,7 @@
                 }
                 debugUnlockAll.addEventListener('click', () => {
                     for (const cardId in allCards) {
-                        if (cardId === 'tower') continue;
+                        if (cardId === 'tower' || cardId === 'miniStoneGiant') continue;
                         if (!cardCollection[cardId]) {
                             cardCollection[cardId] = { level: 1, count: 1, unlocked: true };
                         } else {
@@ -2062,7 +2062,7 @@
                 const arenaNum = aiLevel > 0 ? aiLevel : (currentArenaFloor === 0 ? 1 : (currentArenaFloor === 250 ? 2 : (currentArenaFloor === 500 ? 3 : (currentArenaFloor === 750 ? 4 : 5)))); // UPDATED
                 
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; // FIX: Never include tower in this list
+                    if (cardId === 'tower' || cardId === 'miniStoneGiant') continue; // Never include tower or internal mini in this list
                     if (allCards[cardId].arena <= arenaNum) {
                         unlocked.push(cardId);
                     }
@@ -2089,7 +2089,7 @@
                 
                 // Render Collection & Locked Cards
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue; // FIX: Don't show 'tower' in collection
+                    if (cardId === 'tower' || cardId === 'miniStoneGiant') continue; // Don't show tower or internal mini in collection
                     
                     const cardData = cardCollection[cardId];
                     // --- CARD LOCKING FIX ---
@@ -4538,7 +4538,7 @@ class StoneGiant extends Unit {
                 
                 // --- NEW: Auto-calculate stats for levels 2-15 ---
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue;
+                    if (cardId === 'tower') continue; // Allow miniStoneGiant to auto-scale like other cards
                     const card = allCards[cardId];
                     for (let level = 2; level <= 15; level++) { // Cap at 15
                         if (!card.stats[level]) {
@@ -4632,7 +4632,7 @@ class StoneGiant extends Unit {
                     else arenaNum = 1;
                 }
                 for (const cardId in allCards) {
-                    if (cardId === 'tower') continue;
+                    if (cardId === 'tower' || cardId === 'miniStoneGiant') continue; // Never include tower or internal mini in this list
                     if (allCards[cardId].arena <= arenaNum) {
                         unlocked.push(cardId);
                     }
