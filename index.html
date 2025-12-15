@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Royale</title>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2344719724787837"
-     crossorigin="anonymous"></script>
-    <meta name="monetag" content="13a1e29c0ed4b85e31154eef719ca928">
+    <title>Emoji Royale - Free Web Strategy Game</title>
+    <meta name="description" content="Emoji Royale is a fast, mobile-friendly web strategy game with Trophy Road battles, quick 1v1 duels, 2v2 AI team play, and an arcade-style Emoji Dash mode." />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2344719724787837" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Import Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -21,6 +20,96 @@
             // Stub to satisfy external challenge hook; no extra logic required.
             return true;
         }
+    </script>
+    <script>
+        window.emojiRoyaleAdsense = window.emojiRoyaleAdsense || {
+            client: 'ca-pub-2344719724787837',
+            slots: {
+                // Set these to your AdSense ad unit slot IDs (you can reuse a slot ID, but separate units are recommended).
+                // Login + Menu
+                homeBanner1: '',
+                homeBanner2: '',
+                menuBanner1: '',
+                menuBanner2: '',
+
+                // Other UI screens
+                deckBanner1: '',
+                deckBanner2: '',
+                towerBanner1: '',
+                towerBanner2: '',
+                arenaBanner1: '',
+                arenaBanner2: '',
+                eventsBanner1: '',
+                eventsBanner2: ''
+            }
+        };
+
+        function emojiRoyaleRenderAdsenseInto(container, slot) {
+            if (!container || !slot) return;
+            if (container.dataset.adsLoaded === '1') return;
+
+            container.innerHTML = `
+                <ins class="adsbygoogle"
+                    style="display:block"
+                    data-ad-client="${window.emojiRoyaleAdsense.client}"
+                    data-ad-slot="${slot}"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+            `;
+            container.dataset.adsLoaded = '1';
+
+            try {
+                (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                // If AdSense isn't ready yet, fail silently.
+            }
+        }
+
+        function emojiRoyaleRenderAllAdsenseSlots() {
+            const slots = (window.emojiRoyaleAdsense && window.emojiRoyaleAdsense.slots) || {};
+            document.querySelectorAll('[data-adsense-slot-key]').forEach((container) => {
+                const key = container.getAttribute('data-adsense-slot-key');
+                const slot = slots[key];
+                emojiRoyaleRenderAdsenseInto(container, slot);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Back-compat: if older config keys exist, map them into the new slots object.
+            if (window.emojiRoyaleAdsense.homeBannerSlot && !window.emojiRoyaleAdsense.slots.homeBanner1) {
+                window.emojiRoyaleAdsense.slots.homeBanner1 = window.emojiRoyaleAdsense.homeBannerSlot;
+            }
+            if (window.emojiRoyaleAdsense.menuBannerSlot && !window.emojiRoyaleAdsense.slots.menuBanner1) {
+                window.emojiRoyaleAdsense.slots.menuBanner1 = window.emojiRoyaleAdsense.menuBannerSlot;
+            }
+
+            emojiRoyaleRenderAllAdsenseSlots();
+
+            const overlay = document.getElementById('siteMenuOverlay');
+            const closeBtn = document.getElementById('closeSiteMenuBtn');
+            const openButtons = [
+                document.getElementById('openSiteMenuLoginBtn'),
+                document.getElementById('openSiteMenuMenuBtn')
+            ].filter(Boolean);
+
+            function openOverlay() {
+                if (!overlay) return;
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+
+            function closeOverlay() {
+                if (!overlay) return;
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+
+            openButtons.forEach(btn => btn.addEventListener('click', openOverlay));
+            if (closeBtn) closeBtn.addEventListener('click', closeOverlay);
+            if (overlay) overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeOverlay();
+            });
+        });
     </script>
     <style>
 :root {
@@ -1583,10 +1672,72 @@
             transition: opacity 0.5s ease-in-out;
             z-index: 101; /* Above the "imagine" text */
         }
+
+        /* AdSense review: readable, scrollable written content on the homepage */
+        .home-content-panel {
+            max-height: 42vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .home-content-panel::-webkit-scrollbar {
+            width: 10px;
+        }
+        .home-content-panel::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col items-center p-2">
     <canvas id="bgCanvas"></canvas>
+
+    <!-- In-game menu for guides/policies (opened by a button on login + menu screens) -->
+    <div id="siteMenuOverlay" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[10001]">
+        <div class="glossy-panel w-11/12 max-w-md p-5 rounded-2xl">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold ui-text-effect">Guides & Policies</h2>
+                    <p class="text-sm text-slate-200/80 mt-1">How to Play · Game Modes · About · Contact · Privacy · Updates</p>
+                </div>
+                <button id="closeSiteMenuBtn" class="bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-xl font-bold">Close</button>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-2">
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="how-to-play.html">How to Play</a>
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="game-modes.html">Game Modes</a>
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="about.html">About</a>
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="contact.html">Contact</a>
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="privacy-policy.html">Privacy Policy</a>
+                <a class="glossy-btn px-4 py-3 rounded-xl font-bold hover:scale-[1.01] transition" href="updates.html">Updates</a>
+            </div>
+
+            <div class="mt-4 text-xs text-slate-200/70 leading-relaxed">
+                Tip: these pages explain how the game works, how data and cookies are handled, and how to contact the site owner.
+            </div>
+
+            <div id="adsenseTowerBannerBottom" data-adsense-slot-key="towerBanner2" class="w-full glossy-panel p-3 rounded-2xl text-center mt-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Second tower screen ad slot.</div>
+            </div>
+
+            <div id="adsenseEventsBannerBottom" data-adsense-slot-key="eventsBanner2" class="w-full glossy-panel p-3 rounded-2xl text-center mt-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Second events screen ad slot.</div>
+            </div>
+        </div>
+    </div>
+
+    <noscript>
+        <div style="max-width: 980px; margin: 80px auto 0; padding: 16px; color: #e5e7eb; background: rgba(15,23,42,.8); border: 1px solid rgba(59,130,246,.35); border-radius: 14px;">
+            <h1 style="margin: 0 0 8px; font-size: 24px;">Emoji Royale</h1>
+            <p style="margin: 0; line-height: 1.6;">
+                Emoji Royale is a mobile-friendly web strategy game with multiple modes (Trophy Road, 1v1, 2v2, and Emoji Dash). If your
+                browser has JavaScript disabled, you can still read our game guides and policies:
+                <a href="how-to-play.html">How to Play</a>, <a href="game-modes.html">Game Modes</a>, <a href="privacy-policy.html">Privacy Policy</a>,
+                <a href="contact.html">Contact</a>, and <a href="about.html">About</a>.
+            </p>
+        </div>
+    </noscript>
 
     <!-- 
     ========================================================
@@ -1612,6 +1763,52 @@
         <p class="text-lg mt-2 text-gray-500">Choose your way to play!</p>
         <p id="loginError" class="text-lg mt-2 text-red-400 font-bold h-6"></p> 
         
+        <!-- Written content for AdSense review (homepage) -->
+        <div class="home-content-panel mt-5 w-11/12 max-w-md glossy-panel p-4 rounded-2xl text-left">
+            <h2 class="text-xl font-extrabold tracking-wide ui-text-effect">Welcome to Emoji Royale</h2>
+            <p class="text-sm text-slate-200/90 mt-2 leading-relaxed">
+                Emoji Royale is a fast, readable web game built for quick sessions on both mobile and desktop. The idea is simple: build a
+                deck, manage your elixir, and look for the moment where a smart defense turns into a winning counterpush. Emojis make the
+                action easy to understand at a glance, so you spend less time parsing UI and more time making decisions.
+            </p>
+            <p class="text-sm text-slate-200/90 mt-3 leading-relaxed">
+                There are multiple ways to play. Trophy Road is the progression-focused mode where you climb arenas and sharpen your fundamentals.
+                1v1 is a quick duel for testing a new deck or warming up. 2v2 is a co-op mode where you're paired with an AI teammate against AI opponents.
+                If you want something more arcade-like, Emoji Dash swaps tactics for movement and timing in a short "one more run" loop.
+            </p>
+            <p class="text-sm text-slate-200/90 mt-3 leading-relaxed">
+                Our goal is a game that feels fair and learnable: clear controls, consistent feedback, and enough depth that improving your timing
+                and card choices really matters. If you’re new, start with a balanced deck and focus on the basics: defend efficiently, avoid overspending,
+                and only commit to big pushes when you can support them.
+            </p>
+            <p class="text-sm text-slate-200/90 mt-3 leading-relaxed">
+                Emoji Royale is built as a lightweight web experience, so it loads quickly and plays without an app install. We aim to keep the interface
+                clean, the screens readable, and the controls comfortable on touch devices. If you’re visiting because of ads or sponsorships, note that ad
+                placements are intended for content areas like headers, sidebars, and footers—not inside the gameplay canvas—so the match stays fair and the
+                controls stay unobstructed. For transparency on how data and cookies are handled, read the Privacy Policy page linked above.
+            </p>
+            <p class="text-sm text-slate-200/90 mt-3 leading-relaxed">
+                Want details? Read the step-by-step guide on <a class="underline text-blue-200 hover:text-blue-100" href="how-to-play.html">How to Play</a>,
+                learn the differences on <a class="underline text-blue-200 hover:text-blue-100" href="game-modes.html">Game Modes</a>, and check
+                <a class="underline text-blue-200 hover:text-blue-100" href="updates.html">Updates</a> for patch notes. For policies and support, visit
+                <a class="underline text-blue-200 hover:text-blue-100" href="privacy-policy.html">Privacy Policy</a> and <a class="underline text-blue-200 hover:text-blue-100" href="contact.html">Contact</a>.
+            </p>
+        </div>
+
+        <button id="openSiteMenuLoginBtn" class="login-btn guest mt-4 w-11/12 max-w-md btn-shine">
+            Guides & Policies (How to Play, Modes, About, Contact, Privacy, Updates)
+        </button>
+
+        <!-- Ad containers (configure slot IDs in window.emojiRoyaleAdsense.slots.*) -->
+        <div id="adsenseHomeBanner" data-adsense-slot-key="homeBanner1" class="mt-4 w-11/12 max-w-md glossy-panel p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+            <div class="text-xs text-slate-200/70 mt-2">Ads load here after AdSense slots are configured (or if Auto Ads is enabled).</div>
+        </div>
+        <div id="adsenseHomeBanner2" data-adsense-slot-key="homeBanner2" class="mt-3 w-11/12 max-w-md glossy-panel p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+            <div class="text-xs text-slate-200/70 mt-2">Second ad slot for this screen.</div>
+        </div>
+
         <!-- NEW: Load Save Key Button -->
         <button id="loadKeyBtn" class="login-btn bg-blue-600 hover:bg-blue-700">
             Enter Save Key
@@ -1660,6 +1857,15 @@
                 <div class="bg-gray-800 px-4 py-2 rounded-lg">
                     <span id="trophyDisplay" class="text-xl font-bold text-blue-400 ui-text-effect">🏆 0</span>
                 </div>
+            </div>
+
+            <button id="openSiteMenuMenuBtn" class="login-btn guest mt-4 w-11/12 btn-shine">
+                Guides & Policies (How to Play, Modes, About, Contact, Privacy, Updates)
+            </button>
+
+            <div id="adsenseMenuBannerTop" data-adsense-slot-key="menuBanner1" class="mt-3 w-11/12 glossy-panel p-3 rounded-2xl text-center">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Menu screen ad slot.</div>
             </div>
             
             <!-- Arena Display -->
@@ -1716,6 +1922,12 @@
                 Save Data
             </button>
 
+            <!-- Ad container (configure slot IDs in window.emojiRoyaleAdsense.slots.*) -->
+            <div id="adsenseMenuBannerBottom" data-adsense-slot-key="menuBanner2" class="mt-4 w-full glossy-panel p-3 rounded-2xl text-center">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Second menu screen ad slot.</div>
+            </div>
+
         </div>
         <!-- Bottom Nav Removed: Using Persistent Nav at bottom of body -->
     </div>
@@ -1727,6 +1939,10 @@
     -->
     <div id="deckScreen" class="screen flex-col items-center p-4">
         <div class="flex-grow flex flex-col items-center w-full max-w-md pt-6 pb-24">
+            <div id="adsenseDeckBannerTop" data-adsense-slot-key="deckBanner1" class="w-full glossy-panel p-3 rounded-2xl text-center mb-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Deck screen ad slot.</div>
+            </div>
             <!-- Battle Deck Section -->
             <div class="w-full bg-gray-800 rounded-xl p-4 shadow-lg border-2 border-gray-700 mb-6 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
@@ -1768,6 +1984,10 @@
                 <!-- Locked cards injected by JS -->
             </div>
 
+            <div id="adsenseDeckBannerBottom" data-adsense-slot-key="deckBanner2" class="w-full glossy-panel p-3 rounded-2xl text-center mt-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Second deck screen ad slot.</div>
+            </div>
         </div>
     </div>
 
@@ -1780,6 +2000,11 @@
         <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
             <h1 class="text-3xl font-bold">Tower Power</h1>
             <p id="towerLevelDisplay" class="text-lg text-yellow-300 font-bold">Tower Level 1</p>
+
+            <div id="adsenseTowerBannerTop" data-adsense-slot-key="towerBanner1" class="w-full glossy-panel p-3 rounded-2xl text-center mt-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Tower screen ad slot.</div>
+            </div>
             <div class="text-8xl my-4">👑</div>
             
             <!-- Stats -->
@@ -1815,6 +2040,11 @@
     <div id="arenaScreen" class="screen flex-col items-center p-4">
         <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
             <h1 class="text-3xl font-bold mb-8 ui-text-effect battle-arena-name">Arenas</h1>
+
+            <div id="adsenseArenaBannerTop" data-adsense-slot-key="arenaBanner1" class="w-full glossy-panel p-3 rounded-2xl text-center mb-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Arenas screen ad slot.</div>
+            </div>
             
             <div class="space-y-4 w-full">
                 <div class="arena-list">
@@ -1946,6 +2176,12 @@
                     </div>
                 </div>
             </div>
+
+            <div id="adsenseArenaBannerBottom" data-adsense-slot-key="arenaBanner2" class="w-full glossy-panel p-3 rounded-2xl text-center mt-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Second arenas screen ad slot.</div>
+            </div>
+
             <button id="arenaBackButton" class="arena-btn bg-gray-600 hover:bg-gray-700 mt-8 w-3/4">
                 Back to Menu
             </button>
@@ -1962,6 +2198,11 @@
         <div class="flex-grow flex flex-col items-center w-full max-w-md pt-8 pb-24">
             <h1 class="text-3xl font-bold text-red-400 mb-2" style="text-shadow: 0 0 15px white, 0 0 30px #ef4444;">🎄 Events</h1>
             <p class="text-green-300 font-bold mb-8" style="text-shadow: 0 0 15px #4ade80, 0 0 30px #22c55e;">Seasonal Challenges</p>
+
+            <div id="adsenseEventsBannerTop" data-adsense-slot-key="eventsBanner1" class="w-full glossy-panel p-3 rounded-2xl text-center mb-4">
+                <div class="text-[10px] uppercase tracking-[0.35em] text-slate-200/80">Advertisement</div>
+                <div class="text-xs text-slate-200/70 mt-2">Events screen ad slot.</div>
+            </div>
 
             <div class="bg-gray-800 p-6 rounded-lg w-full border-2 border-green-600 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 15px 15px;"></div>
@@ -16188,7 +16429,7 @@ class StoneGiant extends Unit {
             <div class="bg-gray-700 p-4 rounded-lg mb-4">
                 <p class="text-3xl font-mono text-center text-green-300" id="generatedCode">-----</p>
             </div>
-            <p class="text-sm text-gray-300 mb-4">Share this code with your friend to join.</p>
+            <p class="text-sm text-gray-300 mb-4">Share this code to join.</p>
             <p class="text-sm text-yellow-300 mb-4">Waiting for teammate...</p>
             <button id="cancelCreateBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-bold transition">
                 Cancel
