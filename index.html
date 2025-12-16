@@ -2555,13 +2555,13 @@
     UPDATE LOG MODAL (NEW)
     ========================================================
     -->
-    <div id="updateLogOverlay">
-        <!-- Animated header with battle scene and update icons -->
-        <div class="flex justify-center items-center space-x-2 text-3xl mb-2">
-            <span class="animate-bounce">🌠</span>
-            <span class="animate-ping">🌌</span>
-            <span class="animate-spin">🌟</span>
-        </div>
+        <div id="updateLogOverlay">
+         <!-- Animated header with battle scene and update icons -->
+         <div class="flex justify-center items-center space-x-2 text-3xl mb-2">
+            <span class="animate-bounce">🧬</span>
+            <span class="animate-ping">🌿</span>
+            <span class="animate-spin">🧟</span>
+         </div>
         <h2 class="text-3xl font-bold mb-4">📰 Update Log</h2>
 <div id="updateLogContent" class="text-left text-sm max-h-96 overflow-y-auto w-full max-w-md px-4 space-y-3">
             <!-- Update log content will be injected by JS -->
@@ -4010,6 +4010,15 @@ const firebaseConfig = {
 
             function displayUpdateLogContent() {
             const updates = [
+                    { date: '12/15/2025', title: 'Evo Harvest & Spirit Fixes', items: [
+                        '🧬 Player evolution counters now match the AI logic so Goblins (cycle 1), Farmer (cycle 2), and Giant (cycle 2) trigger at the intended cadence.',
+                        '👑 Evo Goblin Group now raises a ghost for each fallen member that follows the pack and respawns one at a time after three seconds.',
+                        '🌿 Farmer evolution spawns vine plants that stick with him and drag enemies from behind/side into his forward range.',
+                        '⛰️ Giant evolution now creates a stomp circle around him every second that damages all enemy troops and buildings caught inside.',
+                        '🧟 Death Spirit / Necromancer zombie marks now apply even on the killing blow (also fixed in the preview simulation).',
+                        '💧 Wave Spirit now moves like other spirits (also fixes Coral-spawned Wave Spirits).',
+                        '☠️ Zombie death poison clouds now show in the preview window.'
+                    ]},
                     { date: '12/13/2025', title: 'Celestial Citadel & Nebula Nexus', items: [
                         '✨ Arena 17: Celestial Citadel sparkles above the clouds with starlit floors and reflective glass panels.',
                         '🛡️ Celestial Guardian (6 elixir) rushes the bridge, drawing fire and radiating boosts that steady nearby allies.',
@@ -6606,6 +6615,7 @@ if (chestCloseButton) {
                 let dotsWrapper = cardEl.querySelector('.card-ui-evo-dots');
                 if (!isCardInEvoSlot(cardId)) {
                     if (dotsWrapper) dotsWrapper.remove();
+                    playerEvoCycleCounts[cardId] = 0;
                     cardEl.classList.remove('card-ui-evo-ready');
                     return;
                 }
@@ -7053,6 +7063,56 @@ if (chestCloseButton) {
             // Stores the original stats HTML for the card modal so that
             // evolution toggling can restore it when necessary.
             let originalStatsHTML = '';
+            let cardModalDisplayLevel = 1;
+
+            function getStatsForLevel(statsRecord, level) {
+                if (!statsRecord) return null;
+                if (Array.isArray(statsRecord)) {
+                    const index = Math.max(0, Math.min(statsRecord.length - 1, level - 1));
+                    return statsRecord[index] || statsRecord[statsRecord.length - 1] || null;
+                }
+                if (typeof statsRecord === 'object') {
+                    if (statsRecord[level]) return statsRecord[level];
+                    const key = String(level);
+                    if (statsRecord[key]) return statsRecord[key];
+                    const numericKeys = Object.keys(statsRecord).filter(k => !Number.isNaN(Number(k))).sort((a, b) => Number(a) - Number(b));
+                    if (numericKeys.length) {
+                        const fallbackKey = numericKeys[Math.min(level - 1, numericKeys.length - 1)];
+                        return statsRecord[fallbackKey];
+                    }
+                    return statsRecord;
+                }
+                return statsRecord;
+            }
+
+            function buildCardStatsHtml(card, stats) {
+                if (!card) return '';
+                let html = `<div>Targets: <span>${card.targets || '-'}</span></div>`;
+                if (card.isFlying) {
+                    html += `<div>Placement: <span>Air</span></div>`;
+                } else if (card.type !== 'Spell' && card.type !== 'Building') {
+                    html += `<div>Placement: <span>Ground</span></div>`;
+                }
+                if (stats && typeof stats === 'object') {
+                    for (const [key, value] of Object.entries(stats)) {
+                        if (key === 'barbLevel') continue;
+                        const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                        html += `<div>${label}: <span>${value}</span></div>`;
+                    }
+                    if (card.type === 'Spell') {
+                        html += `<div>Radius: <span>${card.radius || '-'}</span></div>`;
+                    }
+                    if (stats.damage && stats.hitSpeed) {
+                        const dps = (stats.damage / stats.hitSpeed).toFixed(1);
+                        html += `<div>DPS: <span>${dps}</span></div>`;
+                    }
+                } else {
+                    if (card.type === 'Spell') {
+                        html += `<div>Radius: <span>${card.radius || '-'}</span></div>`;
+                    }
+                }
+                return html;
+            }
 
             // Controls whether the card list in preview mode filters to evolution-enabled cards
             let previewListEvoOnly = false;
@@ -7233,12 +7293,12 @@ if (chestCloseButton) {
 
             function openCardModal(cardId) {
                 const card = allCards[cardId];
+                if (!card) return;
                 // Assign ID to card object for reference if missing
-                card.id = cardId;
+                if (!card.id) card.id = cardId;
                 currentPreviewCardId = cardId;
                 
-                const cardData = cardCollection[cardId];
-                if (!card) return;
+                const cardData = (cardCollection && cardCollection[cardId]) ? cardCollection[cardId] : null;
                 
                 const isParty = (gameMode === '2v2' || gameMode === 'party1v1');
                 const isEmojiDashMode = (gameMode === 'emojiDash');
@@ -7248,6 +7308,7 @@ if (chestCloseButton) {
                 const useMaxLevel = isMaxLevelMatch();
                 const displayLevel = useMaxLevel ? 15 : ((cardData && cardData.level) ? cardData.level : 1);
                 const stats = card.stats ? card.stats[displayLevel] : null;
+                cardModalDisplayLevel = displayLevel;
 
                 // Reset preview evolution toggle whenever opening a new card modal
                 previewUseEvo = false;
@@ -7267,17 +7328,7 @@ if (chestCloseButton) {
                 switchTab('stats');
 
                 // --- Populate Stats Tab ---
-                cardInfoStats.innerHTML = `<div>Targets: <span>${card.targets || '-'}</span></div>`;
-                if (card.isFlying) cardInfoStats.innerHTML += `<div>Placement: <span>Air</span></div>`;
-                else if (card.type !== 'Spell' && card.type !== 'Building') cardInfoStats.innerHTML += `<div>Placement: <span>Ground</span></div>`;
-
-                if (stats) {
-                    for (const [key, value] of Object.entries(stats)) { 
-                        if (key !== 'barbLevel') cardInfoStats.innerHTML += `<div>${key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}: <span>${value}</span></div>`; 
-                    }
-                    if (card.type === 'Spell') { cardInfoStats.innerHTML += `<div>Radius: <span>${card.radius}</span></div>`; }
-                    if (stats.damage && stats.hitSpeed) { const dps = (stats.damage / stats.hitSpeed).toFixed(1); cardInfoStats.innerHTML += `<div>DPS: <span>${dps}</span></div>`; }
-                }
+                cardInfoStats.innerHTML = buildCardStatsHtml(card, stats);
                 // Save the generated normal stats HTML so it can be restored when toggling evolution off
                 originalStatsHTML = cardInfoStats.innerHTML;
                 // Extra stats logic (Nebula Sentinel, Mage, StoneGiant) ...
@@ -7296,13 +7347,6 @@ if (chestCloseButton) {
                     if (skelStats) {
                         cardInfoStats.innerHTML += `<div class='mt-2 font-bold text-yellow-300'>Spawns 4 Skeletons every 5s:</div>`;
                         cardInfoStats.innerHTML += `<div>Skeleton HP: <span>${skelStats.health}</span></div>`;
-                    }
-                }
-                if (cardId === 'stoneGiant') {
-                    const miniStats = allCards['stoneGiant'] && allCards['stoneGiant'].miniStats ? allCards['stoneGiant'].miniStats[1] : null;
-                    if (miniStats) {
-                        cardInfoStats.innerHTML += `<div class='mt-2 font-bold text-yellow-300'>Splits into 2 Mini Stone Giants:</div>`;
-                        cardInfoStats.innerHTML += `<div>Mini HP: <span>${miniStats.health}</span></div>`;
                     }
                 }
                 if (cardId === 'necromancer') {
@@ -7343,7 +7387,7 @@ if (chestCloseButton) {
                         cardInfoStats.innerHTML += `<div>Circle Radius: <span>${freezeRadius}</span></div>`;
                         cardInfoStats.innerHTML += `<div>Freeze Duration: <span>${freezeDuration}s</span></div>`;
                         cardInfoStats.innerHTML += `<div>After release, troops remain slowed by <span>${slowPercent}%</span>.</div>`;
-                    }
+                        }
                 }
                 if (cardId === 'earthDragon') {
                     const edStats = stats || (card.stats && card.stats[1]);
@@ -7391,7 +7435,7 @@ if (chestCloseButton) {
                     cardInfoProgressContainer.style.display = 'block';
                     cardInfoButton.style.display = 'block';
                     
-                    const displayCount = cardData.count || 0;
+                    const displayCount = (cardData && typeof cardData.count === 'number') ? cardData.count : 0;
                     const costs = upgradeCosts[displayLevel];
                     
                     if (costs) {
@@ -7615,34 +7659,14 @@ if (chestCloseButton) {
         function showEvoStats(cardId) {
             const card = allCards[cardId];
             if (!card || !card.evo) return;
-            const evo = card.evo;
-            const evoStats = (evo && evo.stats) ? evo.stats : {};
-            // Build the evo stats view with detailed attributes
-            let html = `<div class="font-bold text-purple-300 mb-2">Evolution Stats (Cycle: ${evo.cycle})</div>`;
-            // Show known stats. Speed key refers to walk speed. Use more readable labels
-            const statOrder = ['health','damage','hitSpeed','speed','count','range'];
-            statOrder.forEach(key => {
-                if (evoStats[key] !== undefined) {
-                    let label;
-                    if (key === 'speed') label = 'Walk Speed';
-                    else if (key === 'hitSpeed') label = 'Hit Speed';
-                    else label = key.charAt(0).toUpperCase() + key.slice(1);
-                    let value = evoStats[key];
-                    // Format hitSpeed and walk speed with s if numeric
-                    if (key === 'hitSpeed' || key === 'speed') {
-                        value = value + (typeof value === 'number' ? 's' : '');
-                    }
-                    html += `<div>${label}: <span>${value}</span></div>`;
-                }
-            });
-            // DPS calculation if both damage and hitSpeed exist
-            if (evoStats.damage !== undefined && evoStats.hitSpeed !== undefined) {
-                const dps = (evoStats.damage / evoStats.hitSpeed).toFixed(1);
-                html += `<div>DPS: <span>${dps}</span></div>`;
-            }
-            // Append the evolution description
-            if (evo.desc) {
-                html += `<div class="mt-2 text-xs italic text-gray-400">${evo.desc}</div>`;
+            const level = cardModalDisplayLevel || 1;
+            const evoStatsRecord = getStatsForLevel(card.evo.stats, level);
+            const fallbackStats = getStatsForLevel(card.stats, level);
+            const displayStats = evoStatsRecord || fallbackStats;
+            let html = `<div class="font-bold text-purple-300 mb-2">Evolution Stats (Cycle: ${card.evo.cycle || 1})</div>`;
+            html += buildCardStatsHtml(card, displayStats);
+            if (card.evo.desc) {
+                html += `<div class="mt-2 text-xs italic text-gray-400">${card.evo.desc}</div>`;
             }
             if (cardInfoStats) {
                 cardInfoStats.innerHTML = html;
@@ -7940,41 +7964,54 @@ if (chestCloseButton) {
                         // Update All
                         previewSimulationObjects.forEach(o => o.update());
                         
-                        // Cleanup Dead
-                    // Cleanup Dead (Refactored to match main game loop pattern)
-                    const newPreviewObjects = [];
-                    for (const obj of previewSimulationObjects) {
-                        if (obj.health > 0) {
-                            newPreviewObjects.push(obj);
-                            continue;
-                        }
+                        // Cleanup Dead (Refactored to match main game loop pattern)
+                        const newPreviewObjects = [];
+                        const cleanupGlobalGameObjects = gameObjects;
+                        // Route any death-trigger spawns (zombies, poison clouds, etc) into the next frame's array.
+                        gameObjects = newPreviewObjects;
+                        for (const obj of previewSimulationObjects) {
+                            // Don't remove towers in preview, just let them sit at 0 HP
+                            if (obj instanceof Tower) {
+                                if (obj.health <= 0) obj.health = 0;
+                                newPreviewObjects.push(obj);
+                                continue;
+                            }
 
-                        // Handle death effects and special spawns
-                        if (obj instanceof Unit) {
-                            newPreviewObjects.push(new DeathEffect(obj.x, obj.y, obj.emoji));
-                        }
-                        if (obj instanceof BattleRam && !obj.didHit) {
-                            obj.spawnBarbs(); // This also sets health to 0, so it won't be re-added
-                            // Note: spawnBarbs pushes directly to gameObjects, which is aliased to newPreviewObjects here
-                        }
-                        if (obj instanceof StoneGiant && !obj.didSpawnMinis) {
-                            obj.spawnMinis(); // This also pushes directly
-                        }
-                        // Huge Skeleton specific logic
-                        if (obj instanceof HugeSkeleton && !obj.droppedBomb) {
-                            obj.droppedBomb = true; // Mark as dropped
-                            // The GiantBomb itself should be added to the newPreviewObjects
-                            newPreviewObjects.push(new GiantBomb(obj.x, obj.y, obj.team, obj.bombDamage, 100));
-                        }
+                            if (obj.health > 0) {
+                                newPreviewObjects.push(obj);
+                                continue;
+                            }
 
-                        // Don't remove towers in preview, just let them sit at 0 HP
-                        if (obj instanceof Tower) {
-                            if (obj.health <= 0) obj.health = 0;
-                            newPreviewObjects.push(obj); // Keep towers regardless of health for continuous preview
+                            // Handle death effects and special spawns
+                            if (obj instanceof Unit) {
+                                newPreviewObjects.push(new DeathEffect(obj.x, obj.y, obj.emoji));
+                            }
+                            if (obj instanceof Zombie && !obj._poisonSpawned) {
+                                obj._poisonSpawned = true;
+                                spawnPoisonCloud(obj.x, obj.y, obj.team, 3, null, null, false);
+                            }
+                            if (obj.isEvolved && obj._goblinGroupManager) {
+                                obj._goblinGroupManager.notifyMemberDied(obj);
+                            }
+                            if (obj._zombieMark) {
+                                spawnMarkedZombie(obj);
+                            }
+                            if (obj instanceof BattleRam && !obj.didHit) {
+                                obj.spawnBarbs(); // pushes directly to gameObjects (aliased to newPreviewObjects here)
+                            }
+                            if (obj instanceof StoneGiant && !obj.didSpawnMinis) {
+                                obj.spawnMinis(); // pushes directly
+                            }
+                            // Huge Skeleton specific logic
+                            if (obj instanceof HugeSkeleton && !obj.droppedBomb) {
+                                obj.droppedBomb = true; // Mark as dropped
+                                newPreviewObjects.push(new GiantBomb(obj.x, obj.y, obj.team, obj.bombDamage, 100));
+                            }
+
+                            // Other dead objects (like spells, projectiles) are simply not pushed to newPreviewObjects.
                         }
-                        // Other dead objects (like spells, projectiles) are simply not pushed to newPreviewObjects.
-                    }
-                    previewSimulationObjects = newPreviewObjects;
+                        gameObjects = cleanupGlobalGameObjects;
+                        previewSimulationObjects = newPreviewObjects;
 
                     } catch(e) { console.error("Preview Loop Error:", e); }
                     finally {
@@ -8158,7 +8195,7 @@ function getDeckForMode(mode = gameMode) {
                 else if (gameMode === 'party1v1') deckToUse = playerDeckParty;
                 else deckToUse = playerDeck;
 
-                gameDeck = shuffleDeck(deckToUse);
+                gameDeck = (deckToUse || []).slice().reverse();
                 hand = [];
                 discardPile = [];
                 for (let i = 0; i < 4; i++) { hand.push(gameDeck.pop()); }
@@ -8233,7 +8270,7 @@ function getDeckForMode(mode = gameMode) {
                 let requiredCost = card.cost;
                 if (isMirror) {
                     if (mirrorCost === null) {
-                        console.log('Mirror cannot replay spells or there is no previous card.');
+                        console.log('Mirror needs a previous card to replay.');
                         return;
                     }
                     requiredCost = mirrorCost;
@@ -8292,10 +8329,36 @@ function getDeckForMode(mode = gameMode) {
                         if (selectedSpawningUnit.cardCostEl) {
                             selectedSpawningUnit.cardCostEl.textContent = mirrorCost;
                         }
-                        placementIndicator.classList.add('mirror-preview');
-                        const previousCard = lastPlayedCardByTeam.player ? allCards[lastPlayedCardByTeam.player.cardId] : null;
+                        const previous = lastPlayedCardByTeam.player;
+                        const previousCard = previous ? allCards[previous.cardId] : null;
                         const mirrorEmoji = (previousCard && previousCard.emoji) ? previousCard.emoji : '??';
+                        placementIndicator.classList.add('mirror-preview');
                         placementIndicator.innerHTML = `<span class="mirror-preview-emoji">${mirrorEmoji}</span>`;
+
+                        if (previousCard && previousCard.type !== 'Spell') {
+                            // Mirror is a spell card, but when replaying a non-spell we want normal placement rules.
+                            isSpawningSpell = false;
+                            selectedSpawningUnit.type = previousCard.type;
+                            placementRadius = previousCard.placementRadius || 12;
+                            placementIndicator.className = '';
+                            placementIndicator.classList.add('mirror-preview');
+                            placementIndicator.style.width = `${placementRadius * 2}px`;
+                            placementIndicator.style.height = `${placementRadius * 2}px`;
+                            placementIndicator.innerHTML = mirrorEmoji;
+                            placementOverlay.style.display = 'block';
+                        } else if (previousCard && previousCard.type === 'Spell') {
+                            // When replaying a spell, use the original spell radius and show it in the indicator.
+                            isSpawningSpell = true;
+                            spellRadius = previousCard.radius || 32;
+                            selectedSpawningUnit.type = 'Spell';
+                            const mirrorSpellDiameter = Math.max(70, spellRadius * 2);
+                            placementIndicator.className = 'spell';
+                            placementIndicator.classList.add('mirror-preview');
+                            placementIndicator.style.width = `${mirrorSpellDiameter}px`;
+                            placementIndicator.style.height = `${mirrorSpellDiameter}px`;
+                            placementIndicator.innerHTML = `<span class="mirror-preview-emoji">${mirrorEmoji}</span>`;
+                            placementOverlay.style.display = 'none';
+                        }
                     }
                     if (cardId === 'poison') { // NEW: Poison color
                         placementIndicator.style.background = 'rgba(234, 179, 8, 0.2)';
@@ -8356,7 +8419,7 @@ function getDeckForMode(mode = gameMode) {
                 discardPile.push(cardId);
                 hand.splice(handIndex, 1);
                 hand.push(nextCard);
-                if (gameDeck.length === 0) { gameDeck = shuffleDeck(discardPile); discardPile = []; }
+                if (gameDeck.length === 0) { gameDeck = (discardPile || []).slice().reverse(); discardPile = []; }
                 nextCard = gameDeck.pop();
                 renderHand();
             }
@@ -8615,11 +8678,9 @@ function getDeckForMode(mode = gameMode) {
                         if (dist <= threshold) {
                             applyDamage(obj, tickDamage);
                             obj._goblinHexSource = this;
-                            obj._goblinHexInside = true;
                             obj._goblinHexSpawned = obj._goblinHexSpawned || false;
                             this.trackedTargets.add(obj);
                         } else if (obj._goblinHexSource === this) {
-                            obj._goblinHexInside = false;
                             obj._goblinHexSource = null;
                             obj._goblinHexSpawned = false;
                             this.trackedTargets.delete(obj);
@@ -8631,7 +8692,6 @@ function getDeckForMode(mode = gameMode) {
                 if (!target) return;
                 this.trackedTargets.delete(target);
                 target._goblinHexSource = null;
-                target._goblinHexInside = false;
                 target._goblinHexSpawned = true;
                 const x = target.x;
                 const y = target.y;
@@ -8649,7 +8709,6 @@ function getDeckForMode(mode = gameMode) {
             cleanup() {
                 this.trackedTargets.forEach(obj => {
                     if (obj) {
-                        obj._goblinHexInside = false;
                         if (obj._goblinHexSource === this) obj._goblinHexSource = null;
                     }
                 });
@@ -8817,10 +8876,10 @@ function getDeckForMode(mode = gameMode) {
                         gameObjects.push(new DamageText(target.x, target.y - (target.radius || 10), amount));
                     }
                     if (target.health <= 0) {
-                        const hexSource = target._goblinHexSource;
-                        if (hexSource && target._goblinHexInside && !target._goblinHexSpawned) {
-                            hexSource.spawnGoblinFrom(target);
-                        }
+                    const hexSource = target._goblinHexSource;
+                    if (hexSource && !target._goblinHexSpawned) {
+                        hexSource.spawnGoblinFrom(target);
+                    }
                     }
                 }
             }
@@ -9044,6 +9103,12 @@ function getDeckForMode(mode = gameMode) {
                             }
                         }
                         this.cooldownTimer = this.attackCooldown; 
+                        if (this.isEvolved && this instanceof Giant) {
+                            this.triggerEvoAura();
+                        }
+                        if (this.isEvolved && this instanceof Giant) {
+                            this.triggerEvoAura();
+                        }
                     } 
                 }
 
@@ -9433,18 +9498,26 @@ function getDeckForMode(mode = gameMode) {
                         // Determine base damage and whether this is a melee or ranged attack
                         let damage = this.attackDamage;
                         let splash = 0;
+                        let splashMultiplier = 0.45;
                         const isMelee = this.isMeleeUnit || (this.attackRange <= this.radius + this.target.radius + 5);
                         // Apply evolution effects on damage or splash
                         if (this.isEvolved) {
-                            // Goblin: increase damage by 25% per hit
+                            // Goblins stack 25% more damage each hit (resets when card leaves field)
                             if (this instanceof Goblin) {
-                                if (!this.damageMultiplier) this.damageMultiplier = 1;
-                                damage = this.attackDamage * this.damageMultiplier;
+                                if (!this.damageMultiplier || this.damageMultiplier < 1) {
+                                    this.damageMultiplier = 1;
+                                }
+                                damage = Math.max(1, Math.round(this.attackDamage * this.damageMultiplier));
                                 this.damageMultiplier *= 1.25;
                             }
                             // Archer: arrows deal splash damage
                             if (this instanceof Archer) {
                                 splash = 20; // small splash radius for evolved archer
+                            }
+                            // Giant: melee attacks deal small splash around the target
+                            if (this instanceof Giant) {
+                                splash = this.evoAttackSplashRadius;
+                                splashMultiplier = this.evoAttackSplashMultiplier;
                             }
                         }
                         if (isMelee) {
@@ -9454,6 +9527,28 @@ function getDeckForMode(mode = gameMode) {
                                 applyDamage(this, damage);
                             } else {
                                 applyDamage(this.target, damage);
+                            }
+                            if (splash > 0 && this.target) {
+                                const explosionRadius = splash;
+                                const splashDamage = Math.max(1, Math.round(damage * splashMultiplier));
+                                let affected = false;
+                                for (const obj of gameObjects) {
+                                    if (obj === this.target) continue;
+                                    if (obj.team === this.team || obj.health <= 0) continue;
+                                    const dist = getDistance(this.target, obj);
+                                    if (dist >= explosionRadius) continue;
+                                    if (obj instanceof Unit) {
+                                        if (obj.isFlying) continue;
+                                        applyDamage(obj, splashDamage);
+                                        affected = true;
+                                    } else if (obj instanceof Tower || obj instanceof Building) {
+                                        applyDamage(obj, Math.max(1, Math.round(splashDamage * 0.75)));
+                                        affected = true;
+                                    }
+                                }
+                                if (affected) {
+                                    gameObjects.push(new ExplosionEffect(this.target.x, this.target.y, Math.max(16, explosionRadius)));
+                                }
                             }
                             // Skeleton evolution: clone on hit up to 10 skeletons total per team
                             if (this.isEvolved && this instanceof Skeleton) {
@@ -9494,24 +9589,87 @@ function getDeckForMode(mode = gameMode) {
                         this.cooldownTimer = this.attackCooldown; 
                     } 
                 } 
-                update() {
-                if (this.health <= 0) return;
-                if (this.handleZapFreeze()) return;
-                if (this._fisherSlowTimer && this._fisherSlowTimer > 0) {
-                    this._fisherSlowTimer -= deltaTime * 60;
-                    if (this._fisherSlowTimer <= 0) {
-                        this._fisherSlowTimer = 0;
-                        if (this._fisherOriginalSpeed !== undefined) {
-                            this.speed = this._fisherOriginalSpeed;
-                            delete this._fisherOriginalSpeed;
+                triggerEvoAura(spawnVisual = false) {
+                    if (!this.isEvolved) return false;
+                    const radius = this.evoAuraRadius;
+                    const pushStrength = this.evoAuraPushStrength || 4.5;
+                    let didEffect = false;
+                    for (const obj of gameObjects) {
+                        if (obj === this) continue;
+                        if (obj.team === this.team || obj.health <= 0) continue;
+                        if (!(obj instanceof Unit) && !(obj instanceof Building) && !(obj instanceof Tower)) continue;
+                        if (obj instanceof Unit && obj.isFlying) continue;
+                        let dx = obj.x - this.x;
+                        let dy = obj.y - this.y;
+                        let dist = Math.hypot(dx, dy);
+                        if (dist > radius) continue;
+                        if (dist < 0.01) {
+                            const angle = ((obj.id || 0) * 9999) % (Math.PI * 2);
+                            dx = Math.cos(angle);
+                            dy = Math.sin(angle);
+                            dist = 1;
                         }
-                        if (this._fisherOriginalAttackCooldown !== undefined) {
-                            this.attackCooldown = this._fisherOriginalAttackCooldown;
-                            delete this._fisherOriginalAttackCooldown;
+                        const normX = dx / dist;
+                        const normY = dy / dist;
+                        const factor = 1 + ((radius - Math.min(radius, dist)) / radius);
+                        const frameScale = Math.max(0.5, deltaTime * 60);
+                        const sizeScale = 1 + ((obj.radius || 10) / Math.max(1, this.radius));
+                        const push = pushStrength * factor * frameScale * sizeScale;
+                        const desiredDist = Math.max(this.radius + (obj.radius || 10) + 25, radius * 0.9);
+                        const newDist = Math.max(desiredDist, dist + push);
+                        obj.x = this.x + normX * newDist;
+                        obj.y = this.y + normY * newDist;
+                        // Small chip so the effect is noticeable even on towers
+                        const chipDamage = Math.max(1, Math.round(this.evoAuraDamage * 0.2));
+                        if (obj instanceof Unit || obj instanceof Tower || obj instanceof Building) {
+                            applyDamage(obj, chipDamage, { sourceType: 'giantAura' });
+                        }
+                        if (spawnVisual) {
+                            const burst = new GiantQuakeBurstEffect(obj.x, obj.y, Math.max(30, (obj.radius || 10) + 20), this.team);
+                            gameObjects.push(burst);
+                            if (typeof previewSimulationObjects !== 'undefined' && Array.isArray(previewSimulationObjects)) {
+                                previewSimulationObjects.push(burst);
+                            }
+                        }
+                        didEffect = true;
+                    }
+                    if (spawnVisual && didEffect) {
+                        const quakeRadius = Math.max(radius + 60, this.radius * 2 + 60);
+                        const quake = new GiantQuakeEffect(this.x, this.y, quakeRadius, this.team);
+                        gameObjects.push(quake);
+                        if (typeof previewSimulationObjects !== 'undefined' && Array.isArray(previewSimulationObjects)) {
+                            previewSimulationObjects.push(quake);
                         }
                     }
+                    return didEffect;
                 }
-                // Decrement shield timer if active
+                update() {
+                    if (this.health <= 0) return;
+                    if (this.handleZapFreeze()) return;
+                    if (this.isEvolved) {
+                        const frameDelta = Math.max(0.5, deltaTime * 60);
+                        this.evoQuakeTimer = (this.evoQuakeTimer || 0) - frameDelta;
+                        const spawnVisual = this.evoQuakeTimer <= 0;
+                        if (spawnVisual) {
+                            const didPush = this.triggerEvoAura(true);
+                            this.evoQuakeTimer = didPush ? (this.evoQuakeCooldown || 18) : 0;
+                        }
+                    }
+                    if (this._fisherSlowTimer && this._fisherSlowTimer > 0) {
+                        this._fisherSlowTimer -= deltaTime * 60;
+                        if (this._fisherSlowTimer <= 0) {
+                            this._fisherSlowTimer = 0;
+                            if (this._fisherOriginalSpeed !== undefined) {
+                                this.speed = this._fisherOriginalSpeed;
+                                delete this._fisherOriginalSpeed;
+                            }
+                            if (this._fisherOriginalAttackCooldown !== undefined) {
+                                this.attackCooldown = this._fisherOriginalAttackCooldown;
+                                delete this._fisherOriginalAttackCooldown;
+                            }
+                        }
+                    }
+                    // Decrement shield timer if active
                     if (this.shieldTimer && this.shieldTimer > 0) {
                         this.shieldTimer -= deltaTime;
                         if (this.shieldTimer < 0) this.shieldTimer = 0;
@@ -9772,7 +9930,7 @@ function getDeckForMode(mode = gameMode) {
             }
 
             function markUnitAsZombie(target, sourceTeam, markType = 'necromancer', options = {}) {
-                if (!target || target.health <= 0 || !(target instanceof Unit)) return;
+                if (!target || !(target instanceof Unit)) return;
                 if (target.team === sourceTeam) return;
                 if (target instanceof Tower || target instanceof Building) return;
                 target._zombieMark = {
@@ -9813,6 +9971,14 @@ function getDeckForMode(mode = gameMode) {
                     const s = allCards['giant'].stats[level];
                     super(x, y, 18, team, s.health, s.speed, 30, s.damage, s.hitSpeed, '💪', false, false, level, allCards['giant'].aggroRange);
                     this.targetLocked = false;
+                    this.evoAuraRadius = Math.max(s.evoAuraRadius || 0, this.radius + 80, this.radius * 3);
+                    this.evoAuraDamage = s.evoAuraDamage || Math.max(1, Math.round(s.damage * 0.65));
+                    this.evoAttackSplashRadius = s.evoAttackSplashRadius || 26;
+                    this.evoAttackSplashMultiplier = s.evoAttackSplashMultiplier || 0.45;
+                    this.evoQuakeCooldown = s.evoQuakeCooldown || 60;
+                    this.evoQuakeTimer = 0;
+                    // Per-frame push strength (scaled by deltaTime) for the evolved quake aura.
+                    this.evoAuraPushStrength = s.evoAuraPushStrength || 4.5;
                 }
                 findTarget() {
                     // --- BUILDING-TARGETING AI FIX ---
@@ -9907,11 +10073,11 @@ function getDeckForMode(mode = gameMode) {
             class Goblin extends Unit { constructor(x, y, team, level = 1) { const s = allCards['goblins'].stats[level]; super(x, y, 8, team, s.health, 1.2, 20, s.damage, s.hitSpeed, '👺', false, false, level, allCards['goblins'].aggroRange); this.damageMultiplier = 1; } } // Speed 1.5 -> 1.2
             class Skeleton extends Unit { constructor(x, y, team, level = 1) { const s = allCards['skeletons'].stats[level]; super(x, y, 7, team, s.health, 1.4, 20, s.damage, s.hitSpeed, '💀', false, false, level, allCards['skeletons'].aggroRange); } } // Speed 1.6 -> 1.4
             class TinyBot extends Unit { constructor(x, y, team, level = 1) { const s = allCards['tinyBot'].stats[level]; super(x, y, 10, team, s.health, 1.0, 25, s.damage, s.hitSpeed, '🤖', false, false, level, allCards['tinyBot'].aggroRange); } } // Speed 1.2 -> 1.0
+
             class Goblins { constructor(x, y, team, level = 1) {
                 const s = allCards['goblins'].stats[level];
                 for (let i = 0; i < s.count; i++) {
                     const g = new Goblin(x + Math.random()*10 - 5, y + Math.random()*10 - 5, team, level);
-                    // Propagate evolution state to each goblin if pendingEvoSpawn is set
                     try {
                         if (window.pendingEvoSpawn && window.currentSpawnCardHasEvo) {
                             g.isEvolved = true;
@@ -9920,6 +10086,124 @@ function getDeckForMode(mode = gameMode) {
                     gameObjects.push(g);
                 }
             } }
+
+            class GoblinGroupGhost extends GameObject {
+                constructor(manager) {
+                    super(manager.x, manager.y, 0, manager.team, 1);
+                    this.manager = manager;
+                    this.emoji = '👻';
+                }
+                update() {
+                    if (!this.manager || this.manager.health <= 0) {
+                        this.health = 0;
+                        return;
+                    }
+                    const point = this.manager.getFollowPoint();
+                    if (!point) return;
+                    const dx = point.x - this.x;
+                    const dy = point.y - this.y;
+                    const dist = Math.hypot(dx, dy) || 1;
+                    const step = Math.min(dist, 3 * (deltaTime * 60));
+                    this.x += (dx / dist) * step;
+                    this.y += (dy / dist) * step;
+                }
+                draw() {
+                    if (this.health <= 0) return;
+                    ctx.save();
+                    ctx.globalAlpha = 0.85;
+                    ctx.font = '18px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y);
+                    ctx.restore();
+                }
+            }
+
+            class GoblinGroupRespawnManager extends GameObject {
+                constructor(team, level) {
+                    super(0, 0, 0, team, 1);
+                    this.level = level || 1;
+                    this.members = [];
+                    this.respawnQueue = [];
+                    this.respawnTimer = 0;
+                    this.ghost = null;
+                }
+                addMember(member) {
+                    if (!member) return;
+                    this.members.push(member);
+                }
+                getAliveMembers() {
+                    return this.members.filter(m => m && m.health > 0);
+                }
+                getFollowPoint() {
+                    const alive = this.getAliveMembers();
+                    if (!alive.length) return null;
+                    let sumX = 0, sumY = 0;
+                    alive.forEach(m => { sumX += m.x; sumY += m.y; });
+                    return { x: sumX / alive.length, y: sumY / alive.length };
+                }
+                notifyMemberDied(member) {
+                    if (!member) return;
+                    const alive = this.getAliveMembers();
+                    if (!alive.length) return;
+                    const descriptor = {
+                        ctor: member.constructor,
+                        level: Math.max(1, member.level || this.level || 1),
+                    };
+                    this.respawnQueue.push(descriptor);
+                    if (!this.ghost || this.ghost.health <= 0) {
+                        this.ghost = new GoblinGroupGhost(this);
+                        gameObjects.push(this.ghost);
+                    }
+                    if (this.respawnTimer <= 0) {
+                        this.respawnTimer = 3 * 60;
+                    }
+                }
+                update() {
+                    if (this.health <= 0) return;
+                    const alive = this.getAliveMembers();
+                    if (!alive.length) {
+                        this.health = 0;
+                        if (this.ghost) this.ghost.health = 0;
+                        return;
+                    }
+                    const point = this.getFollowPoint();
+                    if (point) {
+                        this.x = point.x;
+                        this.y = point.y;
+                    }
+                    if (!this.respawnQueue.length) return;
+                    this.respawnTimer -= deltaTime * 60;
+                    if (this.respawnTimer > 0) return;
+                    this.respawnTimer = 0;
+                    if (!this.getAliveMembers().length) {
+                        this.respawnQueue.length = 0;
+                        if (this.ghost) this.ghost.health = 0;
+                        return;
+                    }
+                    const spawnPoint = this.getFollowPoint() || { x: this.x, y: this.y };
+                    const descriptor = this.respawnQueue.shift();
+                    const spawnCtor = descriptor && descriptor.ctor ? descriptor.ctor : Goblin;
+                    const spawnLevel = Math.max(1, descriptor && descriptor.level ? descriptor.level : this.level);
+                    const g = new spawnCtor(spawnPoint.x + (Math.random() * 10 - 5), spawnPoint.y + (Math.random() * 10 - 5), this.team, spawnLevel);
+                    g.isEvolved = true;
+                    g._goblinGroupManager = this;
+                    this.members.push(g);
+                    gameObjects.push(g);
+                    if (this.respawnQueue.length > 0) {
+                        this.respawnTimer = 3 * 60;
+                    } else if (this.ghost) {
+                        this.ghost.health = 0;
+                    }
+                }
+                draw() {}
+            }
+
+            function createGoblinGroupManager(team, level) {
+                const manager = new GoblinGroupRespawnManager(team, level);
+                gameObjects.push(manager);
+                return manager;
+            }
             class Skeletons { constructor(x, y, team, level = 1) {
                 const s = allCards['skeletons'].stats[level];
                 for (let i = 0; i < s.count; i++) {
@@ -9939,12 +10223,22 @@ function getDeckForMode(mode = gameMode) {
             class GoblinGang {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['goblinGang'].stats[level];
+                    let evoManager = null;
+                    try {
+                        if (window.pendingEvoSpawn && window.currentSpawnCardHasEvo) {
+                            evoManager = createGoblinGroupManager(team, level);
+                        }
+                    } catch(e) {}
                     // Dagger goblins
                     for (let i = 0; i < s.count; i++) {
                         const g = new Goblin(x + Math.random() * 15 - 7, y + Math.random() * 15 - 7, team, level);
                         try {
                             if (window.pendingEvoSpawn && window.currentSpawnCardHasEvo) {
                                 g.isEvolved = true;
+                                if (evoManager) {
+                                    evoManager.addMember(g);
+                                    g._goblinGroupManager = evoManager;
+                                }
                             }
                         } catch(e) {}
                         gameObjects.push(g);
@@ -9953,10 +10247,14 @@ function getDeckForMode(mode = gameMode) {
                     for (let i = 0; i < s.spear_count; i++) {
                         const sg = new SpearGoblin(x + Math.random() * 15 - 7, y + Math.random() * 15 - 7, team, level);
                         try {
-                            if (window.pendingEvoSpawn && window.currentSpawnCardHasEvo) {
-                                sg.isEvolved = true;
-                            }
-                        } catch(e) {}
+                        if (window.pendingEvoSpawn && window.currentSpawnCardHasEvo) {
+                            sg.isEvolved = true;
+                        }
+                    } catch(e) {}
+                        if (sg.isEvolved && evoManager) {
+                            evoManager.addMember(sg);
+                            sg._goblinGroupManager = evoManager;
+                        }
                         gameObjects.push(sg);
                     }
                 }
@@ -10236,6 +10534,12 @@ function getDeckForMode(mode = gameMode) {
                     this.attackHeight = s.attackHeight;
                     this.attackAnimationTimer = 0;
                     this.attackAngle = 0;
+                    this.vinePlantSpawnInterval = (s.evoPlantInterval || 5) * 60;
+                    this.vinePlantSpawnTimer = this.vinePlantSpawnInterval;
+                    this.vinePlants = [];
+                    this.evoVineRange = s.evoPullRange || 180;
+                    this.evoVineStrength = s.evoPullStrength || 3.4;
+                    this.evoVineOffset = s.evoPullOffset || 0;
                 }
                 attack() { 
                     if (this.cooldownTimer <= 0) { 
@@ -10257,6 +10561,25 @@ function getDeckForMode(mode = gameMode) {
                 }
                 update() {
                     if (this.attackAnimationTimer > 0) { this.attackAnimationTimer--; }
+                    if (this.isEvolved) {
+                        this.vinePlantSpawnTimer -= deltaTime * 60;
+                        if (this.vinePlantSpawnTimer <= 0) {
+                            this.vinePlantSpawnTimer += this.vinePlantSpawnInterval;
+                            this.vinePlants = (this.vinePlants || []).filter(p => p && p.health > 0);
+                            if (this.vinePlants.length < 6) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const offsetRadius = 18 + Math.random() * 10;
+                                const offsetX = Math.cos(angle) * offsetRadius;
+                                const offsetY = Math.sin(angle) * offsetRadius;
+                                const plant = new FarmerVinePlant(this, offsetX, offsetY, {
+                                    range: this.evoVineRange,
+                                    strength: this.evoVineStrength
+                                });
+                                this.vinePlants.push(plant);
+                                gameObjects.push(plant);
+                            }
+                        }
+                    }
                     
                     // Standard unit update logic (copied from Unit)
                     if (this.health <= 0) return;
@@ -10300,12 +10623,93 @@ function getDeckForMode(mode = gameMode) {
                 }
             }
 
+            class FarmerVinePlant extends GameObject {
+                constructor(farmer, offsetX = 0, offsetY = 0, options = {}) {
+                    super(farmer ? farmer.x : 0, farmer ? farmer.y : 0, 0, farmer ? farmer.team : 'player', 1);
+                    this.farmer = farmer;
+                    this.offsetX = offsetX;
+                    this.offsetY = offsetY;
+                    this.pullRange = options.range || 150;
+                    this.pullStrength = options.strength || 2.3;
+                    this.emoji = '🌿';
+                }
+                getForwardVector() {
+                    const f = this.farmer;
+                    if (!f) return { x: 0, y: -1 };
+                    if (f.target && f.target.health > 0) {
+                        const dx = f.target.x - f.x;
+                        const dy = f.target.y - f.y;
+                        const len = Math.hypot(dx, dy) || 1;
+                        return { x: dx / len, y: dy / len };
+                    }
+                    return { x: 0, y: f.team === 'player' ? -1 : 1 };
+                }
+                isBehindOrSide(forward, vx, vy) {
+                    const dist = Math.hypot(vx, vy) || 1;
+                    const dot = (forward.x * vx + forward.y * vy) / dist;
+                    return dot <= 0.35;
+                }
+                update() {
+                    if (!this.farmer || this.farmer.health <= 0) {
+                        this.health = 0;
+                        return;
+                    }
+                    this.x = this.farmer.x + this.offsetX;
+                    this.y = this.farmer.y + this.offsetY;
+
+                    const forward = this.getForwardVector();
+                    let best = null;
+                    let bestDist = this.pullRange;
+                    for (const obj of gameObjects) {
+                        if (obj.team === this.farmer.team || obj.health <= 0) continue;
+                        if (!(obj instanceof Unit)) continue;
+                        if (obj.isFlying) continue;
+                        if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                        const dx = obj.x - this.farmer.x;
+                        const dy = obj.y - this.farmer.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist > this.pullRange) continue;
+                        if (!this.isBehindOrSide(forward, dx, dy)) continue;
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            best = obj;
+                        }
+                    }
+                    if (!best) return;
+
+                    const frontOffset = Math.max(8, this.farmer.attackRange * 0.75);
+                    const destinationX = this.farmer.x + forward.x * frontOffset;
+                    const destinationY = this.farmer.y + forward.y * frontOffset;
+                    const pullDx = destinationX - best.x;
+                    const pullDy = destinationY - best.y;
+                    const pullDist = Math.hypot(pullDx, pullDy) || 1;
+                    const step = Math.min(pullDist, this.pullStrength * (deltaTime * 60));
+                    best.x += (pullDx / pullDist) * step;
+                    best.y += (pullDy / pullDist) * step;
+                }
+                draw() {
+                    if (this.health <= 0) return;
+                    ctx.save();
+                    ctx.globalAlpha = 0.9;
+                    ctx.font = '16px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y);
+                    ctx.restore();
+                }
+            }
+
             // --- PIG (NEW) ---
             class Pig extends Unit {
                 constructor(x, y, team, level = 1) {
                     const s = allCards['pigs'].stats[level];
                     super(x, y, 10, team, s.health, 1.4, 25, s.damage, s.hitSpeed, '🐷', false, false, level, allCards['pigs'].aggroRange); // Speed 1.8 -> 1.4
                     this.targetLocked = false;
+                    if (this.isEvolved) {
+                        this.shieldHitsRemaining = 2;
+                        this.speed *= 1.35;
+                        this.attackDamage = Math.max(1, Math.round(this.attackDamage * 1.1));
+                    }
                 }
                 // Use building-only targeting
                 findTarget() {
@@ -11107,17 +11511,23 @@ class ColdSpirit extends Unit {
                     this.performJump(target);
                     return;
                 }
-                this._idleFloatTimer += deltaTime * 60;
-                const bobOffset = Math.sin(this._idleFloatTimer * 0.08) * 4;
-                this.y = Math.max(30, Math.min(HEIGHT - 30, this._idleBaseY + bobOffset));
+                if (!this.target || this.target.health <= 0) {
+                    this.target = this.findTarget(true);
+                }
+                if (this.target && this.target.health > 0) {
+                    this.move();
+                }
             }
             findJumpTarget() {
                 let closestDist = this.jumpRadius;
                 let candidate = null;
                 for (const obj of gameObjects) {
                     if (obj.team === this.team || obj.health <= 0) continue;
-                    if (!(obj instanceof Unit)) continue;
-                    if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                    const isUnit = obj instanceof Unit;
+                    const isTower = obj instanceof Tower;
+                    if (!isUnit && !isTower) continue;
+                    if (isUnit && obj instanceof PhantomKnight && obj.isInvisible) continue;
+                    if (isUnit && obj.isFlying) continue;
                     const dist = getDistance(this, obj);
                     const contactDist = this.radius + (obj.radius || 0);
                     if (dist <= contactDist + 1) {
@@ -12685,6 +13095,75 @@ class StoneGiant extends Unit {
                 }
             }
 
+            class GiantQuakeEffect extends GameObject {
+                constructor(x, y, radius, team) {
+                    super(x, y, radius, team, 1);
+                    this.baseRadius = radius;
+                    this.maxLifetime = 40;
+                    this.lifetime = this.maxLifetime;
+                }
+                update() {
+                    const frameDelta = Math.max(1, deltaTime * 60);
+                    this.lifetime -= frameDelta;
+                    if (this.lifetime <= 0) {
+                        this.health = 0;
+                        return;
+                    }
+                }
+                draw() {
+                    if (this.health <= 0) return;
+                    const progress = Math.max(0, Math.min(1, this.lifetime / this.maxLifetime));
+                    const alpha = (1 - progress) * 0.7;
+                    const pulse = (1 - progress) * 40;
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    const currentRadius = this.baseRadius + pulse;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, currentRadius, 0, Math.PI * 2);
+                    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, currentRadius);
+                    gradient.addColorStop(0, `rgba(139, 69, 19, ${alpha})`);
+                    gradient.addColorStop(0.6, `rgba(165, 42, 42, ${alpha * 0.6})`);
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = `rgba(77, 38, 0, ${alpha * 0.9})`;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            class GiantQuakeBurstEffect extends GameObject {
+                constructor(x, y, radius, team) {
+                    super(x, y, radius, team, 1);
+                    this.maxLifetime = 18;
+                    this.lifetime = this.maxLifetime;
+                }
+                update() {
+                    this.lifetime -= Math.max(1, deltaTime * 60);
+                    if (this.lifetime <= 0) this.health = 0;
+                }
+                draw() {
+                    if (this.health <= 0) return;
+                    const progress = Math.max(0, Math.min(1, this.lifetime / this.maxLifetime));
+                    const alpha = progress * 0.65;
+                    const currentRadius = this.radius * (1 - progress * 0.4);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentRadius);
+                    gradient.addColorStop(0, `rgba(139, 69, 19, ${alpha})`);
+                    gradient.addColorStop(0.6, `rgba(165, 42, 42, ${alpha * 0.6})`);
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(77, 38, 0, ${alpha * 0.9})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
             class AngerSpell extends GameObject {
                 constructor(x, y, team, radius, duration, spawnDamage) {
                     super(x, y, radius, team, 1);
@@ -13224,7 +13703,7 @@ class StoneGiant extends Unit {
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0 } },
                                 // Evolution: Damage increases by 25% after each hit until they die.
-                                evo: { cycle: 2, desc: 'Damage increases by 25% after each hit until the goblin dies.', stats: { count: 3, health: 100, damage: 25, hitSpeed: 1, speed: 1.0 } } },
+                                evo: { cycle: 1, desc: 'Damage increases by 25% after each hit until the goblin dies.', stats: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0 } } },
                     'skeletons': { name: 'Skeletons', cost: 1, emoji: '💀', type: 'Swarm', unitClass: Skeletons, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { count: 3, health: 14, damage: 11, hitSpeed: 1.2, speed: 1.2 } },
                                 // Evolution: Each skeleton clones itself on each attack up to a max of 10 skeletons.
@@ -13243,7 +13722,9 @@ class StoneGiant extends Unit {
                     'skeletonArmy': { name: 'Skeleton Group', cost: 3, emoji: '☠️', type: 'Swarm', unitClass: SkeletonArmy, placementRadius: 10, isFlying: false, arena: 2, targets: 'Ground', aggroRange: 100,
                                 stats: { 1: { count: 20, health: 22, damage: 20, hitSpeed: 1.2, speed: 1.4 } } }, // Speed 1.6 -> 1.4, stats buffed so it can chew through bots
                     'goblinGang': { name: 'Goblin Group', cost: 3, emoji: '👨‍👩‍👧‍👦', type: 'Swarm', unitClass: GoblinGang, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground', aggroRange: 100,
-                                stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2, spear_speed: 1.0 } } },
+                                stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2, spear_speed: 1.0 } },
+                                // Evolution: Dead goblins become a raised ghost that returns one member at a time after three seconds.
+                                evo: { cycle: 1, desc: 'When an evolved member dies, its spirit floats as a non-interacting ghost and respawns that goblin one at a time after three seconds.', stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2, spear_speed: 1.0 } } } },
                     'spearGoblins': { name: 'Spear Goblins', cost: 2, emoji: '🎯', type: 'Swarm', unitClass: SpearGoblins, placementRadius: 10, isFlying: false, arena: 2, targets: 'Air & Ground', aggroRange: 100,
                                 stats: { 1: { count: 3, health: 60, damage: 25, hitSpeed: 1.2, speed: 1.0 } } },
                     // Arena 3
@@ -13261,9 +13742,13 @@ class StoneGiant extends Unit {
                                 stats: { 1: { health: 700, damage: 100, hitSpeed: 1.5, splashRadius: 32, speed: 0.8 } } },
                     // Arena 4 (NEW CARDS)
                     'pigs': { name: 'Pigs', cost: 4, emoji: '🐷', type: 'WinCon', unitClass: Pigs, placementRadius: 10, isFlying: false, arena: 4, targets: 'Buildings', aggroRange: 100,
-                                stats: { 1: { count: 4, health: 220, damage: 35, hitSpeed: 1.1, speed: 1.2 } } },
+                                stats: { 1: { count: 4, health: 220, damage: 35, hitSpeed: 1.1, speed: 1.2 } },
+                                // Evolution: Iron Snouts — each pig spawns faster, hits harder, and ignores the first two hits.
+                                evo: { cycle: 2, desc: 'Each pig spawns with an iron snout that blocks two hits and charges faster with slightly stronger headbutts.', stats: { count: 4, health: 220, damage: 39, hitSpeed: 1.1, speed: 1.35 } } },
                     'farmer': { name: 'Farmer', cost: 3, emoji: '👨‍🌾', type: 'Melee', unitClass: Farmer, placementRadius: 12, isFlying: false, arena: 4, targets: 'Ground', aggroRange: 100,
-                                stats: { 1: { health: 600, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackHeight: 40, speed: 0.8 } } },
+                                stats: { 1: { health: 600, damage: 70, hitSpeed: 1.4, attackWidth: 30, attackHeight: 40, speed: 0.8 } },
+                                // Evolution: Spawns vines that pull enemies from behind/side into range.
+                                evo: { cycle: 2, desc: 'Every 5 seconds, spawns a vine plant that sticks with the Farmer and pulls the closest enemy troop behind/side into his hit range.', stats: { health: 600, damage: 70, hitSpeed: 1.4, speed: 0.8, range: 115 } } },
                     'poison': { name: 'Poison', cost: 4, emoji: '🤢', type: 'Spell', radius: 60, placementRadius: 60, arena: 4, targets: 'Air & Ground',
                                 stats: { 1: { damagePerSecond: 40, duration: 5 } } },
                     // Arena 5 (NEW CARDS)
@@ -14102,7 +14587,7 @@ class StoneGiant extends Unit {
                 const lastPlayerCard = lastPlayedCardByTeam.player ? allCards[lastPlayedCardByTeam.player.cardId] : null;
                 elixirBar.style.width = `${(playerElixir / MAX_ELIXIR) * 100}%`;
                 elixirText.textContent = elixirInt;
-                document.querySelectorAll('#cardHand .card-ui').forEach(cardEl => {
+                document.querySelectorAll('#cardHand .card-ui, #nextCardSlot .card-ui').forEach(cardEl => {
                     const costEl = cardEl.querySelector('.card-ui-cost');
                     if (!costEl) return;
                     let costValue = parseInt(cardEl.dataset.cost, 10) || 0;
@@ -14159,11 +14644,13 @@ class StoneGiant extends Unit {
                 const deckToUse = getDeckForMode(gameMode);
                 const modeKey = getMatchModeKey();
                 ensureMatchEvoSlotsForMode(modeKey);
-                gameDeck = shuffleDeck(deckToUse);
+                const deckQueue = (deckToUse || []).slice();
                 hand = [];
                 discardPile = [];
-                for (let i = 0; i < 4; i++) { hand.push(gameDeck.pop()); }
-                nextCard = gameDeck.pop();
+                const handSize = Math.min(4, deckQueue.length);
+                for (let i = 0; i < handSize; i++) { hand.push(deckQueue[i]); }
+                nextCard = deckQueue.length > 4 ? deckQueue[4] : null;
+                gameDeck = deckQueue.slice(5);
                 renderHand();
                 
                 // AI
@@ -14217,10 +14704,20 @@ class StoneGiant extends Unit {
                 const costToUse = typeof costOverride === 'number' ? costOverride : allCards[cardId].cost;
                 playerElixir -= costToUse;
                 discardPile.push(cardId);
+                const previousNextCard = nextCard;
                 hand.splice(handIndex, 1);
-                hand.push(nextCard);
-                if (gameDeck.length === 0) { gameDeck = shuffleDeck(discardPile); discardPile = []; }
-                nextCard = gameDeck.pop();
+                if (previousNextCard) {
+                    hand.push(previousNextCard);
+                }
+                let newNextCard = null;
+                if (gameDeck.length > 0) {
+                    newNextCard = gameDeck.shift();
+                }
+                gameDeck.push(cardId);
+                if (!newNextCard) {
+                    newNextCard = cardId;
+                }
+                nextCard = newNextCard;
                 renderHand();
             }
 
@@ -15836,14 +16333,14 @@ class StoneGiant extends Unit {
 
                     // Handle units/projectiles/spells
                     if (obj instanceof Unit || obj instanceof Projectile || obj instanceof Spell || obj instanceof PoisonSpell || obj instanceof AngerSpell || obj instanceof FreezeEffect || obj instanceof HealEffect || obj instanceof ExplosionEffect || obj instanceof VoidTrapEffect || obj instanceof ChaosOrbEffect || obj instanceof ParticleExplosion || obj instanceof DeathEffect || obj instanceof GiantBomb) {
-                        // Spawn Death Effect for Units
-                        if (obj instanceof Unit) {
-                             gameObjects.push(new DeathEffect(obj.x, obj.y, obj.emoji));
-                        }
-                        // Special case: Battle Ram needs to spawn barbs
-                        if (obj instanceof BattleRam && !obj.didHit) {
-                            obj.spawnBarbs();
-                        }
+                         // Spawn Death Effect for Units
+                         if (obj instanceof Unit) {
+                              gameObjects.push(new DeathEffect(obj.x, obj.y, obj.emoji));
+                         }
+                         // Special case: Battle Ram needs to spawn barbs
+                         if (obj instanceof BattleRam && !obj.didHit) {
+                             obj.spawnBarbs();
+                         }
                         // Special case: Stone Giant splits into minis on death
                         if (obj instanceof StoneGiant && !obj.didSpawnMinis) {
                             console.log('Cleanup: StoneGiant died at', obj.x, obj.y, 'spawning minis');
@@ -15872,7 +16369,10 @@ class StoneGiant extends Unit {
                         }
                         if (obj instanceof Zombie && !obj._poisonSpawned) {
                             obj._poisonSpawned = true;
-                            spawnPoisonCloud(obj.x, obj.y, obj.team, 3);
+                            spawnPoisonCloud(obj.x, obj.y, obj.team, 3, null, null, false);
+                        }
+                        if (obj.isEvolved && obj._goblinGroupManager) {
+                            obj._goblinGroupManager.notifyMemberDied(obj);
                         }
                         if (obj instanceof Rotter && !obj.didSpawnWorms) {
                             obj.didSpawnWorms = true;
@@ -16208,12 +16708,12 @@ class StoneGiant extends Unit {
                     isCardInEvoSlot(cardId)
                 ) {
                     const requiredCycles = Math.max(1, cardDef.evo.cycle || 1);
-                    const currentCount = playerEvoCycleCounts[cardId] || 0;
+                    const currentCount = Math.min(playerEvoCycleCounts[cardId] || 0, requiredCycles);
                     if (currentCount >= requiredCycles) {
                         evoSpawnThisUnit = true;
                         playerEvoCycleCounts[cardId] = 0;
                     } else {
-                        playerEvoCycleCounts[cardId] = currentCount + 1;
+                        playerEvoCycleCounts[cardId] = Math.min(requiredCycles, currentCount + 1);
                     }
                     if (evoSpawnThisUnit) {
                         window.pendingEvoSpawn = true;
@@ -16223,26 +16723,23 @@ class StoneGiant extends Unit {
                 refreshCardEvoIndicators();
 
                 let customPlayCost;
-                if (card.type === 'Spell') {
-                    const spellId = cardId;
-                if (spellId === 'mirror') {
-                    const previous = lastPlayedCardByTeam.player;
-                    const previousCardDef = previous ? allCards[previous.cardId] : null;
-                    if (!previous || !previousCardDef || previousCardDef.type === 'Spell') {
-                        cancelPlacement();
-                        return;
-                    }
-                    const baseCost = previous.cost || previousCardDef?.cost || 0;
-                    const mirrorCost = Math.max(1, baseCost + 1);
-                    const mirrorLevel = Math.min(15, (previous.level || 1) + 1);
-                    let spawned = spawnMirroredCardAt(previous.cardId, 'player', mirrorLevel, clampedX, clampedY);
-                    if (!spawned) {
-                        // Mirror fallback for spells
-                        const previousCard = allCards[previous.cardId];
-                        if (previousCard && previousCard.type === 'Spell') {
-                            spawned = spawnSpellForCard(previous.cardId, 'player', mirrorLevel, clampedX, clampedY, false);
-                        }
-                    }
+                 if (card.type === 'Spell') {
+                     const spellId = cardId;
+                 if (spellId === 'mirror') {
+                     const previous = lastPlayedCardByTeam.player;
+                     const previousCardDef = previous ? allCards[previous.cardId] : null;
+                     if (!previous || !previousCardDef) {
+                         cancelPlacement();
+                         return;
+                     }
+                     if (previousCardDef.type === 'Spell') {
+                         cancelPlacement();
+                         return;
+                     }
+                     const baseCost = previous.cost || previousCardDef?.cost || 0;
+                     const mirrorCost = Math.max(1, baseCost + 1);
+                     const mirrorLevel = Math.min(15, (previous.level || 1) + 1);
+                    const spawned = spawnMirroredCardAt(previous.cardId, 'player', mirrorLevel, clampedX, clampedY);
                     if (!spawned) {
                         cancelPlacement();
                         return;
