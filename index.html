@@ -46,6 +46,8 @@
 
     <style>
 
+.hidden { display: none; }
+
 :root {
 
             --bg-dark: #090d1e;
@@ -1016,34 +1018,6 @@
 
             border: none;
 
-            /* Update Log Modal Card Frame */
-
-            #updateLogOverlay > div {
-
-                background: #374151;
-
-                border-radius: 16px;
-
-                border: 4px solid #fde047;
-
-                box-shadow: 0 4px 24px 0 rgba(0,0,0,0.4);
-
-                padding: 2rem 1.5rem;
-
-                max-width: 400px;
-
-                width: 100%;
-
-                margin: 0 auto;
-
-                display: flex;
-
-                flex-direction: column;
-
-                align-items: center;
-
-            }
-
             color: white;
 
             font-size: 2.5rem;
@@ -1061,6 +1035,34 @@
             padding: 1rem;
 
         }
+
+	        #updateLogOverlay .update-log-panel {
+	            padding: 2rem 1.5rem;
+	            max-width: 400px;
+	            width: 100%;
+	            margin: 0 auto;
+	            display: flex;
+	            flex-direction: column;
+	            align-items: center;
+	            gap: 0.75rem;
+	        }
+
+	        #updateLogOverlay .update-log-icons {
+	            display: flex;
+	            justify-content: center;
+	            align-items: center;
+	            gap: 0.5rem;
+	            font-size: 1.875rem;
+	            margin-bottom: 0.25rem;
+	        }
+
+	        #updateLogOverlay #updateLogContent {
+	            width: 100%;
+	            max-height: 24rem;
+	            overflow-y: auto;
+	            padding: 0 1rem;
+	        }
+
 
         #emojiDashResultOverlay {
 
@@ -4376,11 +4378,12 @@
 
     -->
 
-    <div id="updateLogOverlay">
+	    <div id="updateLogOverlay">
+	        <div class="update-log-panel glossy-panel">
 
         <!-- Animated header with battle scene and update icons -->
 
-        <div class="flex justify-center items-center space-x-2 text-3xl mb-2">
+	        <div class="update-log-icons flex justify-center items-center space-x-2 text-3xl mb-2">
 
             <span class="animate-bounce">👹</span>
 
@@ -4398,9 +4401,10 @@
 
         </div>
 
-        <button id="updateLogClose" class="mt-4">Continue</button>
+	        <button id="updateLogClose" class="mt-4">Continue</button>
+	        </div>
 
-    </div>
+	    </div>
 
     <div id="announcementOverlay" class="announcement-overlay">
 
@@ -7402,7 +7406,8 @@ const firebaseConfig = {
 
                         'Save/load system'
 
-                    ]}
+                    ]
+                }
 
                 ];
 
@@ -19788,43 +19793,67 @@ function getDeckForMode(mode = gameMode) {
 
                 }
 
-                applyIronSnoutPush() {
+	                applyIronSnoutPush() {
 
-                    const evoStats = allCards['pigs']?.evo?.stats || {};
+	                    const evoStats = allCards['pigs']?.evo?.stats || {};
 
-                    const pushRadius = evoStats.pushRadius || 24;
+	                    const pushRadius = evoStats.pushRadius || 60;
 
-                    const pushForce = evoStats.pushForce || 18;
+	                    const pushForce = evoStats.pushForce || 60;
 
-                    if (pushRadius <= 0 || pushForce <= 0) return;
+	                    const pushCooldownFrames = evoStats.pushCooldownFrames || 12;
 
-                    for (const obj of gameObjects) {
+	                    if (pushRadius <= 0 || pushForce <= 0) return;
 
-                        if (obj === this || obj.team === this.team || !(obj instanceof Unit) || obj.health <= 0) continue;
+	                    if (!this._ironSnoutCooldowns) this._ironSnoutCooldowns = new Map();
+
+	                    for (const obj of gameObjects) {
+
+	                        if (obj === this || obj.team === this.team || !(obj instanceof Unit) || obj.health <= 0) continue;
 
                         if (obj instanceof Tower || obj instanceof Building) continue;
 
                         if (obj.isTargetable === false) continue;
 
-                        const dist = getDistance(this, obj);
+	                        const dist = getDistance(this, obj);
 
-                        if (dist <= 0 || dist >= pushRadius) continue;
+	                        if (dist <= 0 || dist >= pushRadius) continue;
 
-                        const scale = Math.max(0, 1 - dist / pushRadius);
+	                        const cooldownKey = obj.id;
 
-                        const pushAmount = pushForce * scale;
+	                        const existingCd = this._ironSnoutCooldowns.get(cooldownKey) || 0;
 
-                        const dx = (obj.x - this.x) / dist;
+	                        const nextCd = existingCd - (deltaTime * 60);
 
-                        const dy = (obj.y - this.y) / dist;
+	                        if (nextCd > 0) {
 
-                        obj.x += dx * pushAmount;
+	                            this._ironSnoutCooldowns.set(cooldownKey, nextCd);
 
-                        obj.y += dy * pushAmount;
+	                            continue;
 
-                    }
+	                        } else if (existingCd > 0) {
 
-                }
+	                            this._ironSnoutCooldowns.delete(cooldownKey);
+
+	                        }
+
+	                        const contactDist = (this.radius || 0) + (obj.radius || 0) + 6;
+
+	                        if (dist > contactDist) continue;
+
+	                        const dx = (obj.x - this.x) / dist;
+
+	                        const dy = (obj.y - this.y) / dist;
+
+	                        obj.x += dx * pushForce;
+
+	                        obj.y += dy * pushForce;
+
+	                        this._ironSnoutCooldowns.set(cooldownKey, pushCooldownFrames);
+
+	                    }
+
+	                }
 
             }
 
@@ -25362,7 +25391,7 @@ class StoneGiant extends Unit {
 
                                 stats: { 1: { count: 4, health: 220, damage: 35, hitSpeed: 1.1, speed: 1.2 } },
 
-                                evo: { cycle: 2, desc: 'Iron snouts shove aside enemy troops while charging and deal bonus damage to towers.', stats: { pushRadius: 24, pushForce: 18, towerBonusDamage: 20 } } },
+	                                evo: { cycle: 2, desc: 'Iron snouts shove aside enemy troops while charging and deal bonus damage to towers.', stats: { pushRadius: 60, pushForce: 60, pushCooldownFrames: 12, towerBonusDamage: 20 } } },
 
                     'farmer': { name: 'Farmer', cost: 3, emoji: '👨‍🌾', type: 'Melee', unitClass: Farmer, placementRadius: 12, isFlying: false, arena: 4, targets: 'Ground', aggroRange: 100,
 
@@ -31529,6 +31558,7 @@ class StoneGiant extends Unit {
                 }
 
             }
+        }
 
     </script>
 
@@ -31859,3 +31889,4 @@ class StoneGiant extends Unit {
 </body>
 
 </html>
+
