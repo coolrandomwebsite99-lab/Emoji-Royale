@@ -1047,6 +1047,35 @@
 	            gap: 0.75rem;
 	        }
 
+	        #updateLogOverlay .holiday-countdown {
+	            width: 100%;
+	            border: 1px solid rgba(255,255,255,0.3);
+	            border-radius: 14px;
+	            padding: 0.75rem 1rem;
+	            margin-bottom: 1rem;
+	            background: linear-gradient(135deg, rgba(248,113,113,0.12), rgba(251,146,60,0.15));
+	            text-align: center;
+	        }
+
+	        #updateLogOverlay .holiday-countdown-title {
+	            font-size: 1.25rem;
+	            font-weight: 600;
+	            letter-spacing: 0.02em;
+	            margin-bottom: 0.25rem;
+	        }
+
+	        #updateLogOverlay .holiday-countdown-timer {
+	            font-size: 1rem;
+	            font-family: 'Share Tech Mono', 'Courier New', monospace;
+	            color: #ffe3b3;
+	            margin-bottom: 0.25rem;
+	        }
+
+	        #updateLogOverlay .holiday-countdown-subtitle {
+	            font-size: 0.9rem;
+	            color: #fef3c7;
+	        }
+
 	        #updateLogOverlay .update-log-icons {
 	            display: flex;
 	            justify-content: center;
@@ -1668,6 +1697,38 @@
 
             transform: none !important;
 
+        }
+
+        .battle-holiday-countdown {
+            width: 90%;
+            min-height: 96px;
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-weight: 600;
+            color: #fde68a;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .battle-holiday-countdown-title {
+            font-size: 1.15rem;
+            text-transform: uppercase;
+        }
+
+        .battle-holiday-countdown-timer {
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            font-size: 1rem;
+            color: #ffd166;
+        }
+
+        .battle-holiday-countdown-subtitle {
+            font-size: 0.85rem;
+            color: #fcd34d;
         }
 
         /* Debug Password Input */
@@ -3332,6 +3393,12 @@
 
             </button>
 
+            <div id="battleHolidayCountdown" class="battle-holiday-countdown mt-6">
+                <div class="battle-holiday-countdown-title">Somethings coming!</div>
+                <div id="battleHolidayTimer" class="battle-holiday-countdown-timer">-- d -- h -- m -- s</div>
+                <div class="battle-holiday-countdown-subtitle">Superhereos are coming on December 25, 2025 at 5000 trophies!</div>
+            </div>
+
             <button id="arenaButton" class="arena-btn bg-blue-600 hover:bg-blue-700 mt-3 w-3/4">
 
                 Arenas
@@ -4385,15 +4452,21 @@
 
 	        <div class="update-log-icons flex justify-center items-center space-x-2 text-3xl mb-2">
 
-            <span class="animate-bounce">👹</span>
+            <span class="animate-bounce">🐲</span>
 
-            <span class="animate-ping">👻</span>
+            <span class="animate-ping">🎯</span>
 
-            <span class="animate-spin">🐷</span>
+            <span class="animate-spin">🧬</span>
 
         </div>
 
-        <h2 class="text-3xl font-bold mb-4">📰 Update Log</h2>
+  <h2 class="text-3xl font-bold mb-4">📰 Update Log</h2>
+
+  <div id="holidayCountdown" class="holiday-countdown">
+      <div class="holiday-countdown-title">Somethings coming!</div>
+      <div id="holidayTimer" class="holiday-countdown-timer">-- d -- h -- m -- s</div>
+      <div class="holiday-countdown-subtitle">Superhereos are coming on December 25, 2025 at 5000 trophies!</div>
+  </div>
 
 <div id="updateLogContent" class="text-left text-sm max-h-96 overflow-y-auto w-full max-w-md px-4 space-y-3">
 
@@ -6868,6 +6941,52 @@ const firebaseConfig = {
 
             const updateLogClose = document.getElementById('updateLogClose');
 
+            const holidayTimer = document.getElementById('holidayTimer');
+
+            const battleHolidayTimer = document.getElementById('battleHolidayTimer');
+
+            const holidayTargetDate = new Date('2025-12-25T00:00:00');
+
+            function refreshHolidayCountdown() {
+
+                if (!holidayTimer && !battleHolidayTimer) return;
+
+                const now = new Date();
+
+                let delta = Math.max(0, holidayTargetDate.getTime() - now.getTime());
+
+                const days = Math.floor(delta / (1000 * 60 * 60 * 24));
+
+                delta -= days * (1000 * 60 * 60 * 24);
+
+                const hours = Math.floor(delta / (1000 * 60 * 60));
+
+                delta -= hours * (1000 * 60 * 60);
+
+                const minutes = Math.floor(delta / (1000 * 60));
+
+                delta -= minutes * (1000 * 60);
+
+                const seconds = Math.floor(delta / 1000);
+
+                const pad = (value) => String(value).padStart(2, '0');
+
+                const formatted = `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+
+                if (holidayTimer) holidayTimer.textContent = formatted;
+
+                if (battleHolidayTimer) battleHolidayTimer.textContent = formatted;
+
+            }
+
+            if (holidayTimer || battleHolidayTimer) {
+
+                refreshHolidayCountdown();
+
+                setInterval(refreshHolidayCountdown, 1000);
+
+            }
+
             const announcementOverlay = document.getElementById('announcementOverlay');
 
             const announcementOkBtn = document.getElementById('announcementOkBtn');
@@ -7158,7 +7277,17 @@ const firebaseConfig = {
 
             const updates = [
 
-                    { date: '12/15/2025', title: 'Spectral Goblins & Iron Snouts', items: [
+                    { date: '12/17/2025', title: 'Evolution Volley & Fireball Bounce', items: [
+
+                        '🐲 Fire Dragon evolution: the burning rectangle is now exclusive to the evo, doing moderate damage while still splashing at the endpoint and firing a bounce shot for area control every time.',
+
+                        '🐷 Pigs evolution: their iron snouts shove enemies back and deal skeleton-lethal damage when they collide, so swarms punished by the push never get a chance to reset.',
+
+                        '🎯 Arrows evolution: fires a second delayed volley at the same location for reduced damage.'
+
+                    ]},
+
+	                    { date: '12/15/2025', title: 'Spectral Goblins & Iron Snouts', items: [
 
                         '👹 Goblin Group evolves on a 1-cycle trigger so any fallen gang member becomes a ghost that trails the squad, waits 3 seconds, and then respawns once while a single ghost per group is enforced.',
 
@@ -12949,81 +13078,50 @@ if (chestCloseButton) {
 
             // --- Helper: Get Counters ---
 
-            function getCardRoles(cardId) {
-
-                const map = {
-
-                    'knight': { strong: 'Support/Glass Cannons', weak: 'Air & Swarms' },
-
-                    'archer': { strong: 'Air & Ground', weak: 'Splash & Burst' },
-
-                    'giant': { strong: 'Buildings', weak: 'Swarms & Tank Killers' },
-
-                    'goblins': { strong: 'Distraction/DPS', weak: 'Splash' },
-                    'skeletons': { strong: 'Distraction', weak: 'Splash' },
-                    'tinyBot': { strong: 'Killing Tanks', weak: 'Swarms' },
-                    'fireball': { strong: 'Swarms & Clumps', weak: 'Tanks' },
-                    'arrows': { strong: 'Low HP Swarms', weak: 'Tanks' },
-                    'hut': { strong: 'Passive Pressure', weak: 'Spells' },
-                    'skeletonArmy': { strong: 'Killing Tanks', weak: 'Splash' },
-                    'goblinGang': { strong: 'Tanks & Air', weak: 'Splash' },
-                                stats: { 1: { count: 3, health: 100, damage: 20, hitSpeed: 1, speed: 1.0, spear_count: 3, spear_health: 60, spear_damage: 25, spear_hitSpeed: 1.2, spear_speed: 1.0 } },
-                                evo: { cycle: 1, desc: 'When a group member dies while at least one other survives, it becomes a ghost that trails the squad for 3 seconds before respawning once, and only one respawn can queue at a time.', stats: { ghostDuration: 3, respawnLimit: 1 } } ,
-                    'fireDragon': { strong: 'Swarms', weak: 'Single Ranged' },
-                    'barbarians': { strong: 'Killing Tanks', weak: 'Splash' },
-                    'battleRam': { strong: 'Buildings', weak: 'Swarms' },
-                    'barbarianHut': { strong: 'Pressure', weak: 'Spells' },
-                    'axeSwinger': { strong: 'Ground Swarms', weak: 'Air Units' },
-                    'pigs': { strong: 'Buildings', weak: 'Splash' },
-                    'farmer': { strong: 'Ground Area', weak: 'Air Units' },
-
-                    'poison': { strong: 'Area Denial', weak: 'Fast Units' },
-
-                    'flyingSkeletons': { strong: 'Ground Units', weak: 'Splash' },
-
-                    'megaFlyingSkeleton': { strong: 'Killing Tanks', weak: 'Swarms' },
-
-                    'flyingSkeletonGroup': { strong: 'Killing Tanks', weak: 'Splash' },
-
-                    'warlock': { strong: 'Swarms', weak: 'High DPS' },
-
-                    'mage': { strong: 'Swarms', weak: 'High DPS' },
-
-                    'phantomKnight': { strong: 'Single Target', weak: 'Swarms' },
-
-                    'spiritLantern': { strong: 'Support', weak: 'Spells' },
-
-                    'zapSpirit': { strong: 'Swarms/Stun', weak: 'Ranged' },
-
-                    'coldSpirit': { strong: 'Freeze/Stun', weak: 'Ranged' },
-
-                    'lifeSpirit': { strong: 'Healing', weak: 'Ranged' },
-
-                    'bombSpirit': { strong: 'Swarms', weak: 'Ranged' },
-
-                    'anger': { strong: 'Boosting Units', weak: 'N/A' },
-
-                    'chaosElemental': { strong: 'Killing Tanks', weak: 'Swarms' },
-
-                    'shadowClone': { strong: 'Support', weak: 'Splash' },
-
-                    'voidTrap': { strong: 'Area Control', weak: 'Spread Units' },
-
-                    'stoneGiant': { strong: 'Buildings', weak: 'Swarms' },
-
-                    'miniStoneGiant': { strong: 'Distraction', weak: 'Splash' },
-
-                    'chaosOrb': { strong: 'Area Damage', weak: 'Tanks' },
-
-                    'skeletonYard': { strong: 'Surprise Attack', weak: 'Poison/Splash' },
-
-                    'titan': { strong: 'Anything Ground', weak: 'Inferno/Swarms' }
-
-                };
-
-                return map[cardId] || { strong: 'Specific Units', weak: 'Specific Counters' };
-
-            }
+          function getCardRoles(cardId) {
+    const map = {
+        'knight': { strong: 'Support/Glass Cannons', weak: 'Air & Swarms' },
+        'archer': { strong: 'Air & Ground', weak: 'Splash & Burst' },
+        'giant': { strong: 'Buildings', weak: 'Swarms & Tank Killers' },
+        'goblins': { strong: 'Distraction/DPS', weak: 'Splash' },
+        'skeletons': { strong: 'Distraction', weak: 'Splash' },
+        'tinyBot': { strong: 'Killing Tanks', weak: 'Swarms' },
+        'fireball': { strong: 'Swarms & Clumps', weak: 'Tanks' },
+        'arrows': { strong: 'Low HP Swarms', weak: 'Tanks' },
+        'hut': { strong: 'Passive Pressure', weak: 'Spells' },
+        'skeletonArmy': { strong: 'Killing Tanks', weak: 'Splash' },
+        'goblinGang': { strong: 'Tanks & Air', weak: 'Splash' },
+        'fireDragon': { strong: 'Swarms', weak: 'Single Ranged' },
+        'barbarians': { strong: 'Killing Tanks', weak: 'Splash' },
+        'battleRam': { strong: 'Buildings', weak: 'Swarms' },
+        'barbarianHut': { strong: 'Pressure', weak: 'Spells' },
+        'axeSwinger': { strong: 'Ground Swarms', weak: 'Air Units' },
+        'pigs': { strong: 'Buildings', weak: 'Splash' },
+        'farmer': { strong: 'Ground Area', weak: 'Air Units' },
+        'poison': { strong: 'Area Denial', weak: 'Fast Units' },
+        'flyingSkeletons': { strong: 'Ground Units', weak: 'Splash' },
+        'megaFlyingSkeleton': { strong: 'Killing Tanks', weak: 'Swarms' },
+        'flyingSkeletonGroup': { strong: 'Killing Tanks', weak: 'Splash' },
+        'warlock': { strong: 'Swarms', weak: 'High DPS' },
+        'mage': { strong: 'Swarms', weak: 'High DPS' },
+        'phantomKnight': { strong: 'Single Target', weak: 'Swarms' },
+        'spiritLantern': { strong: 'Support', weak: 'Spells' },
+        'zapSpirit': { strong: 'Swarms/Stun', weak: 'Ranged' },
+        'coldSpirit': { strong: 'Freeze/Stun', weak: 'Ranged' },
+        'lifeSpirit': { strong: 'Healing', weak: 'Ranged' },
+        'bombSpirit': { strong: 'Swarms', weak: 'Ranged' },
+        'anger': { strong: 'Boosting Units', weak: 'N/A' },
+        'chaosElemental': { strong: 'Killing Tanks', weak: 'Swarms' },
+        'shadowClone': { strong: 'Support', weak: 'Splash' },
+        'voidTrap': { strong: 'Area Control', weak: 'Spread Units' },
+        'stoneGiant': { strong: 'Buildings', weak: 'Swarms' },
+        'miniStoneGiant': { strong: 'Distraction', weak: 'Splash' },
+        'chaosOrb': { strong: 'Area Damage', weak: 'Tanks' },
+        'skeletonYard': { strong: 'Surprise Attack', weak: 'Poison/Splash' },
+        'titan': { strong: 'Anything Ground', weak: 'Inferno/Swarms' }
+    };
+    return map[cardId] || { strong: 'Specific Units', weak: 'Specific Counters' };
+}
 
             function getCardCounters(card) {
 
@@ -16605,53 +16703,39 @@ function getDeckForMode(mode = gameMode) {
 
                 
 
-                update() {
+update() {
+    if (this.health <= 0) return;
 
-                    if (this.health <= 0) return;
+    if (this.zapFreezeTimer > 0) {
+        this.zapFreezeTimer -= deltaTime * 60;
+        if (this.zapFreezeTimer > 0) return;
 
-                    if (this.zapFreezeTimer > 0) {
+        this.zapFreezeTimer = 0;
+        if (this._zapOriginalCooldown !== undefined) {
+            this.cooldownTimer = this._zapOriginalCooldown;
+            delete this._zapOriginalCooldown;
+        }
+        this.frozen = false;
+    }
 
-                        this.zapFreezeTimer -= deltaTime * 60;
+    if (this.cooldownTimer > 0) {
+        this.cooldownTimer -= deltaTime * 60;
+    }
 
-                        if (this.zapFreezeTimer > 0) return;
+    // Waffle Ability (King Only)
+    if (this.isKing && this.def.special === 'waffle') {
+        if (this.waffleTimer > 0) this.waffleTimer -= deltaTime * 60;
 
-                        this.zapFreezeTimer = 0;
+        if (this.waffleTimer <= 0) {
+            const friend = gameObjects.find(o => o.team === this.team && o instanceof Unit);
+            if (friend) {
+                gameObjects.push(new WaffleProjectile(this.x, this.y, friend));
+                this.waffleTimer = 25 * 60;
+            }
+        }
+    }
 
-                        if (this._zapOriginalCooldown !== undefined) {
 
-                            this.cooldownTimer = this._zapOriginalCooldown;
-
-                            delete this._zapOriginalCooldown;
-
-                        }
-
-                        this.frozen = false;
-
-                    }
-
-                    if (this.cooldownTimer > 0) { this.cooldownTimer -= deltaTime * 60; }
-
-                    // Waffle Ability (King Only)
-
-                    if (this.isKing && this.def.special === 'waffle') {
-
-                        if (this.waffleTimer > 0) this.waffleTimer -= deltaTime * 60;
-
-                        if (this.waffleTimer <= 0) {
-
-                            const friend = gameObjects.find(o => o.team === this.team && o instanceof Unit);
-
-                            if (friend) {
-
-                                gameObjects.push(new WaffleProjectile(this.x, this.y, friend));
-
-                                this.waffleTimer = 25 * 60;
-
-                            }
-
-                        }
-
-                    }
 
                     // Machine Gun Logic (Non-King)
 
@@ -17053,7 +17137,7 @@ function getDeckForMode(mode = gameMode) {
 
                 }
 
-            }
+        }
 
             class Building extends GameObject {
 
@@ -18815,7 +18899,60 @@ function getDeckForMode(mode = gameMode) {
 
             }
 
-            class FireDragon extends Unit { constructor(x, y, team, level = 1) { const s = allCards['fireDragon'].stats[level]; super(x, y, 14, team, s.health, 1.0, 110, s.damage, s.hitSpeed, '🐲', true, true, level, allCards['fireDragon'].aggroRange); } } // Speed 1.2 -> 1.0
+		            class FireDragon extends Unit {
+
+	                constructor(x, y, team, level = 1) {
+
+	                    const s = allCards['fireDragon'].stats[level];
+
+	                    super(x, y, 14, team, s.health, 1.0, 110, s.damage, s.hitSpeed, '🐲', true, true, level, allCards['fireDragon'].aggroRange);
+
+		                }
+
+	                attack() {
+
+	                    if (!this.target || this.cooldownTimer > 0) return;
+
+		                    const baseStats = allCards['fireDragon']?.stats?.[this.level] || {};
+
+		                    const evoStats = allCards['fireDragon']?.evo?.stats || {};
+
+                    const splashRadius = (this.isEvolved ? (evoStats.splashRadius || baseStats.splashRadius || 0) : (baseStats.splashRadius || 0));
+
+		                    const aimTarget = (this.target && this.target.health > 0) ? this.target : null;
+		                    const aimX = aimTarget ? aimTarget.x : this.x;
+		                    const aimY = aimTarget ? aimTarget.y : this.y - 1;
+		                    const dx = aimX - this.x;
+		                    const dy = aimY - this.y;
+		                    const dist = Math.hypot(dx, dy) || 1;
+		                    const dirX = dx / dist;
+		                    const dirY = dy / dist;
+
+		                    if (this.isEvolved) {
+
+		                        const hitRadius = evoStats.hitRadius || 14;
+
+		                        const bounceBack = evoStats.bounceBack || 18;
+
+		                        gameObjects.push(new FireDragonEvoProjectile(this.x, this.y, this.target, this.team, this.attackDamage, splashRadius, hitRadius, bounceBack));
+
+		                        const waveDamage = evoStats.waveDamage || Math.max(1, Math.round(this.attackDamage * 0.6));
+		                        const waveLength = evoStats.waveLength || 220;
+		                        const waveWidth = evoStats.waveWidth || 38;
+		                        const waveSplash = evoStats.waveSplash || Math.max(splashRadius, 32);
+		                        gameObjects.push(new FireDragonFlameWave(this.x, this.y, dirX, dirY, this.team, waveDamage, waveLength, waveWidth, waveSplash));
+
+		                    } else {
+
+		                        gameObjects.push(new FireballProjectile(this.x, this.y, this.target, this.team, this.attackDamage, splashRadius, 'fireDragon'));
+
+		                    }
+
+                    this.cooldownTimer = this.attackCooldown;
+
+		                }
+
+	            } // Speed 1.2 -> 1.0
 
             class EarthDragon extends Unit {
 
@@ -19807,13 +19944,15 @@ function getDeckForMode(mode = gameMode) {
 
 	                    if (!this._ironSnoutCooldowns) this._ironSnoutCooldowns = new Map();
 
-	                    for (const obj of gameObjects) {
+                        for (const obj of gameObjects) {
 
-	                        if (obj === this || obj.team === this.team || !(obj instanceof Unit) || obj.health <= 0) continue;
+                            if (obj === this || obj.team === this.team || !(obj instanceof Unit) || obj.health <= 0) continue;
 
-                        if (obj instanceof Tower || obj instanceof Building) continue;
+                            if (obj instanceof Tower || obj instanceof Building) continue;
 
-                        if (obj.isTargetable === false) continue;
+                            if (obj.isFlying) continue;
+
+                            if (obj.isTargetable === false) continue;
 
 	                        const dist = getDistance(this, obj);
 
@@ -19843,17 +19982,21 @@ function getDeckForMode(mode = gameMode) {
 
 	                        const dx = (obj.x - this.x) / dist;
 
-	                        const dy = (obj.y - this.y) / dist;
+                        const dy = (obj.y - this.y) / dist;
 
-	                        obj.x += dx * pushForce;
+                        obj.x += dx * pushForce;
 
-	                        obj.y += dy * pushForce;
+                        obj.y += dy * pushForce;
 
-	                        this._ironSnoutCooldowns.set(cooldownKey, pushCooldownFrames);
+                        const skeletonHealth = allCards['skeletons']?.stats?.[1]?.health || 100;
+                        const pushDamage = Math.max(1, skeletonHealth + 10);
+                        applyDamage(obj, pushDamage, { sourceType: 'pigs' });
 
-	                    }
+                        this._ironSnoutCooldowns.set(cooldownKey, pushCooldownFrames);
 
-	                }
+                    }
+
+                }
 
             }
 
@@ -23369,95 +23512,318 @@ class StoneGiant extends Unit {
 
 }
 
-            class Projectile extends GameObject {
+class Projectile extends GameObject {
+    constructor(x, y, target, team, damage, splashRadius = 0, sourceType = null) {
+        super(x, y, 4, team, 1);
+        this.target = target;
+        this.damage = damage;
+        this.speed = 5;
+        this.splashRadius = splashRadius;
+        this.sourceType = sourceType;
+    }
 
-                constructor(x, y, target, team, damage, splashRadius = 0, sourceType = null) {
+    update() {
+        if (!this.target || this.target.health <= 0) {
+            this.health = 0;
+            return;
+        }
+        if (this.target instanceof PhantomKnight && this.target.isInvisible) {
+            this.health = 0;
+            return;
+        }
+        const dist = getDistance(this, this.target);
+        if (dist < this.speed) {
+            // Hit target
+            applyDamage(this.target, this.damage, {
+                sourceType: this.sourceType
+            });
 
-                    super(x, y, 4, team, 1);
-
-                    this.target = target; 
-
-                    this.damage = damage; 
-
-                    this.speed = 5; 
-
-                    this.splashRadius = splashRadius;
-
-                    this.sourceType = sourceType;
-
-                }
-
-                update() { 
-
-                    if (!this.target || this.target.health <= 0) { this.health = 0; return; }
-
-                    if (this.target instanceof PhantomKnight && this.target.isInvisible) { this.health = 0; return; }
-
-                    const dist = getDistance(this, this.target); 
-
-                    if (dist < this.speed) { 
-
-                        // Hit target
-
-                        applyDamage(this.target, this.damage, { sourceType: this.sourceType }); 
-
-                        
-
-                        // Handle splash
-
-                        if (this.splashRadius > 0) {
-
-                            for (const obj of gameObjects) {
-
-                                if (obj.team !== this.team && obj !== this.target && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
-
-                                    if (obj instanceof PhantomKnight && obj.isInvisible) continue;
-
-                                    if (getDistance(this.target, obj) < this.splashRadius) {
-
-                                        applyDamage(obj, this.damage, { sourceType: this.sourceType }); // Splash does full damage
-
-                                    }
-
-                                }
-
-                            }
-
-                            // Spawn Explosion Visual
-
-                            gameObjects.push(new ParticleExplosion(this.x, this.y, '#ff5722'));
-
+            // Handle splash
+            if (this.splashRadius > 0) {
+                for (const obj of gameObjects) {
+                    if (obj.team !== this.team && obj !== this.target && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+                        if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                        if (getDistance(this.target, obj) < this.splashRadius) {
+                            applyDamage(obj, this.damage, {
+                                sourceType: this.sourceType
+                            }); // Splash does full damage
                         }
-
-                        
-
-                        this.health = 0; 
-
-                        return; 
-
-                    } 
-
-                    const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x); 
-
-                    this.x += Math.cos(angle) * this.speed * (deltaTime * 60); /* Scale movement by delta time */
-
-                    this.y += Math.sin(angle) * this.speed * (deltaTime * 60);
-
+                    }
                 }
-
-                draw() { 
-
-                    ctx.beginPath();
-
-                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-                    ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca';
-
-                    ctx.fill();
-
-                }
-
+                // Spawn Explosion Visual
+                gameObjects.push(new ParticleExplosion(this.x, this.y, '#ff5722'));
             }
+
+            this.health = 0;
+            return;
+        }
+        const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+        this.x += Math.cos(angle) * this.speed * (deltaTime * 60); /* Scale movement by delta time */
+        this.y += Math.sin(angle) * this.speed * (deltaTime * 60);
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.team === 'player' ? '#a5f3fc' : '#fecaca';
+        ctx.fill();
+    }
+}
+
+            class FireDragonFlameWave extends GameObject {
+                constructor(x, y, dirX, dirY, team, damage, length = 180, width = 32, splashRadius = 24, options = {}) {
+                    super(x, y, Math.max(length, width) * 0.5, team, 1);
+                    const mag = Math.hypot(dirX, dirY) || 1;
+                    this.dirX = dirX / mag;
+                    this.dirY = dirY / mag;
+                    this.length = length;
+                    this.width = width;
+                    this.damage = damage;
+                    this.splashRadius = splashRadius;
+                    this.endpointX = x + this.dirX * this.length;
+                    this.endpointY = y + this.dirY * this.length;
+                    this.baseDuration = options.duration || 12;
+                    this.timer = this.baseDuration;
+                    this.appliedDamage = false;
+                    this.opacity = 1;
+                }
+                applyWaveDamage() {
+                    if (this.appliedDamage) return;
+                    this.appliedDamage = true;
+                    const halfWidth = this.width / 2;
+                    for (const obj of gameObjects) {
+                        if (!obj || obj.team === this.team || obj.health <= 0) continue;
+                        if (!(obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) continue;
+                        const relX = obj.x - this.x;
+                        const relY = obj.y - this.y;
+                        const forward = relX * this.dirX + relY * this.dirY;
+                        if (forward < 0 || forward > this.length) continue;
+                        const perp = Math.abs(relX * this.dirY - relY * this.dirX);
+                        if (perp > halfWidth) continue;
+                        applyDamage(obj, this.damage, { sourceType: 'fireDragon' });
+                    }
+                    if (this.splashRadius > 0) {
+                        for (const obj of gameObjects) {
+                            if (!obj || obj.team === this.team || obj.health <= 0) continue;
+                            if (!(obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) continue;
+                            if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                            if (getDistance({ x: this.endpointX, y: this.endpointY }, obj) < this.splashRadius) {
+                                applyDamage(obj, this.damage, { sourceType: 'fireDragon' });
+                            }
+                        }
+                        gameObjects.push(new ParticleExplosion(this.endpointX, this.endpointY, '#f97316'));
+                    }
+                }
+                update() {
+                    this.applyWaveDamage();
+                    const deltaFrames = deltaTime * 60;
+                    this.timer -= deltaFrames;
+                    this.opacity = this.baseDuration > 0 ? Math.max(0, this.timer / this.baseDuration) : 0;
+                    if (this.timer <= 0) {
+                        this.health = 0;
+                    }
+                }
+                draw() {
+                    ctx.save();
+                    const perpX = -this.dirY;
+                    const perpY = this.dirX;
+                    const halfWidth = this.width / 2;
+                    const points = [
+                        { x: this.x + perpX * halfWidth, y: this.y + perpY * halfWidth },
+                        { x: this.x - perpX * halfWidth, y: this.y - perpY * halfWidth },
+                        { x: this.endpointX - perpX * halfWidth, y: this.endpointY - perpY * halfWidth },
+                        { x: this.endpointX + perpX * halfWidth, y: this.endpointY + perpY * halfWidth }
+                    ];
+                    ctx.beginPath();
+                    ctx.moveTo(points[0].x, points[0].y);
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.lineTo(points[i].x, points[i].y);
+                    }
+                    ctx.closePath();
+                    const baseAlpha = 0.35 + (this.opacity * 0.35);
+                    ctx.fillStyle = `rgba(251,146,60,${baseAlpha})`;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            class FireDragonBounceEffect extends GameObject {
+    constructor(x, y, team, dirX, dirY, distance = 18) {
+        super(x, y, 6, team, 1);
+        this.dirX = dirX || 0;
+        this.dirY = dirY || 0;
+        this.distance = distance;
+        this.timer = 10;
+    }
+    update() {
+        if (this.health <= 0) return;
+        const step = this.distance / 10;
+        this.x += this.dirX * step;
+        this.y += this.dirY * step;
+        this.timer--;
+        if (this.timer <= 0) this.health = 0;
+    }
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.timer / 10);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = this.team === 'player' ? '#f59e0b' : '#fb923c';
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+            class FireDragonEvoProjectile extends GameObject {
+                constructor(x, y, target, team, directDamage, splashRadius = 20, hitRadius = 14, bounceBack = 18, options = {}) {
+                    super(x, y, 6, team, 1);
+                    this.target = target;
+                    this.directDamage = directDamage;
+                    this.splashRadius = splashRadius;
+                    this.hitRadius = hitRadius;
+                    this.bounceBack = bounceBack;
+                    this.speed = options.speed || 5;
+                    this.maxLifetime = options.maxLifetime || 3 * 60;
+                    this.lifetime = this.maxLifetime;
+                    this.tx = target ? target.x : x;
+                    this.ty = target ? target.y : y;
+                    this.manualMovement = (typeof options.manualDirX === 'number' && typeof options.manualDirY === 'number' && (options.manualDirX !== 0 || options.manualDirY !== 0));
+                    if (this.manualMovement) {
+                        const mag = Math.hypot(options.manualDirX, options.manualDirY) || 1;
+                        this.manualDirX = options.manualDirX / mag;
+                        this.manualDirY = options.manualDirY / mag;
+                        this.manualSpeed = options.speed || this.speed;
+                    } else {
+                        this.manualDirX = 0;
+                        this.manualDirY = 0;
+                        this.manualSpeed = this.speed;
+                    }
+                    this.bounceStage = options.bounceStage || 0;
+                    this.travelDirX = 0;
+                    this.travelDirY = 0;
+                    this.lastVelocityX = 0;
+                    this.lastVelocityY = 0;
+                }
+                getBounceDirection() {
+                    let dirX = this.travelDirX;
+                    let dirY = this.travelDirY;
+                    if (Math.abs(dirX) < 0.001 && Math.abs(dirY) < 0.001) {
+                        dirX = this.manualDirX;
+                        dirY = this.manualDirY;
+                    }
+                    if (Math.abs(dirX) < 0.001 && Math.abs(dirY) < 0.001) {
+                        dirX = this.lastVelocityX;
+                        dirY = this.lastVelocityY;
+                    }
+                    if (Math.abs(dirX) < 0.001 && Math.abs(dirY) < 0.001) {
+                        dirX = 0;
+                        dirY = -1;
+                    }
+                    const len = Math.hypot(dirX, dirY) || 1;
+                    return { x: dirX / len, y: dirY / len };
+                }
+                explode() {
+                    const impactTarget = (this.target && this.target.health > 0) ? this.target : null;
+                    let directHitTarget = null;
+                    if (impactTarget && getDistance(this, impactTarget) <= this.hitRadius) {
+                        applyDamage(impactTarget, this.directDamage, {
+                            sourceType: 'fireDragon'
+                        });
+                        directHitTarget = impactTarget;
+                    }
+                    if (this.splashRadius > 0) {
+                        for (const obj of gameObjects) {
+                            if (!obj || obj.team === this.team || obj.health <= 0) continue;
+                            if (directHitTarget && obj === directHitTarget) continue;
+                            if (!(obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) continue;
+                            if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                            if (getDistance(this, obj) < this.splashRadius) {
+                                applyDamage(obj, this.directDamage, {
+                                    sourceType: 'fireDragon'
+                                });
+                            }
+                        }
+                    }
+                    if (this.bounceBack > 0 && this.bounceStage === 0) {
+                        const bounceDir = this.getBounceDirection();
+                        const effectDirX = -bounceDir.x;
+                        const effectDirY = -bounceDir.y;
+                        gameObjects.push(new FireDragonBounceEffect(this.x, this.y, this.team, effectDirX, effectDirY, this.bounceBack));
+                        const bounceDamage = Math.max(1, Math.round(this.directDamage * 0.6));
+                        const spawnOffset = 8;
+                        const spawnX = this.x - bounceDir.x * spawnOffset;
+                        const spawnY = this.y - bounceDir.y * spawnOffset;
+                        gameObjects.push(new FireDragonEvoProjectile(spawnX, spawnY, null, this.team, bounceDamage, this.splashRadius, this.hitRadius, 0, {
+                            manualDirX: bounceDir.x,
+                            manualDirY: bounceDir.y,
+                            speed: this.speed * 0.9,
+                            maxLifetime: 1 * 60,
+                            bounceStage: 1
+                        }));
+                    }
+                    gameObjects.push(new ParticleExplosion(this.x, this.y, '#ff5722'));
+                    this.health = 0;
+                }
+                update() {
+                    if (this.health <= 0) return;
+                    if (this.target && this.target.health > 0) {
+                        this.tx = this.target.x;
+                        this.ty = this.target.y;
+                    }
+                    const dx = this.tx - this.x;
+                    const dy = this.ty - this.y;
+                    const dist = Math.hypot(dx, dy);
+                    const step = this.speed * (deltaTime * 60);
+                    if (this.manualMovement) {
+                        const frameStep = this.manualSpeed * (deltaTime * 60);
+                        this.lastVelocityX = this.manualDirX * frameStep;
+                        this.lastVelocityY = this.manualDirY * frameStep;
+                        this.travelDirX = this.manualDirX;
+                        this.travelDirY = this.manualDirY;
+                        this.x += this.lastVelocityX;
+                        this.y += this.lastVelocityY;
+                        this.lifetime -= deltaTime * 60;
+                        for (const obj of gameObjects) {
+                            if (!obj || obj.team === this.team || obj.health <= 0) continue;
+                            if (!(obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) continue;
+                            if (obj instanceof PhantomKnight && obj.isInvisible) continue;
+                            if (getDistance(this, obj) <= this.hitRadius) {
+                                this.target = obj;
+                                this.explode();
+                                return;
+                            }
+                        }
+                        if (this.lifetime <= 0) {
+                            this.explode();
+                        }
+                        return;
+                    }
+                    if (dist <= step || this.lifetime <= 0) {
+                        this.explode();
+                        return;
+                    }
+                    const dirX = dx / dist;
+                    const dirY = dy / dist;
+                    this.travelDirX = dirX;
+                    this.travelDirY = dirY;
+                    this.vx = dirX * step;
+                    this.vy = dirY * step;
+                    this.lastVelocityX = this.vx;
+                    this.lastVelocityY = this.vy;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.lifetime -= deltaTime * 60;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = this.team === 'player' ? '#ffc107' : '#ff6f00';
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
 
             class NebulaShard extends GameObject {
 
@@ -24725,11 +25091,39 @@ class StoneGiant extends Unit {
 
                     this.emoji = emoji;
 
-                    this.isEvolved = isEvolved;
+	                    this.isEvolved = isEvolved;
 
-                    this.flameSpawned = false;
+	                    this.flameSpawned = false;
 
-                }
+	                    this._evoSecondVolleyTimer = 0;
+
+	                    this._evoSecondVolleyDamage = 0;
+
+	                    try {
+
+	                        const arrowsEmoji = allCards?.arrows?.emoji;
+
+	                        if (this.isEvolved && arrowsEmoji && this.emoji === arrowsEmoji) {
+
+	                            const evoStats = allCards?.arrows?.evo?.stats || {};
+
+	                            const delaySeconds = evoStats.secondVolleyDelaySeconds || 0.35;
+
+	                            const multiplier = (evoStats.secondVolleyDamageMultiplier === 0 || evoStats.secondVolleyDamageMultiplier) ? evoStats.secondVolleyDamageMultiplier : 0.6;
+
+	                            this._evoSecondVolleyTimer = Math.max(1, Math.round(delaySeconds * 60));
+
+	                            this._evoSecondVolleyDamage = Math.max(1, Math.round(this.damage * multiplier));
+
+	                            this.animationTimer = Math.max(this.animationTimer, this._evoSecondVolleyTimer + 30);
+
+	                            this.maxAnimationTimer = Math.max(this.maxAnimationTimer, this.animationTimer);
+
+	                        }
+
+	                    } catch (e) {}
+
+	                }
 
                 update() {
 
@@ -24759,13 +25153,39 @@ class StoneGiant extends Unit {
 
                             const flameDamage = Math.round(this.damage * 0.75);
 
-                            gameObjects.push(new FlameWave(this.x, this.y, this.team, flameDamage, waveRadius));
+	                            gameObjects.push(new FlameWave(this.x, this.y, this.team, flameDamage, waveRadius));
 
-                        }
+	                        }
 
-                    }
+	                    }
 
-                    this.animationTimer--;
+	                    if (this.hit && this._evoSecondVolleyTimer > 0) {
+
+	                        this._evoSecondVolleyTimer -= (deltaTime * 60);
+
+	                        if (this._evoSecondVolleyTimer <= 0 && this._evoSecondVolleyDamage > 0) {
+
+	                            for (const obj of gameObjects) {
+
+	                                if (obj.team !== this.team && (obj instanceof Unit || obj instanceof Tower || obj instanceof Building)) {
+
+	                                    if (getDistance(this, obj) < this.radius) {
+
+	                                        applyDamage(obj, this._evoSecondVolleyDamage);
+
+	                                    }
+
+	                                }
+
+	                            }
+
+	                            this._evoSecondVolleyDamage = 0;
+
+	                        }
+
+	                    }
+
+	                    this.animationTimer--;
 
                     if (this.animationTimer <= 0) {
 
@@ -25305,7 +25725,9 @@ class StoneGiant extends Unit {
 
                     'giant': { name: 'Giant', cost: 5, emoji: '💪', type: 'Tank', unitClass: Giant, placementRadius: 18, isFlying: false, arena: 1, targets: 'Buildings', aggroRange: 100,
 
-                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.5 } } },
+	                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.5 } },
+
+	                                stats: { 1: { health: 1000, damage: 60, hitSpeed: 1.5, speed: 0.5 } } },
 
                     'goblins': { name: 'Goblins', cost: 2, emoji: '👺', type: 'Swarm', unitClass: Goblins, placementRadius: 10, isFlying: false, arena: 1, targets: 'Ground', aggroRange: 100,
 
@@ -25335,9 +25757,13 @@ class StoneGiant extends Unit {
 
                                 evo: { cycle: 1, desc: 'After the initial explosion, leaves a ring of fire that deals additional damage over time.', stats: { damage: 300 } } },
 
-                    'arrows': { name: 'Arrows', cost: 3, emoji: '🎯', type: 'Spell', radius: 80, placementRadius: 80, arena: 1, targets: 'Air & Ground',
+	                    'arrows': { name: 'Arrows', cost: 3, emoji: '🎯', type: 'Spell', radius: 80, placementRadius: 80, arena: 1, targets: 'Air & Ground',
 
-                                stats: { 1: { damage: 140 } } },
+	                                stats: { 1: { damage: 140 } },
+
+	                                // Evolution: Fires a second delayed volley at the same location.
+
+	                                evo: { cycle: 1, desc: 'Fires a second delayed volley at the same location for reduced damage.', stats: { secondVolleyDelaySeconds: 0.35, secondVolleyDamageMultiplier: 0.6 } } },
 
                     // Arena 2
 
@@ -25361,9 +25787,13 @@ class StoneGiant extends Unit {
 
                     // Arena 3
 
-                    'fireDragon': { name: 'Fire Dragon', cost: 4, emoji: '🐲', type: 'Air', unitClass: FireDragon, placementRadius: 14, isFlying: true, arena: 3, targets: 'Air & Ground', aggroRange: 120,
+	                    'fireDragon': { name: 'Fire Dragon', cost: 4, emoji: '🐲', type: 'Air', unitClass: FireDragon, placementRadius: 14, isFlying: true, arena: 3, targets: 'Air & Ground', aggroRange: 120,
 
-                                stats: { 1: { health: 800, damage: 100, hitSpeed: 1.0, speed: 0.8, splashRadius: 20 } } },
+                                stats: { 1: { health: 800, damage: 100, hitSpeed: 1.0, speed: 0.8, splashRadius: 20 } },
+
+	                                // Evolution: Fireballs always explode for splash, trigger a bounce effect, and immediately spawn a follow-up projectile in the same direction after every hit.
+
+                                evo: { cycle: 2, desc: 'Fireballs deal full direct damage, always explode with splash, spawn a long flame rectangle that scorches everything along the path before splashing outward at the end, and instantly fire a secondary shot that keeps traveling along the previous path for a bonus bounce hit.', stats: { splashRadius: 28, bounceBack: 18, hitRadius: 14, waveDamage: 100, waveLength: 220, waveWidth: 38, waveSplash: 32 } } },
 
                     'barbarians': { name: 'Barbarians', cost: 5, emoji: '🧔', type: 'Swarm', unitClass: Barbarians, placementRadius: 10, isFlying: false, arena: 3, targets: 'Ground', aggroRange: 100,
 
